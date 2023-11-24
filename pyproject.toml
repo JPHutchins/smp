@@ -4,6 +4,7 @@ version = "0"
 description = "Simple Management Protocol (SMP) for remotely managing MCU firmware"
 authors = ["J.P. Hutchins <jphutchins@gmail.com>"]
 readme = "README.md"
+license = "Apache-2.0"
 packages = [
     { include = "smp" },
 ]
