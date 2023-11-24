@@ -28,6 +28,7 @@ jobs:
       - run: poetry install
 
       - name: Test
-        run: |
-          . ./envr.ps1
-          test
+        run: >
+          poetry run coverage erase &&
+          poetry run pytest --cov --maxfail=3 -n auto &&
+          poetry run coverage report
