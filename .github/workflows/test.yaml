@@ -15,8 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: git fetch --prune --unshallow --tags
-
       - run: pipx install poetry
 
       - name: Setup Python ${{ matrix.python-version }}
@@ -28,7 +26,6 @@ jobs:
       - run: poetry install
 
       - name: Test
-        run: >
-          poetry run coverage erase &&
-          poetry run pytest --cov --maxfail=3 -n auto &&
-          poetry run coverage report
+        run: |
+          . ./envr.ps1
+          test

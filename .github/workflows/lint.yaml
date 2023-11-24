@@ -19,14 +19,7 @@ jobs:
           cache: 'poetry'
       - run: poetry install
 
-      - name: black
-        run: poetry run black --check .
-
-      - name: isort
-        run: poetry run isort --check-only .
-
-      - name: flake8
-        run: poetry run flake8 .
-
-      - name: mypy
-        run: poetry run mypy .
+      - name: lint
+        run: |
+          . ./envr.ps1
+          lint
