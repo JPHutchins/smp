@@ -21,5 +21,6 @@ jobs:
 
       - name: lint
         run: |
-          . .venv/bin/activate
-          black --check . && isort --check-only . && flake8 . && mypy .
+          shopt -s expand_aliases
+          . ./envr.ps1
+          lint
