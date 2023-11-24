@@ -2,7 +2,7 @@
 
 import struct
 from dataclasses import dataclass
-from enum import IntEnum, IntFlag, unique
+from enum import IntEnum, IntFlag, auto, unique
 from typing import TypeVar
 
 
@@ -74,7 +74,7 @@ class _VERSION_BIT:
 
 @unique
 class Flag(IntFlag):
-    pass
+    UNUSED = auto()
 
 
 @dataclass(frozen=True)
