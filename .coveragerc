@@ -1,0 +1,15 @@
+[run]
+omit = 
+    */tests/*
+concurrency = multiprocessing
+parallel = True
+
+[paths]
+source = 
+    smp/
+    smpclient/
+    mcumgr/
+
+[report]
+fail_under = 100
+show_missing = True

@@ -1,0 +1,11 @@
+[PROJECT_OPTIONS]
+PROJECT_NAME=smp
+PYTHON_VENV=.venv
+
+[VARIABLES]
+
+[ADD_TO_PATH]
+
+[ALIASES]
+lint=poetry run black --check . && poetry run isort --check-only . && poetry run flake8 . && poetry run mypy .
+test=poetry run coverage erase && poetry run pytest --cov --maxfail=3 -n auto && poetry run coverage report

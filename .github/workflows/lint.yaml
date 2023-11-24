@@ -1,0 +1,32 @@
+name: Lint
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'poetry'
+      - run: poetry install
+
+      - name: black
+        run: poetry run black --check .
+
+      - name: isort
+        run: poetry run isort --check-only .
+
+      - name: flake8
+        run: poetry run flake8 .
+
+      - name: mypy
+        run: poetry run mypy .
