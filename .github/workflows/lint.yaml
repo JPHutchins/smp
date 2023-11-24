@@ -21,5 +21,5 @@ jobs:
 
       - name: lint
         run: |
-          . ./envr.sh
-          lint
+          . .venv/bin/activate
+          black --check . && isort --check-only . && flake8 . && mypy .

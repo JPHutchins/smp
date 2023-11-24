@@ -27,5 +27,5 @@ jobs:
 
       - name: Test
         run: |
-          . ./envr.sh
-          test
+          . .venv/bin/activate
+          coverage erase && pytest --cov --maxfail=3 -n auto && coverage report
