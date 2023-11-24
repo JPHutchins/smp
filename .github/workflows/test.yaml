@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - run: pipx install poetry
+
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
-      
-      - run: pipx install poetry
       
       - run: poetry install
 
