@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smp"
-version = "0.0.0"
+version = "0"
 description = "Simple Management Protocol (SMP) for remotely managing MCU firmware"
 authors = ["J.P. Hutchins <jphutchins@gmail.com>"]
 readme = "README.md"
@@ -26,7 +26,6 @@ isort = "^5.12.0"
 mypy = "^1.7.0"
 mypy-extensions = "^1.0.0"
 pytest-xdist = "^3.4.0"
-poetry-version-plugin = "^0.2.0"
 
 [tool.black]
 line-length = 100
