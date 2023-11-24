@@ -28,6 +28,10 @@ mypy = "^1.7.0"
 mypy-extensions = "^1.0.0"
 pytest-xdist = "^3.4.0"
 
+
+[tool.poetry.group.doc.dependencies]
+sphinx = "^7.2.6"
+
 [tool.black]
 line-length = 100
 skip-string-normalization = 1
