@@ -21,5 +21,5 @@ jobs:
 
       - name: lint
         run: |
-          . ./envr.ps1
+          . ./envr.sh
           lint

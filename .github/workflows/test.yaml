@@ -27,5 +27,5 @@ jobs:
 
       - name: Test
         run: |
-          . ./envr.ps1
+          . ./envr.sh
           test
