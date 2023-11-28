@@ -24,20 +24,34 @@ crc16_func: Final = mkPredefinedCrcFun("xmodem")
 logger: Final = logging.getLogger(__name__)
 
 
-def encode(request: bytes, line_length: int = 8192) -> Generator[bytes, None, None]:
-    """Iteratively pack an SMP bytes to packets of `line_length` size."""
+def encode(smp_bytes: bytes, mtu: int = 128) -> Generator[bytes, None, None]:
+    """Iteratively pack SMP bytes to packets of `mtu` size.
 
-    logger.debug(f"Serializing {request=}")
+    `smp_bytes` is a serialized SMP `Request` or `Response`.
 
-    crc16 = CRC16_STRUCT.pack(crc16_func(request))
-    frame_length = FRAME_LENGTH_STRUCT.pack(len(request) + CRC16_STRUCT.size)
+    `mtu` should conform to the Maximum Transmission Unit requirements of the SMP server and
+    transport.  128 is selected as a conservative default that matches legacy MCUMgr
+    implementations.
 
-    total_size = FRAME_LENGTH_STRUCT.size + len(request) + CRC16_STRUCT.size
-    logger.debug(f"Total size of request is {total_size}B")
+    Typical usage example:
+    ```python
+    my_transport = SMPTransport()  # e.g. PySerial, bleak, etc.
+    my_request = ImageStatesReadRequest()
 
-    packet_size = ((line_length - LINE_LENGTH_SUBTRACTOR) // 4) * 4
+    for packet in encode(bytes(my_request)):  # SMP messages implement __bytes__
+        await my_transport.send(packet)
+    ```
+    """
 
-    complete_b64 = b64encode(frame_length + request + crc16)
+    crc16 = CRC16_STRUCT.pack(crc16_func(smp_bytes))
+    frame_length = FRAME_LENGTH_STRUCT.pack(len(smp_bytes) + CRC16_STRUCT.size)
+
+    total_size = FRAME_LENGTH_STRUCT.size + len(smp_bytes) + CRC16_STRUCT.size
+    logger.debug(f"Total size of smp_bytes is {total_size}B")
+
+    packet_size = ((mtu - LINE_LENGTH_SUBTRACTOR) // 4) * 4
+
+    complete_b64 = b64encode(frame_length + smp_bytes + crc16)
     logger.debug(f"Total size of b64 encoded request is {len(complete_b64)}B")
 
     # send the start delimiter, as many bytes as possible, and newline
@@ -52,7 +66,34 @@ def encode(request: bytes, line_length: int = 8192) -> Generator[bytes, None, No
 
 
 def decode() -> Generator[None, bytes, bytes]:
-    """Iteratively unpack a series of SMP packets to bytes."""
+    """Iteratively unpack a series of SMP packets to bytes.
+
+    After creating an instance of this generator, it must be "primed" by calling `next` once:
+    ```python
+    decoder = decode()
+    next(decoder)
+    ```
+
+    Typical usage example:
+    ```python
+    my_transport = SMPTransport()  # e.g. PySerial, bleak, etc.
+
+    decoder = decode()
+    next(decoder)
+
+    while True:
+        try:
+            raw_bytes = await my_transport.receive()
+            decoder.send(raw_bytes)  # send the bytes to the decoder
+        except StopIteration as e:
+            # when the decoder has constructed a complete frame, it raises `StopIteration`
+            frame = e.value
+            break
+
+    # deserialize the decoded frame
+    my_response = ImageStatesReadResponse.loads(frame)
+    ```
+    """
 
     packet = yield
 

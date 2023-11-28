@@ -12,6 +12,8 @@ T = TypeVar("T", bound=IntEnum)
 
 
 class ErrorV0(message.Response, Generic[T]):
+    """SMP V0 Error response."""
+
     RESPONSE_TYPE = message.ResponseType.ERROR_V0
 
     rc: T
@@ -26,6 +28,8 @@ class Err(BaseModel, Generic[T]):
 
 
 class ErrorV1(message.Response, Generic[T]):
+    """SMP V1 Error response."""
+
     RESPONSE_TYPE = message.ResponseType.ERROR_V1
 
     err: Err[T]

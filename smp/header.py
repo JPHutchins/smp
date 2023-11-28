@@ -7,8 +7,12 @@ from typing import TypeVar
 
 
 class CommandId:
+    """SMP Command ID namespace."""
+
     @unique
     class OSManagement(IntEnum):
+        """OS Management Command IDs."""
+
         ECHO = 0
         ECHO_CONTROL = 1
         TASK_STATS = 2
@@ -21,6 +25,8 @@ class CommandId:
 
     @unique
     class ImageManagement(IntEnum):
+        """Image Management Command IDs."""
+
         STATE = 0
         UPLOAD = 1
         FILE = 2
@@ -34,6 +40,8 @@ AnyCommandId = TypeVar("AnyCommandId", bound=IntEnum)
 
 @unique
 class GroupId(IntEnum):
+    """SMP Group IDs."""
+
     OS_MANAGEMENT = 0
     IMAGE_MANAGEMENT = 1
     STATISTICS_MANAGEMENT = 2
@@ -50,6 +58,8 @@ class GroupId(IntEnum):
 
 @unique
 class OP(IntEnum):
+    """SMP Operation IDs."""
+
     READ = 0
     READ_RSP = 1
     WRITE = 2
@@ -63,6 +73,8 @@ class _OP_BIT:
 
 @unique
 class Version(IntEnum):
+    """SMP Version IDs."""
+
     V0 = 0
     V1 = 1
 
@@ -74,11 +86,15 @@ class _VERSION_BIT:
 
 @unique
 class Flag(IntFlag):
+    """SMP bit Flags."""
+
     UNUSED = auto()
 
 
 @dataclass(frozen=True)
 class Header:
+    """A de/serializable SMP Header representation."""
+
     op: OP
     version: Version
     flags: Flag
@@ -93,6 +109,7 @@ class Header:
     }
     _STRUCT = struct.Struct("!BBHHBB")
     SIZE = _STRUCT.size
+    """Constant size of SMP header: it's 8 8-bit bytes."""
 
     @staticmethod
     def _pack_op(op: OP) -> int:

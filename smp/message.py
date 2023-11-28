@@ -10,13 +10,15 @@ from pydantic import BaseModel, ConfigDict
 from smp import header as smpheader
 from smp.exceptions import SMPMismatchedGroupId
 
-T = TypeVar("T", bound='_MessageBase')
+T = TypeVar("T", bound='MessageBase')
 
 
 _counter = itertools.count()
 
 
-class _MessageBase(ABC, BaseModel):
+class MessageBase(ABC, BaseModel):
+    """Base class for SMP messages."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     _OP: ClassVar[smpheader.OP]
@@ -59,7 +61,9 @@ class _MessageBase(ABC, BaseModel):
         return cls(header=header, **data)
 
 
-class Request(_MessageBase, ABC):
+class Request(MessageBase, ABC):
+    """Base class for requests from an SMP client to an SMP server."""
+
     def model_post_init(self, _: None) -> None:
         data_bytes = cbor2.dumps(
             self.model_dump(exclude_unset=True, exclude={'header'}, exclude_none=True)
@@ -92,12 +96,15 @@ class ResponseType(IntEnum):
     ERROR_V1 = 2
 
 
-class Response(_MessageBase, ABC):
+class Response(MessageBase, ABC):
+    """Base class for responses from an SMP server to an SMP client."""
+
     sequence: int = 0
 
     RESPONSE_TYPE: ClassVar[ResponseType]
 
     def model_post_init(self, _: None) -> None:
+        """@private"""
         data_bytes = cbor2.dumps(
             self.model_dump(exclude_unset=True, exclude={'header', 'sequence'}, exclude_none=True)
         )
