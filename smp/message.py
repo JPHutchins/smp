@@ -20,7 +20,7 @@ class _MessageBase(ABC, BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     _OP: ClassVar[smpheader.OP]
-    _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V1
+    _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V0
     _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
     _GROUP_ID: ClassVar[smpheader.GroupId]
     _COMMAND_ID: ClassVar[smpheader.CommandId.ImageManagement | smpheader.CommandId.OSManagement]

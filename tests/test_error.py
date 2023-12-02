@@ -27,7 +27,7 @@ class FakeErrorV1(ErrorV1[FAKE_ERR]):
 make_header = partial(
     smpheader.Header,
     op=smpheader.OP.READ,
-    version=smpheader.Version.V1,
+    version=smpheader.Version.V0,
     flags=smpheader.Flag(0),
     group_id=smpheader.GroupId.IMAGE_MANAGEMENT,
     sequence=0,
