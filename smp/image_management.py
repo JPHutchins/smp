@@ -87,6 +87,17 @@ class ImageUploadFinalWriteResponse(_ImageManagementGroup, message.WriteResponse
     match: bool | None = None
 
 
+class ImageEraseRequest(_ImageManagementGroup, message.WriteRequest):
+    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
+
+    slot: int | None = None
+    """The slot to erase. If not provided, slot 1 will be erased."""
+
+
+class ImageEraseResponse(_ImageManagementGroup, message.WriteResponse):
+    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
+
+
 @unique
 class IMG_MGMT_ERR(IntEnum):
     OK = 0

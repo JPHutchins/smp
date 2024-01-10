@@ -120,3 +120,60 @@ def test_ImageStatesReadResponse(
     )
     assert_header(r3)
     assert_response(r3)
+
+
+def test_ImageEraseRequest() -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE,
+        smpheader.CommandId.ImageManagement.ERASE,
+        1,  # empty map
+    )
+    r = smpimg.ImageEraseRequest()
+
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+    r = smpimg.ImageEraseRequest.loads(r.BYTES)
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+    r = smpimg.ImageEraseRequest.load(cast(smpheader.Header, r.header), {})
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE,
+        smpheader.CommandId.ImageManagement.ERASE,
+        None,
+    )
+    r = smpimg.ImageEraseRequest(slot=0)
+
+    assert_header(r)
+    assert r.slot == 0
+
+    r = smpimg.ImageEraseRequest.loads(r.BYTES)
+    assert_header(r)
+    assert r.slot == 0
+
+
+def test_ImageEraseResponse() -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE_RSP,
+        smpheader.CommandId.ImageManagement.ERASE,
+        1,  # empty map
+    )
+    r = smpimg.ImageEraseResponse()
+
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+    r = smpimg.ImageEraseResponse.loads(r.BYTES)
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+    r = smpimg.ImageEraseResponse.load(cast(smpheader.Header, r.header), {})
+    assert_header(r)
+    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
