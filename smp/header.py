@@ -28,6 +28,10 @@ class CommandId:
         CORELOAD = 4
         ERASE = 5
 
+    @unique
+    class ShellManagement(IntEnum):
+        EXECUTE = 0
+
 
 AnyCommandId = TypeVar("AnyCommandId", bound=IntEnum)
 
@@ -85,11 +89,12 @@ class Header:
     length: int
     group_id: GroupId
     sequence: int
-    command_id: CommandId.OSManagement | CommandId.ImageManagement | IntEnum
+    command_id: CommandId.OSManagement | CommandId.ImageManagement | CommandId.ShellManagement | IntEnum
 
     _MAP_GROUP_ID_TO_COMMAND_ID_ENUM = {
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
+        GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
     }
     _STRUCT = struct.Struct("!BBHHBB")
     SIZE = _STRUCT.size
