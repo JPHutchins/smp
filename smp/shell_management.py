@@ -10,6 +10,7 @@ from smp import error, header, message
 class _ShellManagementGroup:
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
 
+
 class ExecuteRequest(_ShellManagementGroup, message.WriteRequest):
     _COMMAND_ID = header.CommandId.ShellManagement.EXECUTE
 
