@@ -47,18 +47,21 @@ def _do_test(
 
 
 def test_ExecuteRequest() -> None:
-    _do_test(
+    r = _do_test(
         smpshell.ExecuteRequest,
         smphdr.OP.WRITE,
         shellcmd.EXECUTE,
         {"argv": ["echo", "Hello"]},
     )
+    assert r.argv == ["echo", "Hello"]
 
 
 def test_ExecuteResponse() -> None:
-    _do_test(
+    r = _do_test(
         smpshell.ExecuteResponse,
         smphdr.OP.WRITE_RSP,
         shellcmd.EXECUTE,
         {"o": "Hello", "ret": 0},
     )
+    assert r.o == "Hello"
+    assert r.ret == 0
