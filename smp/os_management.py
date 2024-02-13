@@ -215,41 +215,17 @@ class OS_MGMT_RET_RC(IntEnum):
     UNKNOWN = auto()
     """Unknown error occurred."""
 
-    NO_MEMORY = auto()
-    """Insufficient memory (likely not enough space for CBOR object)."""
+    INVALID_FORMAT = auto()
+    """The provided format value is not valid."""
 
-    INVALID_VALUE = auto()
-    """Error in input value."""
+    QUERY_YIELDS_NO_ANSWER = auto()
+    """Query was not recognized."""
 
-    TIMEOUT = auto()
-    """Operation timed out."""
+    RTC_NOT_SET = auto()
+    """RTC is not set."""
 
-    NO_ENTRY = auto()
-    """No such file/entry."""
-
-    BAD_STATE = auto()
-    """Current state disallows command."""
-
-    MESSAGE_SIZE = auto()
-    """Response too large."""
-
-    NOT_SUPPORTED = auto()
-    """Command not supported."""
-
-    CORRUPT = auto()
-    """Corrupt."""
-
-    BUSY = auto()
-    """Command blocked by processing of other command."""
-
-    ACCESS_DENIED = auto()
-    """Access to specific function, command or resource denied."""
-
-    UNSUPPORTED_TOO_OLD = auto()
-    """Requested SMP MCUmgr protocol version is not supported (too old)."""
-
-    UNSUPPORTED_TOO_NEW = auto()
-    """Requested SMP MCUmgr protocol version is not supported (too new)."""
+    RTC_COMMAND_FAILED = auto()
+    """RTC command failed."""
 
 
 class OSManagementErrorV0(error.ErrorV0[OS_MGMT_RET_RC]):
