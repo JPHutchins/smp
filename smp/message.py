@@ -1,4 +1,5 @@
 """The Simple Management Protocol (SMP) Message base class."""
+
 import itertools
 from abc import ABC
 from enum import IntEnum, unique
@@ -23,7 +24,11 @@ class _MessageBase(ABC, BaseModel):
     _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V0
     _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
     _GROUP_ID: ClassVar[smpheader.GroupId]
-    _COMMAND_ID: ClassVar[smpheader.CommandId.ImageManagement | smpheader.CommandId.OSManagement]
+    _COMMAND_ID: ClassVar[
+        smpheader.CommandId.ImageManagement
+        | smpheader.CommandId.OSManagement
+        | smpheader.CommandId.ShellManagement
+    ]
 
     header: smpheader.Header | None = None
 
