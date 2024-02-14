@@ -4,6 +4,13 @@
 
 The SMP specification can be found [here](https://docs.zephyrproject.org/latest/services/device_mgmt/smp_protocol.html).
 
+If you'd like a library that implements the **serial (UART or USB)**, **Bluetooth (BLE)**, and
+**UDP** transport layers for SMP, take a look at
+[smpclient](https://github.com/intercreate/smpclient).
+
+If you need an SMP CLI application to interact with device firmware, then try
+[smpmgr](https://github.com/intercreate/smpmgr).
+
 ## Install
 
 `smp` is [distributed by PyPI](https://pypi.org/project/smp/) and can be installed with `poetry`, `pip`, and other dependency managers.
