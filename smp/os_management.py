@@ -218,6 +218,15 @@ class OS_MGMT_RET_RC(IntEnum):
     INVALID_FORMAT = auto()
     """The provided format value is not valid."""
 
+    QUERY_YIELDS_NO_ANSWER = auto()
+    """Query was not recognized."""
+
+    RTC_NOT_SET = auto()
+    """RTC is not set."""
+
+    RTC_COMMAND_FAILED = auto()
+    """RTC command failed."""
+
 
 class OSManagementErrorV0(error.ErrorV0[OS_MGMT_RET_RC]):
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
