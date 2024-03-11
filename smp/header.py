@@ -32,11 +32,14 @@ class CommandId:
     class ShellManagement(IntEnum):
         EXECUTE = 0
 
+    @unique
+    class Intercreate(IntEnum):
+        UPLOAD = 1
+
 
 AnyCommandId = TypeVar("AnyCommandId", bound=IntEnum)
 
 
-@unique
 class GroupId(IntEnum):
     OS_MANAGEMENT = 0
     IMAGE_MANAGEMENT = 1
@@ -50,6 +53,7 @@ class GroupId(IntEnum):
     SHELL_MANAGEMENT = 9
     ZEPHYR = 63
     _APPLICATIION_CUSTOM_MIN = 64
+    INTERCREATE = 64
 
 
 @unique
@@ -97,6 +101,7 @@ class Header:
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
+        GroupId.INTERCREATE: CommandId.Intercreate,
     }
     _STRUCT = struct.Struct("!BBHHBB")
     SIZE = _STRUCT.size

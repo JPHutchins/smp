@@ -28,6 +28,7 @@ class _MessageBase(ABC, BaseModel):
         smpheader.CommandId.ImageManagement
         | smpheader.CommandId.OSManagement
         | smpheader.CommandId.ShellManagement
+        | smpheader.CommandId.Intercreate
     ]
 
     header: smpheader.Header | None = None
