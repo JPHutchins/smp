@@ -9,7 +9,7 @@ import cbor2
 from pydantic import BaseModel, ConfigDict
 
 from smp import header as smpheader
-from smp.exceptions import SMPMismatchedGroupId
+from smp.exceptions import SMPMalformed, SMPMismatchedGroupId
 
 T = TypeVar("T", bound='_MessageBase')
 
@@ -86,6 +86,10 @@ class Request(_MessageBase, ABC):
                     ](self._COMMAND_ID),
                 ),
             )
+        elif self.header.length != len(data_bytes):
+            raise SMPMalformed(
+                f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
+            )
         self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
 
 
@@ -122,6 +126,10 @@ class Response(_MessageBase, ABC):
                         smpheader.GroupId(self._GROUP_ID)
                     ](self._COMMAND_ID),
                 ),
+            )
+        elif self.header.length != len(data_bytes):
+            raise SMPMalformed(
+                f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
             )
         self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
 
