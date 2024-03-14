@@ -27,3 +27,7 @@ class SMPDeserializationError(SMPException):
 
 class SMPMismatchedGroupId(SMPDeserializationError):
     ...
+
+
+class SMPMalformed(SMPException):
+    ...
