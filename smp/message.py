@@ -127,10 +127,6 @@ class Response(_MessageBase, ABC):
                     ](self._COMMAND_ID),
                 ),
             )
-        elif self.header.length != len(data_bytes):
-            raise SMPMalformed(
-                f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
-            )
         self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
 
 

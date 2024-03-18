@@ -103,33 +103,3 @@ def test_ImageUploadWriteResponse_injected_header() -> None:
 
     assert cast(smphdr.Header, r.header).length == 10
     assert len(r.BYTES) == 10 + smphdr.Header.SIZE
-
-    with pytest.raises(SMPMalformed):
-        r = smpimg.ImageUploadProgressWriteResponse(
-            header=smphdr.Header(
-                op=h.op,
-                version=h.version,
-                flags=h.flags,
-                length=2,
-                group_id=h.group_id,
-                sequence=h.sequence,
-                command_id=h.command_id,
-            ),
-            rc=0,
-            off=0,
-        )
-
-    with pytest.raises(SMPMalformed):
-        r = smpimg.ImageUploadProgressWriteResponse(
-            header=smphdr.Header(
-                op=h.op,
-                version=h.version,
-                flags=h.flags,
-                length=0,
-                group_id=h.group_id,
-                sequence=h.sequence,
-                command_id=h.command_id,
-            ),
-            rc=0,
-            off=0,
-        )
