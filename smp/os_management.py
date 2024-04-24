@@ -2,7 +2,7 @@
 
 
 from enum import IntEnum, auto, unique
-from typing import Any, Dict
+from typing import Any, ClassVar, Dict
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,7 +10,7 @@ from smp import error, header, message
 
 
 class _OSManagementGroup:
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _GROUP_ID: ClassVar = header.GroupId.OS_MANAGEMENT
 
 
 class EchoWriteRequest(_OSManagementGroup, message.WriteRequest):

@@ -2,13 +2,13 @@
 
 
 from enum import IntEnum, auto, unique
-from typing import List
+from typing import ClassVar, List
 
 from smp import error, header, message
 
 
 class _ShellManagementGroup:
-    _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
+    _GROUP_ID: ClassVar = header.GroupId.SHELL_MANAGEMENT
 
 
 class ExecuteRequest(_ShellManagementGroup, message.WriteRequest):

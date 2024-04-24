@@ -3,7 +3,7 @@
 import struct
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, auto, unique
-from typing import TypeVar
+from typing import ClassVar, Dict, Type, TypeAlias
 
 
 class CommandId:
@@ -37,7 +37,7 @@ class CommandId:
         UPLOAD = 1
 
 
-AnyCommandId = TypeVar("AnyCommandId", bound=IntEnum)
+AnyCommandId: TypeAlias = IntEnum | int
 
 
 class GroupId(IntEnum):
@@ -54,6 +54,9 @@ class GroupId(IntEnum):
     ZEPHYR = 63
     _APPLICATIION_CUSTOM_MIN = 64
     INTERCREATE = 64
+
+
+AnyGroupId: TypeAlias = IntEnum | int
 
 
 @unique
@@ -91,20 +94,24 @@ class Header:
     version: Version
     flags: Flag
     length: int
-    group_id: GroupId
+    group_id: AnyGroupId | GroupId
     sequence: int
     command_id: (
-        CommandId.OSManagement | CommandId.ImageManagement | CommandId.ShellManagement | IntEnum
+        AnyCommandId
+        | CommandId.OSManagement
+        | CommandId.ImageManagement
+        | CommandId.ShellManagement
+        | CommandId.Intercreate
     )
 
-    _MAP_GROUP_ID_TO_COMMAND_ID_ENUM = {
+    _MAP_GROUP_ID_TO_COMMAND_ID_ENUM: ClassVar[Dict[int, Type[IntEnum]]] = {
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
         GroupId.INTERCREATE: CommandId.Intercreate,
     }
-    _STRUCT = struct.Struct("!BBHHBB")
-    SIZE = _STRUCT.size
+    _STRUCT: ClassVar = struct.Struct("!BBHHBB")
+    SIZE: ClassVar = _STRUCT.size
 
     @staticmethod
     def _pack_op(op: OP) -> int:
@@ -131,7 +138,22 @@ class Header:
         """The op and version packed into one byte."""
         return Header._pack_op(op) | Header._pack_version(version)
 
+    @staticmethod
+    def _validate_command_id(group_id: int, command_id: int) -> None:
+        """Validate the command_id if the GroupId is known."""
+
+        if command_id_t := Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM.get(group_id):
+            try:
+                command_id_t(command_id)
+            except ValueError:
+                raise ValueError(
+                    f"Command ID {command_id} is not valid for Group ID {group_id}"
+                    f" ({GroupId(group_id).name})"
+                )
+
     def __post_init__(self) -> None:
+        Header._validate_command_id(self.group_id, self.command_id)
+
         object.__setattr__(
             self,
             '_bytes',
@@ -139,9 +161,9 @@ class Header:
                 self._pack_op_and_version(self.op, self.version),
                 Flag(self.flags),
                 self.length,
-                GroupId(self.group_id),
+                self.group_id,
                 self.sequence,
-                Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[GroupId(self.group_id)](self.command_id),
+                self.command_id,
             ),
         )
 
@@ -161,12 +183,14 @@ class Header:
             header
         )
 
+        Header._validate_command_id(group_id, command_id)
+
         return Header(
             Header._unpack_op(res_ver_op_byte),
             Header._unpack_version(res_ver_op_byte),
             Flag(flags),
             length,
-            GroupId(group_id),
+            group_id,
             sequence,
-            Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[GroupId(group_id)](command_id),
+            command_id,
         )

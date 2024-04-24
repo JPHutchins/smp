@@ -24,11 +24,9 @@ def test_header_serialization(
     command_id: int,
 ) -> None:
     # the validators will raise exceptions
-    if group_id > max(GroupId):
-        with pytest.raises((KeyError, ValueError)):
-            h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
-        return
-    elif command_id > max(Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]):
+    if group_id <= max(GroupId) and command_id > max(
+        Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
+    ):
         with pytest.raises((KeyError, ValueError)):
             h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
         return
@@ -76,12 +74,9 @@ def test_header_deserialization(
     command_id: int,
 ) -> None:
     # the validators will raise exceptions
-    if group_id > max(GroupId):
-        with pytest.raises((KeyError, ValueError)):
-            _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
-            h = Header.loads(_h.BYTES)
-        return
-    elif command_id > max(Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]):
+    if group_id <= max(GroupId) and command_id > max(
+        Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
+    ):
         with pytest.raises((KeyError, ValueError)):
             _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
             h = Header.loads(_h.BYTES)

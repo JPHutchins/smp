@@ -1,7 +1,7 @@
 """The Simple Management Protocol (SMP) Image Management group."""
 
 from enum import IntEnum, auto, unique
-from typing import Generator, List
+from typing import ClassVar, Generator, List
 
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
@@ -9,7 +9,7 @@ from smp import error, header, message
 
 
 class _ImageManagementGroup:
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _GROUP_ID: ClassVar = header.GroupId.IMAGE_MANAGEMENT
 
 
 class HashBytes(bytes):  # pragma: no cover

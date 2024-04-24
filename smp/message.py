@@ -23,9 +23,10 @@ class _MessageBase(ABC, BaseModel):
     _OP: ClassVar[smpheader.OP]
     _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V0
     _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
-    _GROUP_ID: ClassVar[smpheader.GroupId]
+    _GROUP_ID: ClassVar[smpheader.GroupId | smpheader.AnyGroupId]
     _COMMAND_ID: ClassVar[
-        smpheader.CommandId.ImageManagement
+        smpheader.AnyCommandId
+        | smpheader.CommandId.ImageManagement
         | smpheader.CommandId.OSManagement
         | smpheader.CommandId.ShellManagement
         | smpheader.CommandId.Intercreate
@@ -79,11 +80,9 @@ class Request(_MessageBase, ABC):
                     version=self._VERSION,
                     flags=smpheader.Flag(self._FLAGS),
                     length=len(data_bytes),
-                    group_id=smpheader.GroupId(self._GROUP_ID),
+                    group_id=self._GROUP_ID,
                     sequence=next(_counter) % 0xFF,
-                    command_id=smpheader.Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[
-                        smpheader.GroupId(self._GROUP_ID)
-                    ](self._COMMAND_ID),
+                    command_id=self._COMMAND_ID,
                 ),
             )
         elif self.header.length != len(data_bytes):
@@ -120,11 +119,9 @@ class Response(_MessageBase, ABC):
                     version=self._VERSION,
                     flags=smpheader.Flag(self._FLAGS),
                     length=len(data_bytes),
-                    group_id=smpheader.GroupId(self._GROUP_ID),
+                    group_id=self._GROUP_ID,
                     sequence=self.sequence,
-                    command_id=smpheader.Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[
-                        smpheader.GroupId(self._GROUP_ID)
-                    ](self._COMMAND_ID),
+                    command_id=self._COMMAND_ID,
                 ),
             )
         self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
