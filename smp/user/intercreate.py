@@ -1,12 +1,13 @@
 """The Simple Management Protocol (SMP) Intercreate Management group."""
 
 from enum import IntEnum, auto, unique
+from typing import ClassVar
 
 from smp import error, header, message
 
 
 class _IntercreateManagementGroup:
-    _GROUP_ID = header.GroupId.INTERCREATE
+    _GROUP_ID: ClassVar = header.GroupId.INTERCREATE
 
 
 class ImageUploadWriteRequest(_IntercreateManagementGroup, message.WriteRequest):
