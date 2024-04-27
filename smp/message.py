@@ -23,7 +23,7 @@ class _MessageBase(ABC, BaseModel):
     _OP: ClassVar[smpheader.OP]
     _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V0
     _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
-    _GROUP_ID: ClassVar[smpheader.GroupId | smpheader.AnyGroupId]
+    _GROUP_ID: ClassVar[smpheader.GroupId | smpheader.UserGroupId | smpheader.AnyGroupId]
     _COMMAND_ID: ClassVar[
         smpheader.AnyCommandId
         | smpheader.CommandId.ImageManagement
