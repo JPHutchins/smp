@@ -40,6 +40,7 @@ class CommandId:
 AnyCommandId: TypeAlias = IntEnum | int
 
 
+@unique
 class GroupId(IntEnum):
     OS_MANAGEMENT = 0
     IMAGE_MANAGEMENT = 1
@@ -52,7 +53,13 @@ class GroupId(IntEnum):
     FILE_MANAGEMENT = 8
     SHELL_MANAGEMENT = 9
     ZEPHYR = 63
-    _APPLICATIION_CUSTOM_MIN = 64
+
+
+class UserGroupId(IntEnum):
+    """Users may define their own Group IDs starting at 64.
+
+    It is optional to register them here."""
+
     INTERCREATE = 64
 
 
@@ -94,7 +101,7 @@ class Header:
     version: Version
     flags: Flag
     length: int
-    group_id: AnyGroupId | GroupId
+    group_id: AnyGroupId | GroupId | UserGroupId
     sequence: int
     command_id: (
         AnyCommandId
@@ -108,7 +115,6 @@ class Header:
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
-        GroupId.INTERCREATE: CommandId.Intercreate,
     }
     _STRUCT: ClassVar = struct.Struct("!BBHHBB")
     SIZE: ClassVar = _STRUCT.size

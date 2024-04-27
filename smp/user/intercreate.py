@@ -7,7 +7,7 @@ from smp import error, header, message
 
 
 class _IntercreateManagementGroup:
-    _GROUP_ID: ClassVar = header.GroupId.INTERCREATE
+    _GROUP_ID: ClassVar = header.UserGroupId.INTERCREATE
 
 
 class ImageUploadWriteRequest(_IntercreateManagementGroup, message.WriteRequest):
@@ -46,8 +46,8 @@ class IC_MGMT_ERR(IntEnum):
 
 
 class ErrorV0(error.ErrorV0[IC_MGMT_ERR]):
-    _GROUP_ID = header.GroupId.INTERCREATE
+    _GROUP_ID = header.UserGroupId.INTERCREATE
 
 
 class ErrorV1(error.ErrorV1[IC_MGMT_ERR]):
-    _GROUP_ID = header.GroupId.INTERCREATE
+    _GROUP_ID = header.UserGroupId.INTERCREATE

@@ -14,7 +14,7 @@ def test_initial_ImageUploadWriteRequest() -> None:
     )
 
     assert_header = make_assert_header(
-        ic.header.GroupId.INTERCREATE,
+        ic.header.UserGroupId.INTERCREATE,
         ic.header.OP.WRITE,
         ic.header.CommandId.Intercreate.UPLOAD,
         len(r.BYTES) - ic.header.Header.SIZE,
@@ -36,7 +36,7 @@ def test_subsequent_ImageUploadWriteRequest() -> None:
     )
 
     assert_header = make_assert_header(
-        ic.header.GroupId.INTERCREATE,
+        ic.header.UserGroupId.INTERCREATE,
         ic.header.OP.WRITE,
         ic.header.CommandId.Intercreate.UPLOAD,
         len(r.BYTES) - ic.header.Header.SIZE,
@@ -55,7 +55,7 @@ def test_ImageUploadWriteResponse() -> None:
     r = ic.ImageUploadWriteResponse(header=None, sequence=0, off=105000)
 
     assert_header = make_assert_header(
-        ic.header.GroupId.INTERCREATE,
+        ic.header.UserGroupId.INTERCREATE,
         ic.header.OP.WRITE_RSP,
         ic.header.CommandId.Intercreate.UPLOAD,
         len(r.BYTES) - ic.header.Header.SIZE,

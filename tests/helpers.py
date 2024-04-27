@@ -5,7 +5,7 @@ from smp.message import _MessageBase
 
 
 def make_assert_header(
-    group_id: smpheader.GroupId,
+    group_id: smpheader.GroupId | smpheader.UserGroupId,
     op: smpheader.OP,
     command_id: smpheader.AnyCommandId,
     length: int | None,
