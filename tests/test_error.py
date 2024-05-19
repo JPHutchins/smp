@@ -1,5 +1,7 @@
 """Test the SMP Error responses."""
 
+from __future__ import annotations
+
 from enum import IntEnum
 from functools import partial
 

@@ -1,16 +1,14 @@
 """The Simple Management Protocol (SMP) Intercreate Management group."""
 
+from __future__ import annotations
+
 from enum import IntEnum, auto, unique
-from typing import ClassVar
 
 from smp import error, header, message
 
 
-class _IntercreateManagementGroup:
-    _GROUP_ID: ClassVar = header.UserGroupId.INTERCREATE
-
-
-class ImageUploadWriteRequest(_IntercreateManagementGroup, message.WriteRequest):
+class ImageUploadWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.UserGroupId.INTERCREATE
     _COMMAND_ID = header.CommandId.Intercreate.UPLOAD
 
     off: int
@@ -29,7 +27,8 @@ class ImageUploadWriteRequest(_IntercreateManagementGroup, message.WriteRequest)
     """The SHA-256 hash of the image; optional when off == 0, else ignored."""
 
 
-class ImageUploadWriteResponse(_IntercreateManagementGroup, message.WriteResponse):
+class ImageUploadWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.UserGroupId.INTERCREATE
     _COMMAND_ID = header.CommandId.Intercreate.UPLOAD
 
     off: int

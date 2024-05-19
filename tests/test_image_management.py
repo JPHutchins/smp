@@ -1,5 +1,7 @@
 """Test the SMP Image Management group."""
 
+from __future__ import annotations
+
 from typing import cast
 
 import cbor2

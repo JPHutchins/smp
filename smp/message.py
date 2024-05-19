@@ -1,5 +1,7 @@
 """The Simple Management Protocol (SMP) Message base class."""
 
+from __future__ import annotations
+
 import itertools
 from abc import ABC
 from enum import IntEnum, unique

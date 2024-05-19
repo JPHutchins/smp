@@ -1,15 +1,13 @@
 """The Simple Management Protocol (SMP) Image Management group."""
 
+from __future__ import annotations
+
 from enum import IntEnum, auto, unique
-from typing import ClassVar, Generator, List
+from typing import Generator, List
 
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from smp import error, header, message
-
-
-class _ImageManagementGroup:
-    _GROUP_ID: ClassVar = header.GroupId.IMAGE_MANAGEMENT
 
 
 class HashBytes(bytes):  # pragma: no cover
@@ -40,18 +38,21 @@ class ImageState(BaseModel):
         return HashBytes(v)
 
 
-class ImageStatesReadRequest(_ImageManagementGroup, message.ReadRequest):
+class ImageStatesReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.STATE
 
 
-class ImageStatesReadResponse(_ImageManagementGroup, message.ReadResponse):
+class ImageStatesReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.STATE
 
     images: List[ImageState]
     splitStatus: int | None = None
 
 
-class ImageStatesWriteRequest(_ImageManagementGroup, message.WriteRequest):
+class ImageStatesWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.STATE
 
     hash: bytes
@@ -62,7 +63,8 @@ class ImageStatesWriteResponse(ImageStatesReadResponse):
     pass
 
 
-class ImageUploadWriteRequest(_ImageManagementGroup, message.WriteRequest):
+class ImageUploadWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
 
     off: int
@@ -73,28 +75,32 @@ class ImageUploadWriteRequest(_ImageManagementGroup, message.WriteRequest):
     upgrade: bool | None = None  # allowed when off == 0
 
 
-class ImageUploadProgressWriteResponse(_ImageManagementGroup, message.WriteResponse):
+class ImageUploadProgressWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
 
     rc: int | None = None
     off: int | None = None
 
 
-class ImageUploadFinalWriteResponse(_ImageManagementGroup, message.WriteResponse):
+class ImageUploadFinalWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
 
     off: int | None = None
     match: bool | None = None
 
 
-class ImageEraseRequest(_ImageManagementGroup, message.WriteRequest):
+class ImageEraseRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.ERASE
 
     slot: int | None = None
     """The slot to erase. If not provided, slot 1 will be erased."""
 
 
-class ImageEraseResponse(_ImageManagementGroup, message.WriteResponse):
+class ImageEraseResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.ERASE
 
 
