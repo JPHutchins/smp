@@ -16,7 +16,7 @@ packages = [
 source = "git-tag"
 
 [tool.poetry.dependencies]
-python = ">=3.9, <3.13"
+python = ">=3.8, <3.13"
 cbor2 = "^5.5.1"
 crcmod = "^1.7"
 pydantic = "^2.6"
@@ -55,7 +55,8 @@ filterwarnings = [
 legacy_tox_ini = """
     [tox]
     min_version = 4.15
-    env_list = 
+    env_list =
+        py38
         py39
         py310
         py311
