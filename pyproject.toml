@@ -16,10 +16,11 @@ packages = [
 source = "git-tag"
 
 [tool.poetry.dependencies]
-python = ">=3.10, <3.13"
+python = ">=3.9, <3.13"
 cbor2 = "^5.5.1"
 crcmod = "^1.7"
-pydantic = "^2.4.2"
+pydantic = "^2.6"
+eval-type-backport = { version = "^0.2.0", python = "<3.10"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -34,7 +35,7 @@ tox = "^4.15.0"
 
 [tool.black]
 line-length = 100
-skip-string-normalization = 1
+skip-string-normalization = true
 
 [tool.isort]
 profile = "black"
@@ -49,6 +50,34 @@ exclude = ['.venv']
 filterwarnings = [
     "ignore:The --rsyncdir:DeprecationWarning",
 ]
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    min_version = 4.15
+    env_list = 
+        py39
+        py310
+        py311
+        py312
+
+    [testenv]
+    allowlist_externals =
+        poetry
+        black
+        isort
+        flake8
+        mypy
+        coverage
+    commands = 
+        poetry install
+        black --check .
+        isort --check-only .
+        flake8 .
+        mypy .
+        coverage erase
+        pytest --cov --maxfail=3 -n auto
+"""
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

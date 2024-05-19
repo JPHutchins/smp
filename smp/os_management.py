@@ -1,39 +1,41 @@
 """The Simple Management Protocol (SMP) OS Management group."""
 
+from __future__ import annotations
 
 from enum import IntEnum, auto, unique
-from typing import Any, ClassVar, Dict
+from typing import Any, Dict
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from smp import error, header, message
 
 
-class _OSManagementGroup:
-    _GROUP_ID: ClassVar = header.GroupId.OS_MANAGEMENT
-
-
-class EchoWriteRequest(_OSManagementGroup, message.WriteRequest):
+class EchoWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.ECHO
 
     d: str
 
 
-class EchoWriteResponse(_OSManagementGroup, message.WriteResponse):
+class EchoWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.ECHO
 
     r: str
 
 
-class ResetWriteRequest(_OSManagementGroup, message.WriteRequest):
+class ResetWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.RESET
 
 
-class ResetWriteResponse(_OSManagementGroup, message.WriteResponse):
+class ResetWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.RESET
 
 
-class TaskStatisticsReadRequest(_OSManagementGroup, message.ReadRequest):
+class TaskStatisticsReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
 
@@ -66,13 +68,15 @@ class TaskStatistics(BaseModel):
     """Set to 0 by Zephyr."""
 
 
-class TaskStatisticsReadResponse(_OSManagementGroup, message.ReadResponse):
+class TaskStatisticsReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
     tasks: Dict[str, TaskStatistics]
 
 
-class MemoryPoolStatisticsReadRequest(_OSManagementGroup, message.ReadRequest):
+class MemoryPoolStatisticsReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
 
 
@@ -89,46 +93,54 @@ class MemoryPoolStatistics(BaseModel):
     """Lowest number of free blocks the pool reached during run-time."""
 
 
-class MemoryPoolStatisticsReadResponse(_OSManagementGroup, message.ReadResponse):
+class MemoryPoolStatisticsReadResponse(message.ReadResponse):
     """The memory pools are accessed by name."""
 
     model_config = ConfigDict(extra="allow", frozen=True)
 
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
 
 
-class DateTimeReadRequest(_OSManagementGroup, message.ReadRequest):
+class DateTimeReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
 
-class DateTimeReadResponse(_OSManagementGroup, message.ReadResponse):
-    _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
-
-    datetime: str
-
-
-class DateTimeWriteRequest(_OSManagementGroup, message.WriteRequest):
+class DateTimeReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
     datetime: str
 
 
-class DateTimeWriteResponse(_OSManagementGroup, message.WriteResponse):
+class DateTimeWriteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
+
+    datetime: str
+
+
+class DateTimeWriteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
 
-class MCUMgrParametersReadRequest(_OSManagementGroup, message.ReadRequest):
+class MCUMgrParametersReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
 
 
-class MCUMgrParametersReadResponse(_OSManagementGroup, message.ReadResponse):
+class MCUMgrParametersReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
 
     buf_size: int
     buf_count: int
 
 
-class OSApplicationInfoReadRequest(_OSManagementGroup, message.ReadRequest):
+class OSApplicationInfoReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
 
     format: str | None = None
@@ -153,13 +165,15 @@ class OSApplicationInfoReadRequest(_OSManagementGroup, message.ReadRequest):
     """
 
 
-class OSApplicationInfoReadResponse(_OSManagementGroup, message.ReadResponse):
+class OSApplicationInfoReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
 
     output: str
 
 
-class BootloaderInformationReadRequest(_OSManagementGroup, message.ReadRequest):
+class BootloaderInformationReadRequest(message.ReadRequest):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
     query: str | None = None
@@ -193,7 +207,8 @@ class MCUbootModeQueryResponse(BaseModel):
     no_downgrade: bool | None = Field(alias="no-downgrade", default=None)
 
 
-class BootloaderInformationReadResponse(_OSManagementGroup, message.ReadResponse):
+class BootloaderInformationReadResponse(message.ReadResponse):
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
     bootloader: str

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable, cast
 
 from smp import header as smpheader

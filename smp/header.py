@@ -1,9 +1,13 @@
 """The Simple Management Protocol (SMP) header."""
 
+from __future__ import annotations
+
 import struct
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, auto, unique
-from typing import ClassVar, Dict, Type, TypeAlias
+from typing import ClassVar, Dict, Type, Union
+
+from typing_extensions import TypeAlias
 
 
 class CommandId:
@@ -37,7 +41,7 @@ class CommandId:
         UPLOAD = 1
 
 
-AnyCommandId: TypeAlias = IntEnum | int
+AnyCommandId: TypeAlias = Union[IntEnum, int]
 
 
 @unique
@@ -63,7 +67,7 @@ class UserGroupId(IntEnum):
     INTERCREATE = 64
 
 
-AnyGroupId: TypeAlias = IntEnum | int
+AnyGroupId: TypeAlias = Union[IntEnum, int]
 
 
 @unique
@@ -101,23 +105,23 @@ class Header:
     version: Version
     flags: Flag
     length: int
-    group_id: AnyGroupId | GroupId | UserGroupId
+    group_id: Union[AnyGroupId, GroupId, UserGroupId]
     sequence: int
-    command_id: (
-        AnyCommandId
-        | CommandId.OSManagement
-        | CommandId.ImageManagement
-        | CommandId.ShellManagement
-        | CommandId.Intercreate
-    )
+    command_id: Union[
+        AnyCommandId,
+        CommandId.OSManagement,
+        CommandId.ImageManagement,
+        CommandId.ShellManagement,
+        CommandId.Intercreate,
+    ]
 
     _MAP_GROUP_ID_TO_COMMAND_ID_ENUM: ClassVar[Dict[int, Type[IntEnum]]] = {
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
     }
-    _STRUCT: ClassVar = struct.Struct("!BBHHBB")
-    SIZE: ClassVar = _STRUCT.size
+    _STRUCT: ClassVar[struct.Struct] = struct.Struct("!BBHHBB")
+    SIZE: ClassVar[int] = _STRUCT.size
 
     @staticmethod
     def _pack_op(op: OP) -> int:

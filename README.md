@@ -34,6 +34,10 @@ If you need an SMP CLI application to interact with device firmware, then try
    ```
    poetry add -G dev <my_dev_dependency>
    ```
+7.  run tests for all supported python versions:
+   ```
+   tox
+   ```
 
 ## Development Environment Setup
 

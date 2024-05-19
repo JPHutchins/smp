@@ -2,22 +2,20 @@
 
 
 from enum import IntEnum, auto, unique
-from typing import ClassVar, List
+from typing import List
 
 from smp import error, header, message
 
 
-class _ShellManagementGroup:
-    _GROUP_ID: ClassVar = header.GroupId.SHELL_MANAGEMENT
-
-
-class ExecuteRequest(_ShellManagementGroup, message.WriteRequest):
+class ExecuteRequest(message.WriteRequest):
+    _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
     _COMMAND_ID = header.CommandId.ShellManagement.EXECUTE
 
     argv: List[str]
 
 
-class ExecuteResponse(_ShellManagementGroup, message.WriteResponse):
+class ExecuteResponse(message.WriteResponse):
+    _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
     _COMMAND_ID = header.CommandId.ShellManagement.EXECUTE
 
     o: str

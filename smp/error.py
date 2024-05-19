@@ -1,5 +1,7 @@
 """The Simple Management Protocol (SMP) error responses."""
 
+from __future__ import annotations
+
 from enum import IntEnum
 from typing import Generic, TypeVar
 
