@@ -34,7 +34,7 @@ class SHELL_MGMT_RET_RC(IntEnum):
     """The provided format value is not valid."""
 
 
-class ShellManagementErrorV0(error.ErrorV0[SHELL_MGMT_RET_RC]):
+class ShellManagementErrorV0(error.ErrorV0):
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
 
 

@@ -209,7 +209,7 @@ class IMG_MGMT_ERR(IntEnum):
     """Setting test to active slot is not allowed"""
 
 
-class ImageManagementErrorV0(error.ErrorV0[IMG_MGMT_ERR]):
+class ImageManagementErrorV0(error.ErrorV0):
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
 
 

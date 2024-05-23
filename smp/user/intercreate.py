@@ -44,7 +44,7 @@ class IC_MGMT_ERR(IntEnum):
     """No image matched the image provided."""
 
 
-class ErrorV0(error.ErrorV0[IC_MGMT_ERR]):
+class ErrorV0(error.ErrorV0):
     _GROUP_ID = header.UserGroupId.INTERCREATE
 
 

@@ -10,7 +10,7 @@ import pytest
 from pydantic import ValidationError
 
 from smp import header as smpheader
-from smp.error import ErrorV0, ErrorV1
+from smp.error import MGMT_ERR, ErrorV0, ErrorV1
 
 
 class FAKE_ERR(IntEnum):
@@ -18,7 +18,7 @@ class FAKE_ERR(IntEnum):
     ERR = 1
 
 
-class FakeErrorV0(ErrorV0[FAKE_ERR]):
+class FakeErrorV0(ErrorV0):
     _GROUP_ID = smpheader.GroupId.IMAGE_MANAGEMENT
 
 
@@ -37,19 +37,19 @@ make_header = partial(
 )
 
 
-@pytest.mark.parametrize("rc", [FAKE_ERR.OK, FAKE_ERR.ERR, 2])
+@pytest.mark.parametrize("rc", [e.value for e in MGMT_ERR])
 @pytest.mark.parametrize("rsn", ["something", None])
-def test_ErrorV0(rc: FAKE_ERR, rsn: str | None) -> None:
+def test_ErrorV0(rc: MGMT_ERR, rsn: str | None) -> None:
     d = cbor2.dumps({"rc": rc} if rsn is None else {"rc": rc, "rsn": rsn})  # type: ignore
     h = make_header(length=len(d))
 
-    if rc > max(FAKE_ERR):
+    if rc > max(MGMT_ERR):
         with pytest.raises(ValidationError):
             FakeErrorV0.loads(h.BYTES + d)
         return
 
     e = FakeErrorV0.loads(h.BYTES + d)
-    assert FAKE_ERR is type(e.rc)
+    assert MGMT_ERR is type(e.rc)
     assert rc == e.rc
     if rsn is not None:
         assert rsn == e.rsn

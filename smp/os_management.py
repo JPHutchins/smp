@@ -243,7 +243,7 @@ class OS_MGMT_RET_RC(IntEnum):
     """RTC command failed."""
 
 
-class OSManagementErrorV0(error.ErrorV0[OS_MGMT_RET_RC]):
+class OSManagementErrorV0(error.ErrorV0):
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
 
 
