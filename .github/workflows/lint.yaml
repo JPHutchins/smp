@@ -7,10 +7,11 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +23,15 @@ jobs:
           cache: 'poetry'
       - run: poetry install
 
-      - name: lint
+      - name: Lint (Linux or MacOS)
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         run: |
           shopt -s expand_aliases
+          . ./envr.ps1
+          lint
+      
+      - name: Lint (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
           . ./envr.ps1
           lint
