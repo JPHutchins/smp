@@ -87,7 +87,7 @@ def test_ImageUploadWriteResponse_injected_header() -> None:
         command_id=smphdr.CommandId.ImageManagement.UPLOAD,
     )
 
-    r = smpimg.ImageUploadProgressWriteResponse(
+    r = smpimg.ImageUploadWriteResponse(
         header=smphdr.Header(
             op=h.op,
             version=h.version,

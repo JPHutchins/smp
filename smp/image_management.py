@@ -75,20 +75,23 @@ class ImageUploadWriteRequest(message.WriteRequest):
     upgrade: bool | None = None  # allowed when off == 0
 
 
-class ImageUploadProgressWriteResponse(message.WriteResponse):
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
-
-    rc: int | None = None
-    off: int | None = None
-
-
-class ImageUploadFinalWriteResponse(message.WriteResponse):
+class ImageUploadWriteResponse(message.WriteResponse):
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
 
     off: int | None = None
+    """The portion of the upload that has been completed, in 8-bit bytes.
+
+    This is the offset of the next byte to be written. If the offset is equal to
+    the length of the image, the upload is complete.
+    """
     match: bool | None = None
+    """Indicates if the uploaded data successfully matches the provided SHA256.
+
+    Only sent in the final packet if CONFIG_IMG_ENABLE_IMAGE_CHECK is enabled.
+    """
+    rc: int | None = None
+    """Unspecified field used by MCUBoot's SMP Server implementation."""
 
 
 class ImageEraseRequest(message.WriteRequest):

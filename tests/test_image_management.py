@@ -179,3 +179,100 @@ def test_ImageEraseResponse() -> None:
     r = smpimg.ImageEraseResponse.load(cast(smpheader.Header, r.header), {})
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+
+
+def test_ImageUploadWriteRequest() -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE,
+        smpheader.CommandId.ImageManagement.UPLOAD,
+        None,
+    )
+    r = smpimg.ImageUploadWriteRequest(
+        off=0,
+        data=b"hello",
+        image=1,
+        len=5,
+        sha=b"world",
+        upgrade=True,
+    )
+
+    assert_header(r)
+
+    r = smpimg.ImageUploadWriteRequest.loads(r.BYTES)
+    assert_header(r)
+
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE,
+        smpheader.CommandId.ImageManagement.UPLOAD,
+        None,
+    )
+    r = smpimg.ImageUploadWriteRequest(
+        off=0,
+        data=b"hello",
+        image=1,
+        len=5,
+        sha=b"world",
+        upgrade=True,
+    )
+
+    assert_header(r)
+    assert r.off == 0
+    assert r.data == b"hello"
+    assert r.image == 1
+    assert r.len == 5
+    assert r.sha == b"world"
+    assert r.upgrade is True
+
+    r = smpimg.ImageUploadWriteRequest.loads(r.BYTES)
+    assert_header(r)
+    assert r.off == 0
+    assert r.data == b"hello"
+    assert r.image == 1
+    assert r.len == 5
+    assert r.sha == b"world"
+    assert r.upgrade is True
+
+    # when off != 0 do not send image, len, sha, or upgrade
+    r = smpimg.ImageUploadWriteRequest(off=10, data=b"hello")
+    assert_header(r)
+    assert r.off == 10
+    assert r.data == b"hello"
+
+
+@pytest.mark.parametrize("off", [None, 0, 1, 0xFFFF, 0xFFFFFFFF])
+@pytest.mark.parametrize("match", [None, True, False])
+@pytest.mark.parametrize("rc", [None, 0, 1, 10])
+def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int | None) -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE_RSP,
+        smpheader.CommandId.ImageManagement.UPLOAD,
+        None,
+    )
+    r = smpimg.ImageUploadWriteResponse(off=off, match=match, rc=rc)
+
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
+
+    r = smpimg.ImageUploadWriteResponse.loads(r.BYTES)
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
+
+    cbor_dict = (
+        {}
+        | ({"off": off} if off is not None else {})
+        | ({"match": match} if match is not None else {})
+        | ({"rc": rc} if rc is not None else {})
+    )
+
+    r = smpimg.ImageUploadWriteResponse.load(cast(smpheader.Header, r.header), cbor_dict)
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
