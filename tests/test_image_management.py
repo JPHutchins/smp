@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import cast
 
 import cbor2
@@ -264,12 +265,21 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int |
     assert r.match == match
     assert r.rc == rc
 
-    cbor_dict = (
-        {}
-        | ({"off": off} if off is not None else {})
-        | ({"match": match} if match is not None else {})
-        | ({"rc": rc} if rc is not None else {})
-    )
+    if sys.version_info >= (3, 9):
+        cbor_dict = (
+            {}
+            | ({"off": off} if off is not None else {})
+            | ({"match": match} if match is not None else {})
+            | ({"rc": rc} if rc is not None else {})
+        )
+    else:
+        cbor_dict = {}
+        if off is not None:
+            cbor_dict["off"] = off
+        if match is not None:
+            cbor_dict["match"] = match
+        if rc is not None:
+            cbor_dict["rc"] = rc
 
     r = smpimg.ImageUploadWriteResponse.load(cast(smpheader.Header, r.header), cbor_dict)
     assert_header(r)
