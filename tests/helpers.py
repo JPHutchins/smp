@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, cast
+from typing import Callable
 
 from smp import header as smpheader
 from smp.message import _MessageBase
@@ -17,9 +17,9 @@ def make_assert_header(
     def f(
         r: _MessageBase,
     ) -> None:
-        h = cast(smpheader.Header, r.header)
+        h = r.header
         assert op == h.op
-        assert smpheader.Version.V0 == h.version
+        assert smpheader.Version.V2 == h.version
         assert 0 == h.flags
         if length is not None:
             assert length == h.length

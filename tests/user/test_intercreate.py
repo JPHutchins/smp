@@ -52,7 +52,7 @@ def test_subsequent_ImageUploadWriteRequest() -> None:
 
 
 def test_ImageUploadWriteResponse() -> None:
-    r = ic.ImageUploadWriteResponse(header=None, sequence=0, off=105000)
+    r = ic.ImageUploadWriteResponse(sequence=0, off=105000)
 
     assert_header = make_assert_header(
         ic.header.UserGroupId.INTERCREATE,

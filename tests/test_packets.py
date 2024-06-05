@@ -24,7 +24,7 @@ def _assert_header(frame: bytes) -> None:
     # deserialize the header
     h = header.Header.loads(frame[: header.Header.SIZE])
     assert header.OP.WRITE == h.op
-    assert header.Version.V0 == h.version
+    assert header.Version.V2 == h.version
     assert 0 == h.flags
     assert h.length != 0  # TODO: unsure how to check length more specifically
     assert header.GroupId.IMAGE_MANAGEMENT == h.group_id
