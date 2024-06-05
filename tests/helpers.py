@@ -19,7 +19,7 @@ def make_assert_header(
     ) -> None:
         h = r.header
         assert op == h.op
-        assert smpheader.Version.V1 == h.version
+        assert smpheader.Version.V2 == h.version
         assert 0 == h.flags
         if length is not None:
             assert length == h.length

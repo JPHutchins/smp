@@ -93,8 +93,8 @@ class _OP_BIT:
 
 @unique
 class Version(IntEnum):
-    V0 = 0
-    V1 = 1
+    V1 = 0
+    V2 = 1
 
 
 class _VERSION_BIT:

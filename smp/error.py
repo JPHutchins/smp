@@ -63,8 +63,8 @@ class MGMT_ERR(IntEnum):
     """User errors defined from 256 onwards"""
 
 
-class ErrorV0(message.Response):
-    RESPONSE_TYPE = message.ResponseType.ERROR_V0
+class ErrorV1(message.Response):
+    RESPONSE_TYPE = message.ResponseType.ERROR_V1
 
     rc: MGMT_ERR
     """Error code."""
@@ -80,7 +80,7 @@ class Err(BaseModel, Generic[T]):
     rc: T
 
 
-class ErrorV1(message.Response, Generic[T]):
-    RESPONSE_TYPE = message.ResponseType.ERROR_V1
+class ErrorV2(message.Response, Generic[T]):
+    RESPONSE_TYPE = message.ResponseType.ERROR_V2
 
     err: Err[T]

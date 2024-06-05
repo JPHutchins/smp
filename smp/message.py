@@ -38,7 +38,7 @@ class _MessageBase(ABC, BaseModel):
 
     # This is is a dummy header that will be replaced in model_post_init
     header: smpheader.Header = None  # type: ignore
-    version: smpheader.Version = smpheader.Version.V1
+    version: smpheader.Version = smpheader.Version.V2
     sequence: int = None  # type: ignore
 
     def __bytes__(self) -> bytes:
@@ -120,11 +120,11 @@ class Request(_MessageBase, ABC):
 
 @unique
 class ResponseType(IntEnum):
-    """An SMP `Response` to an SMP `Request` must be `SUCCESS`, `ERROR_V0`, or `ERROR_V1`."""
+    """An SMP `Response` to an SMP `Request` must be `SUCCESS`, `ERROR_V1`, or `ERROR_V2`."""
 
     SUCCESS = 0
-    ERROR_V0 = 1
-    ERROR_V1 = 2
+    ERROR_V1 = 1
+    ERROR_V2 = 2
 
 
 class Response(_MessageBase, ABC):
