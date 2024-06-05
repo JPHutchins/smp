@@ -8,7 +8,7 @@ from smp.header import OP, Flag, GroupId, Header, Version
 
 
 @pytest.mark.parametrize("op", [OP.READ, OP.READ_RSP, OP.WRITE, OP.WRITE_RSP])
-@pytest.mark.parametrize("version", [Version.V0, Version.V1])
+@pytest.mark.parametrize("version", [Version.V1, Version.V2])
 @pytest.mark.parametrize("flags", [Flag(0b0), Flag(0b1), Flag(0xFF)])
 @pytest.mark.parametrize("length", [0, 1, 0xFFFF])
 @pytest.mark.parametrize("group_id", [0, 1, 0xFFFF])
@@ -58,7 +58,7 @@ def test_header_serialization(
 
 
 @pytest.mark.parametrize("op", [OP.READ, OP.READ_RSP, OP.WRITE, OP.WRITE_RSP])
-@pytest.mark.parametrize("version", [Version.V0, Version.V1])
+@pytest.mark.parametrize("version", [Version.V1, Version.V2])
 @pytest.mark.parametrize("flags", [Flag(0b0), Flag(0b1), Flag(0xFF)])
 @pytest.mark.parametrize("length", [0, 1, 0xFFFF])
 @pytest.mark.parametrize("group_id", [0, 1, 0xFFFF])
