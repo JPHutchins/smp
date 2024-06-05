@@ -164,6 +164,7 @@ class Header:
     def __post_init__(self) -> None:
         Header._validate_command_id(self.group_id, self.command_id)
 
+        self._bytes: bytes
         object.__setattr__(
             self,
             '_bytes',
@@ -178,11 +179,11 @@ class Header:
         )
 
     def __bytes__(self) -> bytes:
-        return self._bytes  # type: ignore
+        return self._bytes
 
     @property
     def BYTES(self) -> bytes:
-        return self._bytes  # type: ignore
+        return self._bytes
 
     @staticmethod
     def loads(header: bytes) -> 'Header':

@@ -28,10 +28,10 @@ def test_header_serialization(
         Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
     ):
         with pytest.raises((KeyError, ValueError)):
-            h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+            h = Header(op, version, flags, length, group_id, sequence, command_id)
         return
 
-    h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+    h = Header(op, version, flags, length, group_id, sequence, command_id)
 
     # test the abstract data type
     assert op == h.op
@@ -78,11 +78,11 @@ def test_header_deserialization(
         Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
     ):
         with pytest.raises((KeyError, ValueError)):
-            _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+            _h = Header(op, version, flags, length, group_id, sequence, command_id)
             h = Header.loads(_h.BYTES)
         return
 
-    _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+    _h = Header(op, version, flags, length, group_id, sequence, command_id)
     h = Header.loads(_h.BYTES)
 
     # test the abstract data type

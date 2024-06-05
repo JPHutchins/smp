@@ -1,6 +1,5 @@
 """Test the case where the user forms the header separately."""
 
-from typing import cast
 
 import pytest
 
@@ -38,7 +37,7 @@ def test_ImageUploadWriteRequest_injected_header() -> None:
         len=50,
     )
 
-    assert cast(smphdr.Header, r.header).length == 76
+    assert r.header.length == 76
     assert len(r.BYTES) == 76 + smphdr.Header.SIZE
 
     with pytest.raises(SMPMalformed):
@@ -101,5 +100,5 @@ def test_ImageUploadWriteResponse_injected_header() -> None:
         off=0,
     )
 
-    assert cast(smphdr.Header, r.header).length == 10
+    assert r.header.length == 10
     assert len(r.BYTES) == 10 + smphdr.Header.SIZE
