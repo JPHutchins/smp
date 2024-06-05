@@ -29,7 +29,7 @@ def test_ImageStatesReadRequest() -> None:
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
-    r = smpimg.ImageStatesReadRequest.load(cast(smpheader.Header, r.header), {})
+    r = smpimg.ImageStatesReadRequest.load(r.header, {})
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
@@ -119,7 +119,7 @@ def test_ImageStatesReadResponse(
     assert_response(r2)
 
     r3 = smpimg.ImageStatesReadResponse.load(
-        cast(smpheader.Header, r1.header), r1.model_dump(exclude={'header'})
+        r1.header, r1.model_dump(exclude={'header', 'sequence'})
     )
     assert_header(r3)
     assert_response(r3)
@@ -141,7 +141,7 @@ def test_ImageEraseRequest() -> None:
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
-    r = smpimg.ImageEraseRequest.load(cast(smpheader.Header, r.header), {})
+    r = smpimg.ImageEraseRequest.load(r.header, {})
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
@@ -177,7 +177,7 @@ def test_ImageEraseResponse() -> None:
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
-    r = smpimg.ImageEraseResponse.load(cast(smpheader.Header, r.header), {})
+    r = smpimg.ImageEraseResponse.load(r.header, {})
     assert_header(r)
     assert smpheader.Header.SIZE + 1 == len(r.BYTES)
 
@@ -281,7 +281,7 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int |
         if rc is not None:
             cbor_dict["rc"] = rc
 
-    r = smpimg.ImageUploadWriteResponse.load(cast(smpheader.Header, r.header), cbor_dict)
+    r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
     assert_header(r)
     assert r.off == off
     assert r.match == match
