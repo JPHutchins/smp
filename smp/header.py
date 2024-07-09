@@ -37,6 +37,14 @@ class CommandId:
         EXECUTE = 0
 
     @unique
+    class FileManagement(IntEnum):
+        FILE_DOWNLOAD_UPLOAD = 0
+        FILE_STATUS = 1
+        FILE_HASH_CHECKSUM = 2
+        SUPPORTED_FILE_HASH_CHECKSUM_TYPES = 3
+        FILE_CLOSE = 4
+
+    @unique
     class Intercreate(IntEnum):
         UPLOAD = 1
 
@@ -113,12 +121,14 @@ class Header:
         CommandId.ImageManagement,
         CommandId.ShellManagement,
         CommandId.Intercreate,
+        CommandId.FileManagement,
     ]
 
     _MAP_GROUP_ID_TO_COMMAND_ID_ENUM: ClassVar[Dict[int, Type[IntEnum]]] = {
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
+        GroupId.FILE_MANAGEMENT: CommandId.FileManagement,
     }
     _STRUCT: ClassVar[struct.Struct] = struct.Struct("!BBHHBB")
     SIZE: ClassVar[int] = _STRUCT.size
