@@ -1,5 +1,7 @@
 """The Simple Management Protocol (SMP) File Management group."""
 
+from __future__ import annotations
+
 from enum import IntEnum, auto, unique
 from typing import Dict
 
