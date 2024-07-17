@@ -216,5 +216,6 @@ def test_BootloaderInformationReadResponse() -> None:
     )
 
     assert r.bootloader == "MCUboot"
-    assert r.response["mode"] == smpos.MCUbootMode.SWAP_WITHOUT_SCRATCH  # type: ignore
-    assert r.response["no-downgrade"] is True  # type: ignore
+    assert type(r.response) is dict
+    assert r.response["mode"] == smpos.MCUbootMode.SWAP_WITHOUT_SCRATCH
+    assert r.response["no-downgrade"] is True

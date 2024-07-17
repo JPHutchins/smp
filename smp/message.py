@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import logging
 from abc import ABC
 from enum import IntEnum, unique
 from typing import ClassVar, Type, TypeVar, cast
@@ -17,13 +18,13 @@ T = TypeVar("T", bound='_MessageBase')
 
 
 _counter = itertools.count()
+logger = logging.getLogger(__name__)
 
 
 class _MessageBase(ABC, BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     _OP: ClassVar[smpheader.OP]
-    _VERSION: ClassVar[smpheader.Version] = smpheader.Version.V0
     _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
     _GROUP_ID: ClassVar[smpheader.GroupId | smpheader.UserGroupId | smpheader.AnyGroupId]
     _COMMAND_ID: ClassVar[
@@ -35,14 +36,17 @@ class _MessageBase(ABC, BaseModel):
         | smpheader.CommandId.FileManagement
     ]
 
-    header: smpheader.Header | None = None
+    # This is is a dummy header that will be replaced in model_post_init
+    header: smpheader.Header = None  # type: ignore
+    version: smpheader.Version = smpheader.Version.V2
+    sequence: int = None  # type: ignore
 
     def __bytes__(self) -> bytes:
-        return self._bytes  # type: ignore
+        return self._bytes
 
     @property
     def BYTES(self) -> bytes:
-        return self._bytes  # type: ignore
+        return self._bytes
 
     @classmethod
     def loads(cls: Type[T], data: bytes) -> T:
@@ -68,66 +72,63 @@ class _MessageBase(ABC, BaseModel):
             )
         return cls(header=header, **data)
 
-
-class Request(_MessageBase, ABC):
     def model_post_init(self, _: None) -> None:
         data_bytes = cbor2.dumps(
-            self.model_dump(exclude_unset=True, exclude={'header'}, exclude_none=True)
+            self.model_dump(
+                exclude_unset=True, exclude={'header', 'version', 'sequence'}, exclude_none=True
+            )
         )
-        if self.header is None:
+        self._bytes: bytes
+        if self.header is None:  # create the header
             object.__setattr__(
                 self,
                 'header',
                 smpheader.Header(
                     op=self._OP,
-                    version=self._VERSION,
+                    version=self.version,
                     flags=smpheader.Flag(self._FLAGS),
                     length=len(data_bytes),
                     group_id=self._GROUP_ID,
-                    sequence=next(_counter) % 0xFF,
+                    sequence=next(_counter) % 0xFF if self.sequence is None else self.sequence,
                     command_id=self._COMMAND_ID,
                 ),
             )
-        elif self.header.length != len(data_bytes):
-            raise SMPMalformed(
-                f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
-            )
-        self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
+            object.__setattr__(self, 'sequence', self.header.sequence)
+        else:  # validate the header and update version & sequence
+            if self.header.length != len(data_bytes):
+                raise SMPMalformed(
+                    f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
+                )
+            if self.sequence is not None:  # pragma: no cover
+                raise ValueError(
+                    f"{self.sequence=} {self.header.sequence=} "
+                    "Do not use the sequence attribute when the header is provided."
+                )
+            object.__setattr__(self, 'sequence', self.header.sequence)
+            if self.version != self.header.version:
+                logger.warning(
+                    f"Overriding {self.version=} with {self.header.version=} "
+                    "from the provided header."
+                )
+            object.__setattr__(self, 'version', self.header.version)
+        self._bytes = self.header.BYTES + data_bytes
+
+
+class Request(_MessageBase, ABC):
+    ...
 
 
 @unique
 class ResponseType(IntEnum):
-    """An SMP `Response` to an SMP `Request` must be `SUCCESS`, `ERROR_V0`, or `ERROR_V1`."""
+    """An SMP `Response` to an SMP `Request` must be `SUCCESS`, `ERROR_V1`, or `ERROR_V2`."""
 
     SUCCESS = 0
-    ERROR_V0 = 1
-    ERROR_V1 = 2
+    ERROR_V1 = 1
+    ERROR_V2 = 2
 
 
 class Response(_MessageBase, ABC):
-    sequence: int = 0
-
     RESPONSE_TYPE: ClassVar[ResponseType]
-
-    def model_post_init(self, _: None) -> None:
-        data_bytes = cbor2.dumps(
-            self.model_dump(exclude_unset=True, exclude={'header', 'sequence'}, exclude_none=True)
-        )
-        if self.header is None:
-            object.__setattr__(
-                self,
-                'header',
-                smpheader.Header(
-                    op=self._OP,
-                    version=self._VERSION,
-                    flags=smpheader.Flag(self._FLAGS),
-                    length=len(data_bytes),
-                    group_id=self._GROUP_ID,
-                    sequence=self.sequence,
-                    command_id=self._COMMAND_ID,
-                ),
-            )
-        self._bytes = cast(smpheader.Header, self.header).BYTES + data_bytes
 
 
 class ReadRequest(Request, ABC):

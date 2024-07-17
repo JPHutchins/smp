@@ -8,7 +8,7 @@ from smp.header import OP, Flag, GroupId, Header, Version
 
 
 @pytest.mark.parametrize("op", [OP.READ, OP.READ_RSP, OP.WRITE, OP.WRITE_RSP])
-@pytest.mark.parametrize("version", [Version.V0, Version.V1])
+@pytest.mark.parametrize("version", [Version.V1, Version.V2])
 @pytest.mark.parametrize("flags", [Flag(0b0), Flag(0b1), Flag(0xFF)])
 @pytest.mark.parametrize("length", [0, 1, 0xFFFF])
 @pytest.mark.parametrize("group_id", [0, 1, 0xFFFF])
@@ -28,10 +28,10 @@ def test_header_serialization(
         Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
     ):
         with pytest.raises((KeyError, ValueError)):
-            h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+            h = Header(op, version, flags, length, group_id, sequence, command_id)
         return
 
-    h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+    h = Header(op, version, flags, length, group_id, sequence, command_id)
 
     # test the abstract data type
     assert op == h.op
@@ -58,7 +58,7 @@ def test_header_serialization(
 
 
 @pytest.mark.parametrize("op", [OP.READ, OP.READ_RSP, OP.WRITE, OP.WRITE_RSP])
-@pytest.mark.parametrize("version", [Version.V0, Version.V1])
+@pytest.mark.parametrize("version", [Version.V1, Version.V2])
 @pytest.mark.parametrize("flags", [Flag(0b0), Flag(0b1), Flag(0xFF)])
 @pytest.mark.parametrize("length", [0, 1, 0xFFFF])
 @pytest.mark.parametrize("group_id", [0, 1, 0xFFFF])
@@ -78,11 +78,11 @@ def test_header_deserialization(
         Header._MAP_GROUP_ID_TO_COMMAND_ID_ENUM[group_id]
     ):
         with pytest.raises((KeyError, ValueError)):
-            _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+            _h = Header(op, version, flags, length, group_id, sequence, command_id)
             h = Header.loads(_h.BYTES)
         return
 
-    _h = Header(op, version, flags, length, group_id, sequence, command_id)  # type: ignore
+    _h = Header(op, version, flags, length, group_id, sequence, command_id)
     h = Header.loads(_h.BYTES)
 
     # test the abstract data type

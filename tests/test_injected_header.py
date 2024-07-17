@@ -1,6 +1,5 @@
 """Test the case where the user forms the header separately."""
 
-from typing import cast
 
 import pytest
 
@@ -12,7 +11,7 @@ from smp.exceptions import SMPMalformed
 def test_ImageUploadWriteRequest_injected_header() -> None:
     h = smphdr.Header(
         op=smphdr.OP.WRITE,
-        version=smphdr.Version.V0,
+        version=smphdr.Version.V1,
         flags=smphdr.Flag(0),
         length=0,
         group_id=smphdr.GroupId.IMAGE_MANAGEMENT,
@@ -38,7 +37,7 @@ def test_ImageUploadWriteRequest_injected_header() -> None:
         len=50,
     )
 
-    assert cast(smphdr.Header, r.header).length == 76
+    assert r.header.length == 76
     assert len(r.BYTES) == 76 + smphdr.Header.SIZE
 
     with pytest.raises(SMPMalformed):
@@ -79,7 +78,7 @@ def test_ImageUploadWriteRequest_injected_header() -> None:
 def test_ImageUploadWriteResponse_injected_header() -> None:
     h = smphdr.Header(
         op=smphdr.OP.WRITE_RSP,
-        version=smphdr.Version.V0,
+        version=smphdr.Version.V1,
         flags=smphdr.Flag(0),
         length=0,
         group_id=smphdr.GroupId.IMAGE_MANAGEMENT,
@@ -101,5 +100,5 @@ def test_ImageUploadWriteResponse_injected_header() -> None:
         off=0,
     )
 
-    assert cast(smphdr.Header, r.header).length == 10
+    assert r.header.length == 10
     assert len(r.BYTES) == 10 + smphdr.Header.SIZE
