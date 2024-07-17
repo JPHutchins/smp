@@ -165,9 +165,9 @@ class FS_MGMT_ERR(IntEnum):
     """The operation cannot be performed because the file is empty with no contents. """
 
 
-class FileSystemManagementErrorV0(error.ErrorV0):
+class FileSystemManagementErrorV1(error.ErrorV1):
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
 
 
-class FileSystemManagementErrorV1(error.ErrorV1[FS_MGMT_ERR]):
+class FileSystemManagementErrorV2(error.ErrorV2[FS_MGMT_ERR]):
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
