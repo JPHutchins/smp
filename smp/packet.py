@@ -10,10 +10,13 @@ from crcmod.predefined import mkPredefinedCrcFun  # type: ignore
 from smp.exceptions import SMPBadContinueDelimiter, SMPBadCRC, SMPBadStartDelimiter
 
 SIXTY_NINE: Final = struct.pack("!BB", 6, 9)
+START_DELIMITER: Final = SIXTY_NINE
 FOUR_TWENTY: Final = struct.pack("!BB", 4, 20)
+CONTINUE_DELIMITER: Final = FOUR_TWENTY
 DELIMITER_SIZE: Final = len(SIXTY_NINE)
 assert len(SIXTY_NINE) == len(FOUR_TWENTY) and len(FOUR_TWENTY) == DELIMITER_SIZE
-CR: Final = b"\n"
+LF: Final = b"\n"
+END_DELIMITER: Final = LF
 LINE_LENGTH_SUBTRACTOR: Final = 4  # you'd think it's 3, len(delimiter) + len(CR)
 FRAME_LENGTH_STRUCT: Final = struct.Struct("!H")
 CRC16_STRUCT: Final = struct.Struct("!H")
@@ -41,13 +44,13 @@ def encode(request: bytes, line_length: int = 8192) -> Generator[bytes, None, No
     logger.debug(f"Total size of b64 encoded request is {len(complete_b64)}B")
 
     # send the start delimiter, as many bytes as possible, and newline
-    yield SIXTY_NINE + complete_b64[:packet_size] + CR
+    yield START_DELIMITER + complete_b64[:packet_size] + END_DELIMITER
 
     remaining = complete_b64[packet_size:]
 
     while len(remaining) > 0:
         # send the continue delimiter, as many bytes as possible, and newline
-        yield FOUR_TWENTY + remaining[:packet_size] + CR
+        yield CONTINUE_DELIMITER + remaining[:packet_size] + END_DELIMITER
         remaining = remaining[packet_size:]
 
 
@@ -56,10 +59,10 @@ def decode() -> Generator[None, bytes, bytes]:
 
     packet = yield
 
-    if packet[:DELIMITER_SIZE] != SIXTY_NINE:
+    if packet[:DELIMITER_SIZE] != START_DELIMITER:
         raise SMPBadStartDelimiter(f"Bad start delimiter {packet[:DELIMITER_SIZE].hex()}")
 
-    length_and_frame = b64decode(packet[DELIMITER_SIZE : -len(CR)])
+    length_and_frame = b64decode(packet[DELIMITER_SIZE : -len(END_DELIMITER)])
     frame_length = FRAME_LENGTH_STRUCT.unpack(length_and_frame[: FRAME_LENGTH_STRUCT.size])[0]
     logger.debug(f"Response {length_and_frame=}")
 
@@ -68,10 +71,10 @@ def decode() -> Generator[None, bytes, bytes]:
     while len(frame) < frame_length:
         packet = yield
 
-        if packet[:DELIMITER_SIZE] != FOUR_TWENTY:
+        if packet[:DELIMITER_SIZE] != CONTINUE_DELIMITER:
             raise SMPBadContinueDelimiter(f"Bad continue delimiter {packet[:DELIMITER_SIZE].hex()}")
 
-        frame.extend(b64decode(packet[DELIMITER_SIZE : -len(CR)]))
+        frame.extend(b64decode(packet[DELIMITER_SIZE : -len(END_DELIMITER)]))
 
     complete_frame = frame[: -CRC16_STRUCT.size]
     packet_crc16 = CRC16_STRUCT.unpack(frame[-CRC16_STRUCT.size :])[0]
