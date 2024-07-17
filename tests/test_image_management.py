@@ -252,25 +252,22 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int |
         smpheader.CommandId.ImageManagement.UPLOAD,
         None,
     )
-    r = smpimg.ImageUploadWriteResponse(off=off, match=match, rc=rc)
+    r = smpimg.ImageUploadWriteResponse(off=off, match=match)
 
     assert_header(r)
     assert r.off == off
     assert r.match == match
-    assert r.rc == rc
 
     r = smpimg.ImageUploadWriteResponse.loads(r.BYTES)
     assert_header(r)
     assert r.off == off
     assert r.match == match
-    assert r.rc == rc
 
     if sys.version_info >= (3, 9):
         cbor_dict = (
             {}
             | ({"off": off} if off is not None else {})
             | ({"match": match} if match is not None else {})
-            | ({"rc": rc} if rc is not None else {})
         )
     else:
         cbor_dict = {}
@@ -278,11 +275,8 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int |
             cbor_dict["off"] = off
         if match is not None:
             cbor_dict["match"] = match
-        if rc is not None:
-            cbor_dict["rc"] = rc
 
     r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
     assert_header(r)
     assert r.off == off
     assert r.match == match
-    assert r.rc == rc

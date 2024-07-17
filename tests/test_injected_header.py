@@ -91,14 +91,13 @@ def test_ImageUploadWriteResponse_injected_header() -> None:
             op=h.op,
             version=h.version,
             flags=h.flags,
-            length=10,
+            length=6,
             group_id=h.group_id,
             sequence=h.sequence,
             command_id=h.command_id,
         ),
-        rc=0,
         off=0,
     )
 
-    assert r.header.length == 10
-    assert len(r.BYTES) == 10 + smphdr.Header.SIZE
+    assert r.header.length == 6
+    assert len(r.BYTES) == 6 + smphdr.Header.SIZE

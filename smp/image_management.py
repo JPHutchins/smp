@@ -90,8 +90,6 @@ class ImageUploadWriteResponse(message.WriteResponse):
 
     Only sent in the final packet if CONFIG_IMG_ENABLE_IMAGE_CHECK is enabled.
     """
-    rc: int | None = None
-    """Unspecified field used by MCUBoot's SMP Server implementation."""
 
 
 class ImageEraseRequest(message.WriteRequest):
