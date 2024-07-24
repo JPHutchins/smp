@@ -40,13 +40,14 @@ class _MessageBase(ABC, BaseModel):
     header: smpheader.Header = None  # type: ignore
     version: smpheader.Version = smpheader.Version.V2
     sequence: int = None  # type: ignore
+    smp_data: bytes = None  # type: ignore
 
     def __bytes__(self) -> bytes:
-        return self._bytes
+        return self.smp_data
 
     @property
     def BYTES(self) -> bytes:
-        return self._bytes
+        return self.smp_data
 
     @classmethod
     def loads(cls: Type[T], data: bytes) -> T:
@@ -54,6 +55,7 @@ class _MessageBase(ABC, BaseModel):
         message = cls(
             header=smpheader.Header.loads(data[: smpheader.Header.SIZE]),
             **cast(dict, cbor2.loads(data[smpheader.Header.SIZE :])),
+            smp_data=data,
         )
         if message.header is None:  # pragma: no cover
             raise ValueError
@@ -75,10 +77,11 @@ class _MessageBase(ABC, BaseModel):
     def model_post_init(self, _: None) -> None:
         data_bytes = cbor2.dumps(
             self.model_dump(
-                exclude_unset=True, exclude={'header', 'version', 'sequence'}, exclude_none=True
+                exclude_unset=True,
+                exclude={'header', 'version', 'sequence', 'smp_data'},
+                exclude_none=True,
             )
         )
-        self._bytes: bytes
         if self.header is None:  # create the header
             object.__setattr__(
                 self,
@@ -95,7 +98,7 @@ class _MessageBase(ABC, BaseModel):
             )
             object.__setattr__(self, 'sequence', self.header.sequence)
         else:  # validate the header and update version & sequence
-            if self.header.length != len(data_bytes):
+            if self.smp_data is None and self.header.length != len(data_bytes):
                 raise SMPMalformed(
                     f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
                 )
@@ -111,7 +114,8 @@ class _MessageBase(ABC, BaseModel):
                     "from the provided header."
                 )
             object.__setattr__(self, 'version', self.header.version)
-        self._bytes = self.header.BYTES + data_bytes
+        if self.smp_data is None:
+            object.__setattr__(self, 'smp_data', bytes(self.header) + data_bytes)
 
 
 class Request(_MessageBase, ABC):
