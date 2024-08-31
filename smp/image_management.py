@@ -85,11 +85,29 @@ class ImageUploadWriteResponse(message.WriteResponse):
     This is the offset of the next byte to be written. If the offset is equal to
     the length of the image, the upload is complete.
     """
+
     match: bool | None = None
     """Indicates if the uploaded data successfully matches the provided SHA256.
 
     Only sent in the final packet if CONFIG_IMG_ENABLE_IMAGE_CHECK is enabled.
     """
+
+    rc: int | None = None
+    """Legacy field that contains a return code; possibly `MGMT_ERR`.
+
+    This field may be present on old SMP server implementations or new SMP
+    server implementations that have set
+    `CONFIG_MCUMGR_SMP_LEGACY_RC_BEHAVIOUR=y` for backwards compatibility with
+    old SMP clients.
+
+    Note that we are not validating this field because we don't necessarily
+    trust the server to send us valid values. If this value is present, then it
+    indicates use of an SMP server that is out of spec and interpretation of the
+    value should be done with reference to that server's source code, rather
+    that the SMP specification.
+
+    Zephyr source code reference: https://github.com/zephyrproject-rtos/zephyr/blob/91a1e706535b2f99433280513c5bc66dfb918506/subsys/mgmt/mcumgr/grp/img_mgmt/src/img_mgmt.c#L397-L400
+    """  # noqa: E501
 
 
 class ImageEraseRequest(message.WriteRequest):

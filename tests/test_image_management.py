@@ -244,8 +244,7 @@ def test_ImageUploadWriteRequest() -> None:
 
 @pytest.mark.parametrize("off", [None, 0, 1, 0xFFFF, 0xFFFFFFFF])
 @pytest.mark.parametrize("match", [None, True, False])
-@pytest.mark.parametrize("rc", [None, 0, 1, 10])
-def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int | None) -> None:
+def test_ImageUploadWriteResponse(off: int | None, match: bool | None) -> None:
     assert_header = make_assert_header(
         smpheader.GroupId.IMAGE_MANAGEMENT,
         smpheader.OP.WRITE_RSP,
@@ -280,3 +279,51 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None, rc: int |
     assert_header(r)
     assert r.off == off
     assert r.match == match
+
+
+@pytest.mark.parametrize("off", [None, 0, 1, 0xFFFF, 0xFFFFFFFF])
+@pytest.mark.parametrize("match", [None, True, False])
+@pytest.mark.parametrize("rc", [None, 0, 1, -23478934])
+def test_legacy_ImageUploadWriteResponse(
+    off: int | None, match: bool | None, rc: int | None
+) -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.WRITE_RSP,
+        smpheader.CommandId.ImageManagement.UPLOAD,
+        None,
+    )
+    r = smpimg.ImageUploadWriteResponse(off=off, match=match, rc=rc)
+
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
+
+    r = smpimg.ImageUploadWriteResponse.loads(r.BYTES)
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
+
+    if sys.version_info >= (3, 9):
+        cbor_dict = (
+            {}
+            | ({"off": off} if off is not None else {})
+            | ({"match": match} if match is not None else {})
+            | ({"rc": rc} if rc is not None else {})
+        )
+    else:
+        cbor_dict = {}
+        if off is not None:
+            cbor_dict["off"] = off
+        if match is not None:
+            cbor_dict["match"] = match
+        if rc is not None:
+            cbor_dict["rc"] = rc
+
+    r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
+    assert_header(r)
+    assert r.off == off
+    assert r.match == match
+    assert r.rc == rc
