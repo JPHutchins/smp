@@ -1,4 +1,4 @@
-"""The Simple Management Protocol (SMP) Statistics Management group."""
+"""The Simple Management Protocol (SMP) Zephyr Management group."""
 
 
 from enum import IntEnum, unique
