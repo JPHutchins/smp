@@ -33,6 +33,18 @@ class CommandId:
         ERASE = 5
 
     @unique
+    class StatisticsManagement(IntEnum):
+        GROUP_DATA = 0
+        LIST_OF_GROUPS = 1
+
+    @unique
+    class SettingsManagement(IntEnum):
+        READ_WRITE_SETTING = 0
+        DELETE_SETTING = 1
+        COMMIT_SETTINGS = 2
+        LOAD_SAVE_SETTINGS = 3
+
+    @unique
     class ShellManagement(IntEnum):
         EXECUTE = 0
 
@@ -43,6 +55,10 @@ class CommandId:
         FILE_HASH_CHECKSUM = 2
         SUPPORTED_FILE_HASH_CHECKSUM_TYPES = 3
         FILE_CLOSE = 4
+
+    @unique
+    class ZephyrManagement(IntEnum):
+        ERASE_STORAGE = 0
 
     @unique
     class Intercreate(IntEnum):
@@ -64,7 +80,7 @@ class GroupId(IntEnum):
     TEST_CRASH = 7
     FILE_MANAGEMENT = 8
     SHELL_MANAGEMENT = 9
-    ZEPHYR = 63
+    ZEPHYR_MANAGEMENT = 63
 
 
 class UserGroupId(IntEnum):
