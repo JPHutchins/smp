@@ -50,6 +50,10 @@ class CommandId:
         FILE_CLOSE = 4
 
     @unique
+    class ZephyrManagement(IntEnum):
+        ERASE_STORAGE = 0
+
+    @unique
     class Intercreate(IntEnum):
         UPLOAD = 1
 
@@ -69,7 +73,7 @@ class GroupId(IntEnum):
     TEST_CRASH = 7
     FILE_MANAGEMENT = 8
     SHELL_MANAGEMENT = 9
-    ZEPHYR = 63
+    ZEPHYR_MANAGEMENT = 63
 
 
 class UserGroupId(IntEnum):
