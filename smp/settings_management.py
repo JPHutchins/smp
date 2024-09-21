@@ -1,5 +1,6 @@
 """The Simple Management Protocol (SMP) Settings Management group."""
 
+from __future__ import annotations
 
 from enum import IntEnum, unique
 
