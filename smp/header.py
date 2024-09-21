@@ -38,6 +38,13 @@ class CommandId:
         LIST_OF_GROUPS = 1
 
     @unique
+    class SettingsManagement(IntEnum):
+        READ_WRITE_SETTING = 0
+        DELETE_SETTING = 1
+        COMMIT_SETTINGS = 2
+        LOAD_SAVE_SETTINGS = 3
+
+    @unique
     class ShellManagement(IntEnum):
         EXECUTE = 0
 
