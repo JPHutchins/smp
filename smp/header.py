@@ -33,6 +33,11 @@ class CommandId:
         ERASE = 5
 
     @unique
+    class StatisticsManagement(IntEnum):
+        GROUP_DATA = 0
+        LIST_OF_GROUPS = 1
+
+    @unique
     class ShellManagement(IntEnum):
         EXECUTE = 0
 
