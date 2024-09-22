@@ -1,0 +1,4 @@
+{"message": "smp.os_management.BootloaderInformationReadRequest", "version": 1, "sequence": 156, "kwargs": {}, "bytes": "0800000100009c08a0"}
+{"message": "smp.os_management.BootloaderInformationReadRequest", "version": 1, "sequence": 156, "kwargs": {}, "bytes": "0800000100009c08a0"}
+{"message": "smp.os_management.BootloaderInformationReadRequest", "version": 1, "sequence": 157, "kwargs": {"query": "MCUbootMode"}, "bytes": "0800001300009d08a16571756572796b4d4355626f6f744d6f6465"}
+{"message": "smp.os_management.BootloaderInformationReadRequest", "version": 1, "sequence": 157, "kwargs": {"query": "MCUbootMode"}, "bytes": "0800001300009d08a16571756572796b4d4355626f6f744d6f6465"}

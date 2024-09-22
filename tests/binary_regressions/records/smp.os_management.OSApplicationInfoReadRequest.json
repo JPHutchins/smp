@@ -1,0 +1,4 @@
+{"message": "smp.os_management.OSApplicationInfoReadRequest", "version": 1, "sequence": 153, "kwargs": {}, "bytes": "0800000100009907a0"}
+{"message": "smp.os_management.OSApplicationInfoReadRequest", "version": 1, "sequence": 153, "kwargs": {}, "bytes": "0800000100009907a0"}
+{"message": "smp.os_management.OSApplicationInfoReadRequest", "version": 1, "sequence": 154, "kwargs": {"format": "snrvbmpioa"}, "bytes": "0800001300009a07a166666f726d61746a736e7276626d70696f61"}
+{"message": "smp.os_management.OSApplicationInfoReadRequest", "version": 1, "sequence": 154, "kwargs": {"format": "snrvbmpioa"}, "bytes": "0800001300009a07a166666f726d61746a736e7276626d70696f61"}

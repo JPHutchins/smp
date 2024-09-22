@@ -1,0 +1,2 @@
+{"message": "smp.file_management.FileUploadRequest", "version": 1, "sequence": 2, "kwargs": {"off": 0, "data": "74657374", "name": "test.txt", "len": 1000}, "bytes": "0a00002500080200a4636c656e1903e8636f66660064646174614474657374646e616d6568746573742e747874"}
+{"message": "smp.file_management.FileUploadRequest", "version": 1, "sequence": 2, "kwargs": {"off": 0, "data": "74657374", "name": "test.txt", "len": 1000}, "bytes": "0a00002500080200a4636c656e1903e8636f66660064646174614474657374646e616d6568746573742e747874"}

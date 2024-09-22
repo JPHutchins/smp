@@ -1,0 +1,2 @@
+{"message": "smp.file_management.FileStatusRequest", "version": 1, "sequence": 4, "kwargs": {"name": "test.txt"}, "bytes": "0800000f00080401a1646e616d6568746573742e747874"}
+{"message": "smp.file_management.FileStatusRequest", "version": 1, "sequence": 4, "kwargs": {"name": "test.txt"}, "bytes": "0800000f00080401a1646e616d6568746573742e747874"}

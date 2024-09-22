@@ -80,7 +80,8 @@ class _MessageBase(ABC, BaseModel):
                 exclude_unset=True,
                 exclude={'header', 'version', 'sequence', 'smp_data'},
                 exclude_none=True,
-            )
+            ),
+            canonical=True,
         )
         if self.header is None:  # create the header
             object.__setattr__(
@@ -116,6 +117,53 @@ class _MessageBase(ABC, BaseModel):
             object.__setattr__(self, 'version', self.header.version)
         if self.smp_data is None:
             object.__setattr__(self, 'smp_data', bytes(self.header) + data_bytes)
+
+    # # Uncomment this to create a record for a de/serialization regression lock
+    #     self._log_serialized_bytes()
+
+    # def _log_serialized_bytes(self) -> None:
+    #     import json
+    #     import os
+
+    #     from smp.image_management import HashBytes
+
+    #     kwargs = self.model_dump(
+    #         exclude_unset=True,
+    #         exclude={'header', 'version', 'sequence', 'smp_data'},
+    #         exclude_none=True,
+    #     )
+
+    #     message = f"{self.__class__.__module__}.{self.__class__.__qualname__}"
+
+    #     log_dir = "serialization_logs"
+    #     os.makedirs(log_dir, exist_ok=True)
+    #     log_file = os.path.join(log_dir, f"{message}.json")
+
+    #     def convert_bytes(obj: dict) -> dict:
+    #         if isinstance(obj, dict):
+    #             return {k: convert_bytes(v) for k, v in obj.items()}
+    #         elif isinstance(obj, list):
+    #             return [convert_bytes(i) for i in obj]
+    #         elif isinstance(obj, tuple):
+    #             return tuple(convert_bytes(i) for i in obj)
+    #         elif isinstance(obj, bytes) or isinstance(obj, HashBytes):
+    #             return obj.hex()
+    #         else:
+    #             return obj
+
+    #     log_data = {
+    #         "message": message,
+    #         "version": self.version,
+    #         "sequence": self.sequence,
+    #         "kwargs": convert_bytes(kwargs),
+    #         "bytes": self.BYTES.hex(),
+    #     }
+
+    #     try:
+    #         with open(log_file, "a") as f:
+    #             f.write(json.dumps(log_data) + "\n")
+    #     except OSError as e:
+    #         print(f"Failed to write to {log_file}: {e}")
 
 
 class Request(_MessageBase, ABC):

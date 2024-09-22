@@ -1,0 +1,5 @@
+{"message": "smp.image_management.ImageEraseRequest", "version": 1, "sequence": 14, "kwargs": {}, "bytes": "0a00000100010e05a0"}
+{"message": "smp.image_management.ImageEraseRequest", "version": 1, "sequence": 14, "kwargs": {}, "bytes": "0a00000100010e05a0"}
+{"message": "smp.image_management.ImageEraseRequest", "version": 1, "sequence": 14, "kwargs": {}, "bytes": "0a00000100010e05a0"}
+{"message": "smp.image_management.ImageEraseRequest", "version": 1, "sequence": 15, "kwargs": {"slot": 0}, "bytes": "0a00000700010f05a164736c6f7400"}
+{"message": "smp.image_management.ImageEraseRequest", "version": 1, "sequence": 15, "kwargs": {"slot": 0}, "bytes": "0a00000700010f05a164736c6f7400"}

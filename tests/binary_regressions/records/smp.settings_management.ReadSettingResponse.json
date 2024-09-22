@@ -1,0 +1,4 @@
+{"message": "smp.settings_management.ReadSettingResponse", "version": 1, "sequence": 54, "kwargs": {"val": "6578616d706c65"}, "bytes": "0900000d00033600a16376616c476578616d706c65"}
+{"message": "smp.settings_management.ReadSettingResponse", "version": 1, "sequence": 54, "kwargs": {"val": "6578616d706c65"}, "bytes": "0900000d00033600a16376616c476578616d706c65"}
+{"message": "smp.settings_management.ReadSettingResponse", "version": 1, "sequence": 55, "kwargs": {"val": "6578616d706c65", "max_size": 256}, "bytes": "0900001900033700a26376616c476578616d706c65686d61785f73697a65190100"}
+{"message": "smp.settings_management.ReadSettingResponse", "version": 1, "sequence": 55, "kwargs": {"val": "6578616d706c65", "max_size": 256}, "bytes": "0900001900033700a26376616c476578616d706c65686d61785f73697a65190100"}

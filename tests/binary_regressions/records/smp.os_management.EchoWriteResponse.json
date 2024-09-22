@@ -1,0 +1,2 @@
+{"message": "smp.os_management.EchoWriteResponse", "version": 1, "sequence": 140, "kwargs": {"r": "Hi!"}, "bytes": "0b00000700008c00a1617263486921"}
+{"message": "smp.os_management.EchoWriteResponse", "version": 1, "sequence": 140, "kwargs": {"r": "Hi!"}, "bytes": "0b00000700008c00a1617263486921"}

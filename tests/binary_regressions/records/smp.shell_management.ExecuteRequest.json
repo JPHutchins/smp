@@ -1,0 +1,2 @@
+{"message": "smp.shell_management.ExecuteRequest", "version": 1, "sequence": 66, "kwargs": {"argv": ["echo", "Hello"]}, "bytes": "0a00001200094200a1646172677682646563686f6548656c6c6f"}
+{"message": "smp.shell_management.ExecuteRequest", "version": 1, "sequence": 66, "kwargs": {"argv": ["echo", "Hello"]}, "bytes": "0a00001200094200a1646172677682646563686f6548656c6c6f"}

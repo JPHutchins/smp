@@ -1,0 +1,2 @@
+{"message": "smp.file_management.FileDownloadRequest", "version": 1, "sequence": 0, "kwargs": {"off": 0, "name": "test_file.txt"}, "bytes": "0800001900080000a2636f666600646e616d656d746573745f66696c652e747874"}
+{"message": "smp.file_management.FileDownloadRequest", "version": 1, "sequence": 0, "kwargs": {"off": 0, "name": "test_file.txt"}, "bytes": "0800001900080000a2636f666600646e616d656d746573745f66696c652e747874"}

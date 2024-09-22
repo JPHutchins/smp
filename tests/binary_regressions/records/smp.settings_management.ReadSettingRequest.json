@@ -1,0 +1,4 @@
+{"message": "smp.settings_management.ReadSettingRequest", "version": 1, "sequence": 52, "kwargs": {"name": "example"}, "bytes": "0800000e00033400a1646e616d65676578616d706c65"}
+{"message": "smp.settings_management.ReadSettingRequest", "version": 1, "sequence": 52, "kwargs": {"name": "example"}, "bytes": "0800000e00033400a1646e616d65676578616d706c65"}
+{"message": "smp.settings_management.ReadSettingRequest", "version": 1, "sequence": 53, "kwargs": {"name": "example", "max_size": 256}, "bytes": "0800001a00033500a2646e616d65676578616d706c65686d61785f73697a65190100"}
+{"message": "smp.settings_management.ReadSettingRequest", "version": 1, "sequence": 53, "kwargs": {"name": "example", "max_size": 256}, "bytes": "0800001a00033500a2646e616d65676578616d706c65686d61785f73697a65190100"}

@@ -1,0 +1,2 @@
+{"message": "smp.os_management.OSApplicationInfoReadResponse", "version": 1, "sequence": 155, "kwargs": {"output": "the requested output string"}, "bytes": "0900002500009b07a1666f7574707574781b74686520726571756573746564206f757470757420737472696e67"}
+{"message": "smp.os_management.OSApplicationInfoReadResponse", "version": 1, "sequence": 155, "kwargs": {"output": "the requested output string"}, "bytes": "0900002500009b07a1666f7574707574781b74686520726571756573746564206f757470757420737472696e67"}
