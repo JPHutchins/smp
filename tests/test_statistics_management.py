@@ -20,7 +20,7 @@ def _do_test(
     command_id: smphdr.CommandId.StatisticsManagement,
     data: Dict[str, Any],
 ) -> T:
-    cbor = cbor2.dumps(data)
+    cbor = cbor2.dumps(data, canonical=True)
     assert_header = make_assert_header(
         smphdr.GroupId.STATISTICS_MANAGEMENT, op, command_id, len(cbor)
     )

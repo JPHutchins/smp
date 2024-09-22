@@ -25,7 +25,7 @@ def _do_test(
     data: Dict[str, Any],
     nested_model: Type[BaseModel] | None = None,
 ) -> T:
-    cbor = cbor2.dumps(data)
+    cbor = cbor2.dumps(data, canonical=True)
     assert_header = make_assert_header(smphdr.GroupId.OS_MANAGEMENT, op, command_id, len(cbor))
 
     def _assert_common(r: smpmsg._MessageBase) -> None:
