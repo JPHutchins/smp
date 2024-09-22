@@ -1,0 +1,2 @@
+{"message": "smp.statistics_management.GroupDataResponse", "version": 1, "sequence": 69, "kwargs": {"name": "example", "fields": {"field1": 1, "field2": 2}}, "bytes": "0900002600024500a2646e616d65676578616d706c65666669656c6473a2666669656c643101666669656c643202"}
+{"message": "smp.statistics_management.GroupDataResponse", "version": 1, "sequence": 69, "kwargs": {"name": "example", "fields": {"field1": 1, "field2": 2}}, "bytes": "0900002600024500a2646e616d65676578616d706c65666669656c6473a2666669656c643101666669656c643202"}

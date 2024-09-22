@@ -1,0 +1,2 @@
+{"message": "smp.statistics_management.GroupDataRequest", "version": 1, "sequence": 68, "kwargs": {"name": "example"}, "bytes": "0800000e00024400a1646e616d65676578616d706c65"}
+{"message": "smp.statistics_management.GroupDataRequest", "version": 1, "sequence": 68, "kwargs": {"name": "example"}, "bytes": "0800000e00024400a1646e616d65676578616d706c65"}

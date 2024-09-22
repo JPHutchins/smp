@@ -1,0 +1,2 @@
+{"message": "smp.os_management.MCUMgrParametersReadResponse", "version": 1, "sequence": 152, "kwargs": {"buf_size": 1, "buf_count": 2}, "bytes": "0900001600009806a2686275665f73697a6501696275665f636f756e7402"}
+{"message": "smp.os_management.MCUMgrParametersReadResponse", "version": 1, "sequence": 152, "kwargs": {"buf_size": 1, "buf_count": 2}, "bytes": "0900001600009806a2686275665f73697a6501696275665f636f756e7402"}

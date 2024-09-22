@@ -1,0 +1,2 @@
+{"message": "smp.file_management.FileHashChecksumRequest", "version": 1, "sequence": 6, "kwargs": {"name": "test.txt", "type": "crc32", "off": 0, "len": 100}, "bytes": "0800002500080602a4636c656e1864636f666600646e616d6568746573742e7478746474797065656372633332"}
+{"message": "smp.file_management.FileHashChecksumRequest", "version": 1, "sequence": 6, "kwargs": {"name": "test.txt", "type": "crc32", "off": 0, "len": 100}, "bytes": "0800002500080602a4636c656e1864636f666600646e616d6568746573742e7478746474797065656372633332"}

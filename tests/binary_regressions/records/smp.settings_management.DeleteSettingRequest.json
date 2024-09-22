@@ -1,0 +1,2 @@
+{"message": "smp.settings_management.DeleteSettingRequest", "version": 1, "sequence": 58, "kwargs": {"name": "example"}, "bytes": "0a00000e00033a01a1646e616d65676578616d706c65"}
+{"message": "smp.settings_management.DeleteSettingRequest", "version": 1, "sequence": 58, "kwargs": {"name": "example"}, "bytes": "0a00000e00033a01a1646e616d65676578616d706c65"}

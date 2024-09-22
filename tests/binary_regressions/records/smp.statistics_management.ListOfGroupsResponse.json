@@ -1,0 +1,2 @@
+{"message": "smp.statistics_management.ListOfGroupsResponse", "version": 1, "sequence": 71, "kwargs": {"stat_list": ["example1", "example2"]}, "bytes": "0900001e00024701a169737461745f6c69737482686578616d706c6531686578616d706c6532"}
+{"message": "smp.statistics_management.ListOfGroupsResponse", "version": 1, "sequence": 71, "kwargs": {"stat_list": ["example1", "example2"]}, "bytes": "0900001e00024701a169737461745f6c69737482686578616d706c6531686578616d706c6532"}

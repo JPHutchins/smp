@@ -1,0 +1,2 @@
+{"message": "smp.os_management.DateTimeReadResponse", "version": 1, "sequence": 148, "kwargs": {"datetime": "2024-01-01T00:00:00Z"}, "bytes": "0900001f00009404a1686461746574696d6574323032342d30312d30315430303a30303a30305a"}
+{"message": "smp.os_management.DateTimeReadResponse", "version": 1, "sequence": 148, "kwargs": {"datetime": "2024-01-01T00:00:00Z"}, "bytes": "0900001f00009404a1686461746574696d6574323032342d30312d30315430303a30303a30305a"}

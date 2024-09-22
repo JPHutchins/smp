@@ -1,0 +1,2 @@
+{"message": "smp.shell_management.ExecuteResponse", "version": 1, "sequence": 67, "kwargs": {"o": "Hello", "ret": 0}, "bytes": "0b00000e00094300a2616f6548656c6c6f6372657400"}
+{"message": "smp.shell_management.ExecuteResponse", "version": 1, "sequence": 67, "kwargs": {"o": "Hello", "ret": 0}, "bytes": "0b00000e00094300a2616f6548656c6c6f6372657400"}

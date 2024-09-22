@@ -1,0 +1,2 @@
+{"message": "smp.settings_management.WriteSettingRequest", "version": 1, "sequence": 56, "kwargs": {"name": "example", "val": "6578616d706c65"}, "bytes": "0a00001a00033800a26376616c476578616d706c65646e616d65676578616d706c65"}
+{"message": "smp.settings_management.WriteSettingRequest", "version": 1, "sequence": 56, "kwargs": {"name": "example", "val": "6578616d706c65"}, "bytes": "0a00001a00033800a26376616c476578616d706c65646e616d65676578616d706c65"}
