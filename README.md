@@ -43,7 +43,6 @@ If you need an SMP CLI application to interact with device firmware, then try
 
 ### Install Dependencies
 
-- python >=3.8, <3.13
 - poetry: https://python-poetry.org/docs/#installation
 
 ### Create the venv
