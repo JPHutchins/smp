@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import struct
 from dataclasses import dataclass
-from enum import IntEnum, IntFlag, auto, unique
+from enum import IntEnum, IntFlag, unique
 from typing import ClassVar, Dict, Type, Union
 
 from typing_extensions import TypeAlias
@@ -120,7 +120,7 @@ class _VERSION_BIT:
 
 @unique
 class Flag(IntFlag):
-    UNUSED = auto()
+    UNUSED = 0
 
 
 @dataclass(frozen=True)

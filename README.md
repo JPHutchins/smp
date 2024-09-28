@@ -15,6 +15,11 @@ If you need an SMP CLI application to interact with device firmware, then try
 
 `smp` is [distributed by PyPI](https://pypi.org/project/smp/) and can be installed with `poetry`, `pip`, and other dependency managers.
 
+## User Documentation
+
+Documentation is in the source code so that it is available to your editor.
+An online version is generated and available [here](https://jphutchins.github.io/smp/).
+
 ## Development Quickstart
 
 > Assumes that you've already [setup your development environment](#development-environment-setup).

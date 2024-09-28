@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from enum import IntEnum, auto, unique
+from enum import IntEnum, unique
 
 from smp import error, header, message
 
 
 class ImageUploadWriteRequest(message.WriteRequest):
+    """Upload an image to an application-defined location like a secondary MCU."""
+
     _GROUP_ID = header.UserGroupId.INTERCREATE
     _COMMAND_ID = header.CommandId.Intercreate.UPLOAD
 
@@ -28,6 +30,8 @@ class ImageUploadWriteRequest(message.WriteRequest):
 
 
 class ImageUploadWriteResponse(message.WriteResponse):
+    """Success response to an image upload request."""
+
     _GROUP_ID = header.UserGroupId.INTERCREATE
     _COMMAND_ID = header.CommandId.Intercreate.UPLOAD
 
@@ -37,16 +41,22 @@ class ImageUploadWriteResponse(message.WriteResponse):
 
 @unique
 class IC_MGMT_ERR(IntEnum):
+    """Intercreate Management error codes."""
+
     OK = 0
     """No error."""
 
-    INVALID_IMAGE = auto()
+    INVALID_IMAGE = 1
     """No image matched the image provided."""
 
 
 class ErrorV1(error.ErrorV1):
+    """Intercreate Management error response."""
+
     _GROUP_ID = header.UserGroupId.INTERCREATE
 
 
 class ErrorV2(error.ErrorV2[IC_MGMT_ERR]):
+    """Intercreate Management error response."""
+
     _GROUP_ID = header.UserGroupId.INTERCREATE

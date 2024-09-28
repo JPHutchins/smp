@@ -129,6 +129,8 @@ class SaveSettingsResponse(smpmsg.WriteResponse):
 
 @unique
 class SETTINGS_MGMT_ERR(IntEnum):
+    """Return codes for the settings management group."""
+
     OK = 0
     """No error, this is implied if there is no ret value in the response."""
 
@@ -155,8 +157,12 @@ class SETTINGS_MGMT_ERR(IntEnum):
 
 
 class SettingsManagementErrorV1(smperr.ErrorV1):
+    """Error response to a settings management command."""
+
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
 
 
 class SettingsManagementErrorV2(smperr.ErrorV2[SETTINGS_MGMT_ERR]):
+    """Error response to a settings management command."""
+
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT

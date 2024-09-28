@@ -1,0 +1,71 @@
+site_name: Simple Management Protocol (SMP)
+
+repo_name: JPHutchins/smp
+repo_url: https://github.com/JPHutchins/smp
+
+nav:
+  - Home: index.md
+  - File Management: file_management.md
+  - Image Management: image_management.md
+  - OS Management: os_management.md
+  - Settings Management: settings_management.md
+  - Shell Management: shell_management.md
+  - Statistics Management: statistics_management.md
+  - Zephyr Management: zephyr_management.md
+  - User Groups:
+      - Intercreate: user/intercreate.md
+  - Packets (USB/Serial): packet.md
+  - Errors: error.md
+  - Exceptions: exception.md
+  - De/Serialization: message.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            members_order: source
+            show_private_members: true
+            show_signature_annotations: true
+            show_if_no_docstring: true
+  - mike:
+      # These fields are all optional; the defaults are as below...
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ""
+      canonical_version: null
+      version_selector: true
+      css_dir: css
+      javascript_dir: js
+
+extra:
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  palette:
+    primary: custom
+    accent: custom
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.snippets
+  - pymdownx.superfences

@@ -10,6 +10,8 @@ import smp.message as smpmsg
 
 
 class GroupDataRequest(smpmsg.ReadRequest):
+    """Read the statistics group data."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
 
@@ -17,6 +19,8 @@ class GroupDataRequest(smpmsg.ReadRequest):
 
 
 class GroupDataResponse(smpmsg.ReadResponse):
+    """Statistics group data response."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
 
@@ -25,11 +29,15 @@ class GroupDataResponse(smpmsg.ReadResponse):
 
 
 class ListOfGroupsRequest(smpmsg.ReadRequest):
+    """List the available statistics groups."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
 
 
 class ListOfGroupsResponse(smpmsg.ReadResponse):
+    """List of available statistics groups."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
 
@@ -38,6 +46,8 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
 
 @unique
 class STAT_MGMT_ERR(IntEnum):
+    """Return codes for the statistics management group."""
+
     OK = 0
     """No error, this is implied if there is no ret value in the response."""
 
@@ -58,8 +68,12 @@ class STAT_MGMT_ERR(IntEnum):
 
 
 class StatisticsManagementErrorV1(smperr.ErrorV1):
+    """Error response to a statistics management command."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
 
 
 class StatisticsManagementErrorV2(smperr.ErrorV2[STAT_MGMT_ERR]):
+    """Error response to a statistics management command."""
+
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT

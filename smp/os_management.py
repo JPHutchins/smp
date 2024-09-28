@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from enum import IntEnum, auto, unique
-from typing import Any, Dict
+from enum import IntEnum, unique
+from typing import Any, Dict, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,35 +11,68 @@ from smp import error, header, message
 
 
 class EchoWriteRequest(message.WriteRequest):
+    """Echo back the provided string."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.ECHO
 
     d: str
+    """String to echo."""
 
 
 class EchoWriteResponse(message.WriteResponse):
+    """Success response to an echo request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.ECHO
 
     r: str
+    """Echoed string."""
 
 
 class ResetWriteRequest(message.WriteRequest):
+    """Performs reset of system.
+
+    The device should issue response before resetting so that the SMP client
+    could receive information that the command has been accepted. By default,
+    this command is accepted in all conditions, however if the
+    `CONFIG_MCUMGR_GRP_OS_RESET_HOOK` is enabled and an application registers a
+    callback, the callback will be called when this command is issued and can be
+    used to perform any necessary tidy operations prior to the module rebooting,
+    or to reject the reset request outright altogether with an error response.
+
+    For details on this functionality, see [callbacks](https://docs.zephyrproject.org/latest/services/device_mgmt/mcumgr_callbacks.html#mcumgr-callbacks).  # noqa: E501
+    """
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.RESET
 
+    force: Literal[0, 1] | None = None
+    """Force reset.
+
+    Normally the command sends an empty CBOR map as data, but if a previous
+    reset attempt has responded with “rc” equal to MGMT_ERR_EBUSY then the
+    following map may be sent to force a reset
+    """
+
 
 class ResetWriteResponse(message.WriteResponse):
+    """Success response to a reset request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.RESET
 
 
 class TaskStatisticsReadRequest(message.ReadRequest):
+    """Request task statistics."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
 
 class TaskStatistics(BaseModel):
+    """Task statistics."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     prio: int
@@ -69,18 +102,25 @@ class TaskStatistics(BaseModel):
 
 
 class TaskStatisticsReadResponse(message.ReadResponse):
+    """Task statistics response."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
     tasks: Dict[str, TaskStatistics]
+    """Task statistics map."""
 
 
 class MemoryPoolStatisticsReadRequest(message.ReadRequest):
+    """Request memory pool statistics."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
 
 
 class MemoryPoolStatistics(BaseModel):
+    """Memory pool statistics."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     blksize: int
@@ -103,11 +143,15 @@ class MemoryPoolStatisticsReadResponse(message.ReadResponse):
 
 
 class DateTimeReadRequest(message.ReadRequest):
+    """Request the current date and time."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
 
 class DateTimeReadResponse(message.ReadResponse):
+    """Response to a date and time request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
@@ -115,6 +159,8 @@ class DateTimeReadResponse(message.ReadResponse):
 
 
 class DateTimeWriteRequest(message.WriteRequest):
+    """Set the current date and time."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
@@ -122,24 +168,34 @@ class DateTimeWriteRequest(message.WriteRequest):
 
 
 class DateTimeWriteResponse(message.WriteResponse):
+    """Success response to a date and time request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
 
 class MCUMgrParametersReadRequest(message.ReadRequest):
+    """Request MCU Manager parameters."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
 
 
 class MCUMgrParametersReadResponse(message.ReadResponse):
+    """Success response to a MCU Manager parameters request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
 
     buf_size: int
+    """Single SMP buffer size, this includes SMP header and CBOR payload."""
     buf_count: int
+    """Number of SMP buffers."""
 
 
 class OSApplicationInfoReadRequest(message.ReadRequest):
+    """Request information about the application running on the device."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
 
@@ -166,13 +222,18 @@ class OSApplicationInfoReadRequest(message.ReadRequest):
 
 
 class OSApplicationInfoReadResponse(message.ReadResponse):
+    """Success response to an application information request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
 
     output: str
+    """Text response including requested parameters."""
 
 
 class BootloaderInformationReadRequest(message.ReadRequest):
+    """Request bootloader information."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
@@ -201,6 +262,8 @@ class MCUbootMode(IntEnum):
 
 
 class MCUbootModeQueryResponse(BaseModel):
+    """Response to a MCUboot mode query."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     mode: MCUbootMode
@@ -208,6 +271,8 @@ class MCUbootModeQueryResponse(BaseModel):
 
 
 class BootloaderInformationReadResponse(message.ReadResponse):
+    """Success response to a bootloader information request."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
@@ -224,28 +289,34 @@ class BootloaderInformationReadResponse(message.ReadResponse):
 
 @unique
 class OS_MGMT_RET_RC(IntEnum):
+    """OS Management return codes."""
+
     OK = 0
     """No error, this is implied if there is no ret value in the response."""
 
-    UNKNOWN = auto()
+    UNKNOWN = 1
     """Unknown error occurred."""
 
-    INVALID_FORMAT = auto()
+    INVALID_FORMAT = 2
     """The provided format value is not valid."""
 
-    QUERY_YIELDS_NO_ANSWER = auto()
+    QUERY_YIELDS_NO_ANSWER = 3
     """Query was not recognized."""
 
-    RTC_NOT_SET = auto()
+    RTC_NOT_SET = 4
     """RTC is not set."""
 
-    RTC_COMMAND_FAILED = auto()
+    RTC_COMMAND_FAILED = 5
     """RTC command failed."""
 
 
 class OSManagementErrorV1(error.ErrorV1):
+    """OS Management error response."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
 
 
 class OSManagementErrorV2(error.ErrorV2[OS_MGMT_RET_RC]):
+    """OS Management error response."""
+
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
