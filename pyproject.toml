@@ -9,6 +9,7 @@ authors = [
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/JPHutchins/smp"
+documentation = "https://jphutchins.github.io/smp/"
 packages = [{ include = "smp" }]
 
 [tool.poetry-version-plugin]
