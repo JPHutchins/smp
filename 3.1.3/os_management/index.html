@@ -1,0 +1,4763 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../image_management/">
+      
+      
+        <link rel="next" href="../settings_management/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.38">
+    
+    
+      
+        <title>OS Management - Simple Management Protocol (SMP)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8c3ca2c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#os-management" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Simple Management Protocol (SMP)" class="md-header__button md-logo" aria-label="Simple Management Protocol (SMP)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Simple Management Protocol (SMP)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OS Management
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JPHutchins/smp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JPHutchins/smp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Simple Management Protocol (SMP)" class="md-nav__button md-logo" aria-label="Simple Management Protocol (SMP)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Simple Management Protocol (SMP)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JPHutchins/smp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JPHutchins/smp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    File Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../image_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Image Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    OS Management
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    OS Management
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management" class="md-nav__link">
+    <span class="md-ellipsis">
+      os_management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      EchoWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EchoWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteRequest.d" class="md-nav__link">
+    <span class="md-ellipsis">
+      d
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      EchoWriteResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EchoWriteResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteResponse.r" class="md-nav__link">
+    <span class="md-ellipsis">
+      r
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResetWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ResetWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteRequest.force" class="md-nav__link">
+    <span class="md-ellipsis">
+      force
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResetWriteResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatisticsReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatistics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TaskStatistics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.prio" class="md-nav__link">
+    <span class="md-ellipsis">
+      prio
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.tid" class="md-nav__link">
+    <span class="md-ellipsis">
+      tid
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.state" class="md-nav__link">
+    <span class="md-ellipsis">
+      state
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.stkuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      stkuse
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.stksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      stksize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.cswcnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      cswcnt
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.last_checkin" class="md-nav__link">
+    <span class="md-ellipsis">
+      last_checkin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.next_checkin" class="md-nav__link">
+    <span class="md-ellipsis">
+      next_checkin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatisticsReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TaskStatisticsReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadResponse.tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatisticsReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatistics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MemoryPoolStatistics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.blksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      blksize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.nblks" class="md-nav__link">
+    <span class="md-ellipsis">
+      nblks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.nfree" class="md-nav__link">
+    <span class="md-ellipsis">
+      nfree
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.min" class="md-nav__link">
+    <span class="md-ellipsis">
+      min
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatisticsReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MemoryPoolStatisticsReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadResponse.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DateTimeReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadResponse.datetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      datetime
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DateTimeWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteRequest.datetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      datetime
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeWriteResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUMgrParametersReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUMgrParametersReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUMgrParametersReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse.buf_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      buf_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse.buf_count" class="md-nav__link">
+    <span class="md-ellipsis">
+      buf_count
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSApplicationInfoReadRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSApplicationInfoReadRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadRequest.format" class="md-nav__link">
+    <span class="md-ellipsis">
+      format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSApplicationInfoReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSApplicationInfoReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadResponse.output" class="md-nav__link">
+    <span class="md-ellipsis">
+      output
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      BootloaderInformationReadRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BootloaderInformationReadRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadRequest.query" class="md-nav__link">
+    <span class="md-ellipsis">
+      query
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUbootMode
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUbootMode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.UNKNOWN" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNKNOWN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.APPLICATION" class="md-nav__link">
+    <span class="md-ellipsis">
+      APPLICATION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.SWAP_USING_SCRATCH" class="md-nav__link">
+    <span class="md-ellipsis">
+      SWAP_USING_SCRATCH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.OVERWRITE_ONLY" class="md-nav__link">
+    <span class="md-ellipsis">
+      OVERWRITE_ONLY
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.SWAP_WITHOUT_SCRATCH" class="md-nav__link">
+    <span class="md-ellipsis">
+      SWAP_WITHOUT_SCRATCH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITHOUT_REVERT" class="md-nav__link">
+    <span class="md-ellipsis">
+      DIRECT_XIP_WITHOUT_REVERT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITH_REVERT" class="md-nav__link">
+    <span class="md-ellipsis">
+      DIRECT_XIP_WITH_REVERT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.RAM_LOADER" class="md-nav__link">
+    <span class="md-ellipsis">
+      RAM_LOADER
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUbootModeQueryResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUbootModeQueryResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.no_downgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      no_downgrade
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      BootloaderInformationReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BootloaderInformationReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse.bootloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      bootloader
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse.response" class="md-nav__link">
+    <span class="md-ellipsis">
+      response
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC" class="md-nav__link">
+    <span class="md-ellipsis">
+      OS_MGMT_RET_RC
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OS_MGMT_RET_RC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.OK" class="md-nav__link">
+    <span class="md-ellipsis">
+      OK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.UNKNOWN" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNKNOWN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.INVALID_FORMAT" class="md-nav__link">
+    <span class="md-ellipsis">
+      INVALID_FORMAT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.QUERY_YIELDS_NO_ANSWER" class="md-nav__link">
+    <span class="md-ellipsis">
+      QUERY_YIELDS_NO_ANSWER
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.RTC_NOT_SET" class="md-nav__link">
+    <span class="md-ellipsis">
+      RTC_NOT_SET
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.RTC_COMMAND_FAILED" class="md-nav__link">
+    <span class="md-ellipsis">
+      RTC_COMMAND_FAILED
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSManagementErrorV1" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSManagementErrorV1
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSManagementErrorV2" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSManagementErrorV2
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shell_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Shell Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../statistics_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Statistics Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zephyr_management/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Zephyr Management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    User Groups
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            User Groups
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user/intercreate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intercreate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Packets (USB/Serial)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exception/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../message/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    De/Serialization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management" class="md-nav__link">
+    <span class="md-ellipsis">
+      os_management
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      EchoWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EchoWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteRequest.d" class="md-nav__link">
+    <span class="md-ellipsis">
+      d
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      EchoWriteResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="EchoWriteResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.EchoWriteResponse.r" class="md-nav__link">
+    <span class="md-ellipsis">
+      r
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResetWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ResetWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteRequest.force" class="md-nav__link">
+    <span class="md-ellipsis">
+      force
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.ResetWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      ResetWriteResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatisticsReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatistics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TaskStatistics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.prio" class="md-nav__link">
+    <span class="md-ellipsis">
+      prio
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.tid" class="md-nav__link">
+    <span class="md-ellipsis">
+      tid
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.state" class="md-nav__link">
+    <span class="md-ellipsis">
+      state
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.stkuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      stkuse
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.stksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      stksize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.cswcnt" class="md-nav__link">
+    <span class="md-ellipsis">
+      cswcnt
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      runtime
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.last_checkin" class="md-nav__link">
+    <span class="md-ellipsis">
+      last_checkin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatistics.next_checkin" class="md-nav__link">
+    <span class="md-ellipsis">
+      next_checkin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      TaskStatisticsReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="TaskStatisticsReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.TaskStatisticsReadResponse.tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatisticsReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatistics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MemoryPoolStatistics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.blksize" class="md-nav__link">
+    <span class="md-ellipsis">
+      blksize
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.nblks" class="md-nav__link">
+    <span class="md-ellipsis">
+      nblks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.nfree" class="md-nav__link">
+    <span class="md-ellipsis">
+      nfree
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatistics.min" class="md-nav__link">
+    <span class="md-ellipsis">
+      min
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MemoryPoolStatisticsReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MemoryPoolStatisticsReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MemoryPoolStatisticsReadResponse.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DateTimeReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeReadResponse.datetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      datetime
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeWriteRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DateTimeWriteRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteRequest.datetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      datetime
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.DateTimeWriteResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      DateTimeWriteResponse
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUMgrParametersReadRequest
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUMgrParametersReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUMgrParametersReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse.buf_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      buf_size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUMgrParametersReadResponse.buf_count" class="md-nav__link">
+    <span class="md-ellipsis">
+      buf_count
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSApplicationInfoReadRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSApplicationInfoReadRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadRequest.format" class="md-nav__link">
+    <span class="md-ellipsis">
+      format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSApplicationInfoReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OSApplicationInfoReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OSApplicationInfoReadResponse.output" class="md-nav__link">
+    <span class="md-ellipsis">
+      output
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadRequest" class="md-nav__link">
+    <span class="md-ellipsis">
+      BootloaderInformationReadRequest
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BootloaderInformationReadRequest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadRequest.query" class="md-nav__link">
+    <span class="md-ellipsis">
+      query
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUbootMode
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUbootMode">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.UNKNOWN" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNKNOWN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.APPLICATION" class="md-nav__link">
+    <span class="md-ellipsis">
+      APPLICATION
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.SWAP_USING_SCRATCH" class="md-nav__link">
+    <span class="md-ellipsis">
+      SWAP_USING_SCRATCH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.OVERWRITE_ONLY" class="md-nav__link">
+    <span class="md-ellipsis">
+      OVERWRITE_ONLY
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.SWAP_WITHOUT_SCRATCH" class="md-nav__link">
+    <span class="md-ellipsis">
+      SWAP_WITHOUT_SCRATCH
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITHOUT_REVERT" class="md-nav__link">
+    <span class="md-ellipsis">
+      DIRECT_XIP_WITHOUT_REVERT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITH_REVERT" class="md-nav__link">
+    <span class="md-ellipsis">
+      DIRECT_XIP_WITH_REVERT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootMode.RAM_LOADER" class="md-nav__link">
+    <span class="md-ellipsis">
+      RAM_LOADER
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      MCUbootModeQueryResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MCUbootModeQueryResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.model_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      model_config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      mode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.MCUbootModeQueryResponse.no_downgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      no_downgrade
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      BootloaderInformationReadResponse
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BootloaderInformationReadResponse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse.bootloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      bootloader
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.BootloaderInformationReadResponse.response" class="md-nav__link">
+    <span class="md-ellipsis">
+      response
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC" class="md-nav__link">
+    <span class="md-ellipsis">
+      OS_MGMT_RET_RC
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OS_MGMT_RET_RC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.OK" class="md-nav__link">
+    <span class="md-ellipsis">
+      OK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.UNKNOWN" class="md-nav__link">
+    <span class="md-ellipsis">
+      UNKNOWN
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.INVALID_FORMAT" class="md-nav__link">
+    <span class="md-ellipsis">
+      INVALID_FORMAT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.QUERY_YIELDS_NO_ANSWER" class="md-nav__link">
+    <span class="md-ellipsis">
+      QUERY_YIELDS_NO_ANSWER
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.RTC_NOT_SET" class="md-nav__link">
+    <span class="md-ellipsis">
+      RTC_NOT_SET
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smp.os_management.OS_MGMT_RET_RC.RTC_COMMAND_FAILED" class="md-nav__link">
+    <span class="md-ellipsis">
+      RTC_COMMAND_FAILED
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSManagementErrorV1" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSManagementErrorV1
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smp.os_management.OSManagementErrorV2" class="md-nav__link">
+    <span class="md-ellipsis">
+      OSManagementErrorV2
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="os-management">OS Management<a class="headerlink" href="#os-management" title="Permanent link">&para;</a></h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="smp.os_management"></a>
+    <div class="doc doc-contents first">
+
+        <p>The Simple Management Protocol (SMP) OS Management group.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.EchoWriteRequest" class="doc doc-heading">
+            <code>EchoWriteRequest</code>
+
+
+<a href="#smp.os_management.EchoWriteRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteRequest" href="../message/#smp.message.WriteRequest">WriteRequest</a></code></p>
+
+
+        <p>Echo back the provided string.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span>
+<span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="k">class</span> <span class="nc">EchoWriteRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteRequest</span><span class="p">):</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Echo back the provided string.&quot;&quot;&quot;</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">ECHO</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>    <span class="n">d</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;String to echo.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.EchoWriteRequest.d" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">d</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.EchoWriteRequest.d" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>String to echo.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.EchoWriteResponse" class="doc doc-heading">
+            <code>EchoWriteResponse</code>
+
+
+<a href="#smp.os_management.EchoWriteResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteResponse" href="../message/#smp.message.WriteResponse">WriteResponse</a></code></p>
+
+
+        <p>Success response to an echo request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="k">class</span> <span class="nc">EchoWriteResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteResponse</span><span class="p">):</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to an echo request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">ECHO</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="n">r</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Echoed string.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.EchoWriteResponse.r" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">r</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.EchoWriteResponse.r" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Echoed string.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.ResetWriteRequest" class="doc doc-heading">
+            <code>ResetWriteRequest</code>
+
+
+<a href="#smp.os_management.ResetWriteRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteRequest" href="../message/#smp.message.WriteRequest">WriteRequest</a></code></p>
+
+
+        <p>Performs reset of system.</p>
+<p>The device should issue response before resetting so that the SMP client
+could receive information that the command has been accepted. By default,
+this command is accepted in all conditions, however if the
+<code>CONFIG_MCUMGR_GRP_OS_RESET_HOOK</code> is enabled and an application registers a
+callback, the callback will be called when this command is issued and can be
+used to perform any necessary tidy operations prior to the module rebooting,
+or to reject the reset request outright altogether with an error response.</p>
+<p>For details on this functionality, see <a href="https://docs.zephyrproject.org/latest/services/device_mgmt/mcumgr_callbacks.html#mcumgr-callbacks">callbacks</a>.  # noqa: E501</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="k">class</span> <span class="nc">ResetWriteRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteRequest</span><span class="p">):</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs reset of system.</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    The device should issue response before resetting so that the SMP client</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    could receive information that the command has been accepted. By default,</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    this command is accepted in all conditions, however if the</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    `CONFIG_MCUMGR_GRP_OS_RESET_HOOK` is enabled and an application registers a</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    callback, the callback will be called when this command is issued and can be</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    used to perform any necessary tidy operations prior to the module rebooting,</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    or to reject the reset request outright altogether with an error response.</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    For details on this functionality, see [callbacks](https://docs.zephyrproject.org/latest/services/device_mgmt/mcumgr_callbacks.html#mcumgr-callbacks).  # noqa: E501</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">RESET</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="n">force</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Force reset.</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    Normally the command sends an empty CBOR map as data, but if a previous</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    reset attempt has responded with “rc” equal to MGMT_ERR_EBUSY then the</span>
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    following map may be sent to force a reset</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.ResetWriteRequest.force" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">force</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.ResetWriteRequest.force" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Force reset.</p>
+<p>Normally the command sends an empty CBOR map as data, but if a previous
+reset attempt has responded with “rc” equal to MGMT_ERR_EBUSY then the
+following map may be sent to force a reset</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.ResetWriteResponse" class="doc doc-heading">
+            <code>ResetWriteResponse</code>
+
+
+<a href="#smp.os_management.ResetWriteResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteResponse" href="../message/#smp.message.WriteResponse">WriteResponse</a></code></p>
+
+
+        <p>Success response to a reset request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span>
+<span class="normal"><a href="#__codelineno-0-63">63</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="k">class</span> <span class="nc">ResetWriteResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteResponse</span><span class="p">):</span>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to a reset request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a>
+</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">RESET</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.TaskStatisticsReadRequest" class="doc doc-heading">
+            <code>TaskStatisticsReadRequest</code>
+
+
+<a href="#smp.os_management.TaskStatisticsReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request task statistics.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span>
+<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+<span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-66"><a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="k">class</span> <span class="nc">TaskStatisticsReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-67"><a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request task statistics.&quot;&quot;&quot;</span>
+</span><span id="__span-0-68"><a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+</span><span id="__span-0-69"><a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-70"><a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">TASK_STATS</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.TaskStatistics" class="doc doc-heading">
+            <code>TaskStatistics</code>
+
+
+<a href="#smp.os_management.TaskStatistics" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+        <p>Task statistics.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-73"> 73</a></span>
+<span class="normal"><a href="#__codelineno-0-74"> 74</a></span>
+<span class="normal"><a href="#__codelineno-0-75"> 75</a></span>
+<span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
+<span class="normal"><a href="#__codelineno-0-77"> 77</a></span>
+<span class="normal"><a href="#__codelineno-0-78"> 78</a></span>
+<span class="normal"><a href="#__codelineno-0-79"> 79</a></span>
+<span class="normal"><a href="#__codelineno-0-80"> 80</a></span>
+<span class="normal"><a href="#__codelineno-0-81"> 81</a></span>
+<span class="normal"><a href="#__codelineno-0-82"> 82</a></span>
+<span class="normal"><a href="#__codelineno-0-83"> 83</a></span>
+<span class="normal"><a href="#__codelineno-0-84"> 84</a></span>
+<span class="normal"><a href="#__codelineno-0-85"> 85</a></span>
+<span class="normal"><a href="#__codelineno-0-86"> 86</a></span>
+<span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
+<span class="normal"><a href="#__codelineno-0-88"> 88</a></span>
+<span class="normal"><a href="#__codelineno-0-89"> 89</a></span>
+<span class="normal"><a href="#__codelineno-0-90"> 90</a></span>
+<span class="normal"><a href="#__codelineno-0-91"> 91</a></span>
+<span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
+<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
+<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
+<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
+<span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
+<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
+<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
+<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
+<span class="normal"><a href="#__codelineno-0-100">100</a></span>
+<span class="normal"><a href="#__codelineno-0-101">101</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="k">class</span> <span class="nc">TaskStatistics</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Task statistics.&quot;&quot;&quot;</span>
+</span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>
+</span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a>
+</span><span id="__span-0-78"><a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="n">prio</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-79"><a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Task priority.&quot;&quot;&quot;</span>
+</span><span id="__span-0-80"><a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="n">tid</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-81"><a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Numeric task ID.&quot;&quot;&quot;</span>
+</span><span id="__span-0-82"><a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">state</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-83"><a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Numeric task state.&quot;&quot;&quot;</span>
+</span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="n">stkuse</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack usage.</span>
+</span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>
+</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    The unit is system dependent and in case of Zephyr this is number of 4 byte words.</span>
+</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="n">stksize</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Stack size.</span>
+</span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a>
+</span><span id="__span-0-92"><a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">    The unit is system dependent and in case of Zephyr this is number of 4 byte words.</span>
+</span><span id="__span-0-93"><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-94"><a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="n">cswcnt</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-95"><a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of context switches.&quot;&quot;&quot;</span>
+</span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="n">runtime</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-97"><a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Runtime in ticks.&quot;&quot;&quot;</span>
+</span><span id="__span-0-98"><a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="n">last_checkin</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set to 0 by Zephyr.&quot;&quot;&quot;</span>
+</span><span id="__span-0-100"><a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="n">next_checkin</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-101"><a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set to 0 by Zephyr.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.model_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s1">&#39;forbid&#39;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.model_config" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.prio" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">prio</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.prio" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Task priority.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.tid" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">tid</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.tid" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numeric task ID.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.state" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">state</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.state" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numeric task state.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.stkuse" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stkuse</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.stkuse" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Stack usage.</p>
+<p>The unit is system dependent and in case of Zephyr this is number of 4 byte words.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.stksize" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">stksize</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.stksize" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Stack size.</p>
+<p>The unit is system dependent and in case of Zephyr this is number of 4 byte words.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.cswcnt" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">cswcnt</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.cswcnt" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Number of context switches.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.runtime" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">runtime</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.runtime" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Runtime in ticks.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.last_checkin" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">last_checkin</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.last_checkin" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Set to 0 by Zephyr.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatistics.next_checkin" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">next_checkin</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatistics.next_checkin" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Set to 0 by Zephyr.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.TaskStatisticsReadResponse" class="doc doc-heading">
+            <code>TaskStatisticsReadResponse</code>
+
+
+<a href="#smp.os_management.TaskStatisticsReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>Task statistics response.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-104">104</a></span>
+<span class="normal"><a href="#__codelineno-0-105">105</a></span>
+<span class="normal"><a href="#__codelineno-0-106">106</a></span>
+<span class="normal"><a href="#__codelineno-0-107">107</a></span>
+<span class="normal"><a href="#__codelineno-0-108">108</a></span>
+<span class="normal"><a href="#__codelineno-0-109">109</a></span>
+<span class="normal"><a href="#__codelineno-0-110">110</a></span>
+<span class="normal"><a href="#__codelineno-0-111">111</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-104"><a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="k">class</span> <span class="nc">TaskStatisticsReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-105"><a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Task statistics response.&quot;&quot;&quot;</span>
+</span><span id="__span-0-106"><a id="__codelineno-0-106" name="__codelineno-0-106"></a>
+</span><span id="__span-0-107"><a id="__codelineno-0-107" name="__codelineno-0-107"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-108"><a id="__codelineno-0-108" name="__codelineno-0-108"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">TASK_STATS</span>
+</span><span id="__span-0-109"><a id="__codelineno-0-109" name="__codelineno-0-109"></a>
+</span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a>    <span class="n">tasks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TaskStatistics</span><span class="p">]</span>
+</span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Task statistics map.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.TaskStatisticsReadResponse.tasks" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">tasks</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TaskStatistics</span><span class="p">]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.TaskStatisticsReadResponse.tasks" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Task statistics map.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MemoryPoolStatisticsReadRequest" class="doc doc-heading">
+            <code>MemoryPoolStatisticsReadRequest</code>
+
+
+<a href="#smp.os_management.MemoryPoolStatisticsReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request memory pool statistics.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-114">114</a></span>
+<span class="normal"><a href="#__codelineno-0-115">115</a></span>
+<span class="normal"><a href="#__codelineno-0-116">116</a></span>
+<span class="normal"><a href="#__codelineno-0-117">117</a></span>
+<span class="normal"><a href="#__codelineno-0-118">118</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="k">class</span> <span class="nc">MemoryPoolStatisticsReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request memory pool statistics.&quot;&quot;&quot;</span>
+</span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a>
+</span><span id="__span-0-117"><a id="__codelineno-0-117" name="__codelineno-0-117"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-118"><a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">MEMORY_POOL_STATS</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MemoryPoolStatistics" class="doc doc-heading">
+            <code>MemoryPoolStatistics</code>
+
+
+<a href="#smp.os_management.MemoryPoolStatistics" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+        <p>Memory pool statistics.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-121">121</a></span>
+<span class="normal"><a href="#__codelineno-0-122">122</a></span>
+<span class="normal"><a href="#__codelineno-0-123">123</a></span>
+<span class="normal"><a href="#__codelineno-0-124">124</a></span>
+<span class="normal"><a href="#__codelineno-0-125">125</a></span>
+<span class="normal"><a href="#__codelineno-0-126">126</a></span>
+<span class="normal"><a href="#__codelineno-0-127">127</a></span>
+<span class="normal"><a href="#__codelineno-0-128">128</a></span>
+<span class="normal"><a href="#__codelineno-0-129">129</a></span>
+<span class="normal"><a href="#__codelineno-0-130">130</a></span>
+<span class="normal"><a href="#__codelineno-0-131">131</a></span>
+<span class="normal"><a href="#__codelineno-0-132">132</a></span>
+<span class="normal"><a href="#__codelineno-0-133">133</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-121"><a id="__codelineno-0-121" name="__codelineno-0-121"></a><span class="k">class</span> <span class="nc">MemoryPoolStatistics</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-122"><a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Memory pool statistics.&quot;&quot;&quot;</span>
+</span><span id="__span-0-123"><a id="__codelineno-0-123" name="__codelineno-0-123"></a>
+</span><span id="__span-0-124"><a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-125"><a id="__codelineno-0-125" name="__codelineno-0-125"></a>
+</span><span id="__span-0-126"><a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="n">blksize</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-127"><a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Size of the memory block in the pool.&quot;&quot;&quot;</span>
+</span><span id="__span-0-128"><a id="__codelineno-0-128" name="__codelineno-0-128"></a>    <span class="n">nblks</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of memory blocks in the pool.&quot;&quot;&quot;</span>
+</span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="n">nfree</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-131"><a id="__codelineno-0-131" name="__codelineno-0-131"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of free memory blocks in the pool.&quot;&quot;&quot;</span>
+</span><span id="__span-0-132"><a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="nb">min</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Lowest number of free blocks the pool reached during run-time.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatistics.model_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s1">&#39;forbid&#39;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatistics.model_config" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatistics.blksize" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">blksize</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatistics.blksize" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Size of the memory block in the pool.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatistics.nblks" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">nblks</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatistics.nblks" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Number of memory blocks in the pool.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatistics.nfree" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">nfree</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatistics.nfree" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Number of free memory blocks in the pool.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatistics.min" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">min</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatistics.min" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Lowest number of free blocks the pool reached during run-time.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MemoryPoolStatisticsReadResponse" class="doc doc-heading">
+            <code>MemoryPoolStatisticsReadResponse</code>
+
+
+<a href="#smp.os_management.MemoryPoolStatisticsReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>The memory pools are accessed by name.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-136">136</a></span>
+<span class="normal"><a href="#__codelineno-0-137">137</a></span>
+<span class="normal"><a href="#__codelineno-0-138">138</a></span>
+<span class="normal"><a href="#__codelineno-0-139">139</a></span>
+<span class="normal"><a href="#__codelineno-0-140">140</a></span>
+<span class="normal"><a href="#__codelineno-0-141">141</a></span>
+<span class="normal"><a href="#__codelineno-0-142">142</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-136"><a id="__codelineno-0-136" name="__codelineno-0-136"></a><span class="k">class</span> <span class="nc">MemoryPoolStatisticsReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-137"><a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;The memory pools are accessed by name.&quot;&quot;&quot;</span>
+</span><span id="__span-0-138"><a id="__codelineno-0-138" name="__codelineno-0-138"></a>
+</span><span id="__span-0-139"><a id="__codelineno-0-139" name="__codelineno-0-139"></a>    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-140"><a id="__codelineno-0-140" name="__codelineno-0-140"></a>
+</span><span id="__span-0-141"><a id="__codelineno-0-141" name="__codelineno-0-141"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-142"><a id="__codelineno-0-142" name="__codelineno-0-142"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">MEMORY_POOL_STATS</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MemoryPoolStatisticsReadResponse.model_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s1">&#39;allow&#39;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MemoryPoolStatisticsReadResponse.model_config" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.DateTimeReadRequest" class="doc doc-heading">
+            <code>DateTimeReadRequest</code>
+
+
+<a href="#smp.os_management.DateTimeReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request the current date and time.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-145">145</a></span>
+<span class="normal"><a href="#__codelineno-0-146">146</a></span>
+<span class="normal"><a href="#__codelineno-0-147">147</a></span>
+<span class="normal"><a href="#__codelineno-0-148">148</a></span>
+<span class="normal"><a href="#__codelineno-0-149">149</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-145"><a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="k">class</span> <span class="nc">DateTimeReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-146"><a id="__codelineno-0-146" name="__codelineno-0-146"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request the current date and time.&quot;&quot;&quot;</span>
+</span><span id="__span-0-147"><a id="__codelineno-0-147" name="__codelineno-0-147"></a>
+</span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">DATETIME_STRING</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.DateTimeReadResponse" class="doc doc-heading">
+            <code>DateTimeReadResponse</code>
+
+
+<a href="#smp.os_management.DateTimeReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>Response to a date and time request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-152">152</a></span>
+<span class="normal"><a href="#__codelineno-0-153">153</a></span>
+<span class="normal"><a href="#__codelineno-0-154">154</a></span>
+<span class="normal"><a href="#__codelineno-0-155">155</a></span>
+<span class="normal"><a href="#__codelineno-0-156">156</a></span>
+<span class="normal"><a href="#__codelineno-0-157">157</a></span>
+<span class="normal"><a href="#__codelineno-0-158">158</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="k">class</span> <span class="nc">DateTimeReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Response to a date and time request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a>
+</span><span id="__span-0-155"><a id="__codelineno-0-155" name="__codelineno-0-155"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-156"><a id="__codelineno-0-156" name="__codelineno-0-156"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">DATETIME_STRING</span>
+</span><span id="__span-0-157"><a id="__codelineno-0-157" name="__codelineno-0-157"></a>
+</span><span id="__span-0-158"><a id="__codelineno-0-158" name="__codelineno-0-158"></a>    <span class="n">datetime</span><span class="p">:</span> <span class="nb">str</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.DateTimeReadResponse.datetime" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">datetime</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.DateTimeReadResponse.datetime" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.DateTimeWriteRequest" class="doc doc-heading">
+            <code>DateTimeWriteRequest</code>
+
+
+<a href="#smp.os_management.DateTimeWriteRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteRequest" href="../message/#smp.message.WriteRequest">WriteRequest</a></code></p>
+
+
+        <p>Set the current date and time.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-161">161</a></span>
+<span class="normal"><a href="#__codelineno-0-162">162</a></span>
+<span class="normal"><a href="#__codelineno-0-163">163</a></span>
+<span class="normal"><a href="#__codelineno-0-164">164</a></span>
+<span class="normal"><a href="#__codelineno-0-165">165</a></span>
+<span class="normal"><a href="#__codelineno-0-166">166</a></span>
+<span class="normal"><a href="#__codelineno-0-167">167</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-161"><a id="__codelineno-0-161" name="__codelineno-0-161"></a><span class="k">class</span> <span class="nc">DateTimeWriteRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteRequest</span><span class="p">):</span>
+</span><span id="__span-0-162"><a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the current date and time.&quot;&quot;&quot;</span>
+</span><span id="__span-0-163"><a id="__codelineno-0-163" name="__codelineno-0-163"></a>
+</span><span id="__span-0-164"><a id="__codelineno-0-164" name="__codelineno-0-164"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-165"><a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">DATETIME_STRING</span>
+</span><span id="__span-0-166"><a id="__codelineno-0-166" name="__codelineno-0-166"></a>
+</span><span id="__span-0-167"><a id="__codelineno-0-167" name="__codelineno-0-167"></a>    <span class="n">datetime</span><span class="p">:</span> <span class="nb">str</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.DateTimeWriteRequest.datetime" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">datetime</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.DateTimeWriteRequest.datetime" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.DateTimeWriteResponse" class="doc doc-heading">
+            <code>DateTimeWriteResponse</code>
+
+
+<a href="#smp.os_management.DateTimeWriteResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.WriteResponse" href="../message/#smp.message.WriteResponse">WriteResponse</a></code></p>
+
+
+        <p>Success response to a date and time request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-170">170</a></span>
+<span class="normal"><a href="#__codelineno-0-171">171</a></span>
+<span class="normal"><a href="#__codelineno-0-172">172</a></span>
+<span class="normal"><a href="#__codelineno-0-173">173</a></span>
+<span class="normal"><a href="#__codelineno-0-174">174</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-170"><a id="__codelineno-0-170" name="__codelineno-0-170"></a><span class="k">class</span> <span class="nc">DateTimeWriteResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">WriteResponse</span><span class="p">):</span>
+</span><span id="__span-0-171"><a id="__codelineno-0-171" name="__codelineno-0-171"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to a date and time request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-172"><a id="__codelineno-0-172" name="__codelineno-0-172"></a>
+</span><span id="__span-0-173"><a id="__codelineno-0-173" name="__codelineno-0-173"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-174"><a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">DATETIME_STRING</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MCUMgrParametersReadRequest" class="doc doc-heading">
+            <code>MCUMgrParametersReadRequest</code>
+
+
+<a href="#smp.os_management.MCUMgrParametersReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request MCU Manager parameters.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-177">177</a></span>
+<span class="normal"><a href="#__codelineno-0-178">178</a></span>
+<span class="normal"><a href="#__codelineno-0-179">179</a></span>
+<span class="normal"><a href="#__codelineno-0-180">180</a></span>
+<span class="normal"><a href="#__codelineno-0-181">181</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-177"><a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="k">class</span> <span class="nc">MCUMgrParametersReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-178"><a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request MCU Manager parameters.&quot;&quot;&quot;</span>
+</span><span id="__span-0-179"><a id="__codelineno-0-179" name="__codelineno-0-179"></a>
+</span><span id="__span-0-180"><a id="__codelineno-0-180" name="__codelineno-0-180"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">MCUMGR_PARAMETERS</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MCUMgrParametersReadResponse" class="doc doc-heading">
+            <code>MCUMgrParametersReadResponse</code>
+
+
+<a href="#smp.os_management.MCUMgrParametersReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>Success response to a MCU Manager parameters request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-184">184</a></span>
+<span class="normal"><a href="#__codelineno-0-185">185</a></span>
+<span class="normal"><a href="#__codelineno-0-186">186</a></span>
+<span class="normal"><a href="#__codelineno-0-187">187</a></span>
+<span class="normal"><a href="#__codelineno-0-188">188</a></span>
+<span class="normal"><a href="#__codelineno-0-189">189</a></span>
+<span class="normal"><a href="#__codelineno-0-190">190</a></span>
+<span class="normal"><a href="#__codelineno-0-191">191</a></span>
+<span class="normal"><a href="#__codelineno-0-192">192</a></span>
+<span class="normal"><a href="#__codelineno-0-193">193</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-184"><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="k">class</span> <span class="nc">MCUMgrParametersReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-185"><a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to a MCU Manager parameters request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-186"><a id="__codelineno-0-186" name="__codelineno-0-186"></a>
+</span><span id="__span-0-187"><a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-188"><a id="__codelineno-0-188" name="__codelineno-0-188"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">MCUMGR_PARAMETERS</span>
+</span><span id="__span-0-189"><a id="__codelineno-0-189" name="__codelineno-0-189"></a>
+</span><span id="__span-0-190"><a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="n">buf_size</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-191"><a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Single SMP buffer size, this includes SMP header and CBOR payload.&quot;&quot;&quot;</span>
+</span><span id="__span-0-192"><a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="n">buf_count</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-193"><a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of SMP buffers.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUMgrParametersReadResponse.buf_size" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">buf_size</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUMgrParametersReadResponse.buf_size" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Single SMP buffer size, this includes SMP header and CBOR payload.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUMgrParametersReadResponse.buf_count" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">buf_count</span><span class="p">:</span> <span class="nb">int</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUMgrParametersReadResponse.buf_count" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Number of SMP buffers.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.OSApplicationInfoReadRequest" class="doc doc-heading">
+            <code>OSApplicationInfoReadRequest</code>
+
+
+<a href="#smp.os_management.OSApplicationInfoReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request information about the application running on the device.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-196">196</a></span>
+<span class="normal"><a href="#__codelineno-0-197">197</a></span>
+<span class="normal"><a href="#__codelineno-0-198">198</a></span>
+<span class="normal"><a href="#__codelineno-0-199">199</a></span>
+<span class="normal"><a href="#__codelineno-0-200">200</a></span>
+<span class="normal"><a href="#__codelineno-0-201">201</a></span>
+<span class="normal"><a href="#__codelineno-0-202">202</a></span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span>
+<span class="normal"><a href="#__codelineno-0-204">204</a></span>
+<span class="normal"><a href="#__codelineno-0-205">205</a></span>
+<span class="normal"><a href="#__codelineno-0-206">206</a></span>
+<span class="normal"><a href="#__codelineno-0-207">207</a></span>
+<span class="normal"><a href="#__codelineno-0-208">208</a></span>
+<span class="normal"><a href="#__codelineno-0-209">209</a></span>
+<span class="normal"><a href="#__codelineno-0-210">210</a></span>
+<span class="normal"><a href="#__codelineno-0-211">211</a></span>
+<span class="normal"><a href="#__codelineno-0-212">212</a></span>
+<span class="normal"><a href="#__codelineno-0-213">213</a></span>
+<span class="normal"><a href="#__codelineno-0-214">214</a></span>
+<span class="normal"><a href="#__codelineno-0-215">215</a></span>
+<span class="normal"><a href="#__codelineno-0-216">216</a></span>
+<span class="normal"><a href="#__codelineno-0-217">217</a></span>
+<span class="normal"><a href="#__codelineno-0-218">218</a></span>
+<span class="normal"><a href="#__codelineno-0-219">219</a></span>
+<span class="normal"><a href="#__codelineno-0-220">220</a></span>
+<span class="normal"><a href="#__codelineno-0-221">221</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="k">class</span> <span class="nc">OSApplicationInfoReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request information about the application running on the device.&quot;&quot;&quot;</span>
+</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a>
+</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">OS_APPLICATION_INFO</span>
+</span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a>
+</span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a>    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Format specifier of returned response.</span>
+</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a>
+</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">    Fields are appended in their natural ascending index order, not the order</span>
+</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="sd">    of characters that are received by the command.</span>
+</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a>
+</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">    Format specifiers:</span>
+</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="sd">    * `s` Kernel name</span>
+</span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">    * `n` Node name</span>
+</span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="sd">    * `r` Kernel release</span>
+</span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">    * `v` Kernel version</span>
+</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">    * `b` Build date and time (requires `CONFIG_MCUMGR_GRP_OS_INFO_BUILD_DATE_TIME`)</span>
+</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    * `m` Machine</span>
+</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">    * `p` Processor</span>
+</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="sd">    * `i` Hardware platform</span>
+</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    * `o` Operating system</span>
+</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">    * `a` All fields (shorthand for all above options)</span>
+</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a>
+</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">    If this option is not provided, the `s` Kernel name option will be used.</span>
+</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OSApplicationInfoReadRequest.format" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OSApplicationInfoReadRequest.format" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Format specifier of returned response.</p>
+<p>Fields are appended in their natural ascending index order, not the order
+of characters that are received by the command.</p>
+<p>Format specifiers:
+* <code>s</code> Kernel name
+* <code>n</code> Node name
+* <code>r</code> Kernel release
+* <code>v</code> Kernel version
+* <code>b</code> Build date and time (requires <code>CONFIG_MCUMGR_GRP_OS_INFO_BUILD_DATE_TIME</code>)
+* <code>m</code> Machine
+* <code>p</code> Processor
+* <code>i</code> Hardware platform
+* <code>o</code> Operating system
+* <code>a</code> All fields (shorthand for all above options)</p>
+<p>If this option is not provided, the <code>s</code> Kernel name option will be used.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.OSApplicationInfoReadResponse" class="doc doc-heading">
+            <code>OSApplicationInfoReadResponse</code>
+
+
+<a href="#smp.os_management.OSApplicationInfoReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>Success response to an application information request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-224">224</a></span>
+<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+<span class="normal"><a href="#__codelineno-0-226">226</a></span>
+<span class="normal"><a href="#__codelineno-0-227">227</a></span>
+<span class="normal"><a href="#__codelineno-0-228">228</a></span>
+<span class="normal"><a href="#__codelineno-0-229">229</a></span>
+<span class="normal"><a href="#__codelineno-0-230">230</a></span>
+<span class="normal"><a href="#__codelineno-0-231">231</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a><span class="k">class</span> <span class="nc">OSApplicationInfoReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to an application information request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a>
+</span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">OS_APPLICATION_INFO</span>
+</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229"></a>
+</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Text response including requested parameters.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OSApplicationInfoReadResponse.output" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">output</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OSApplicationInfoReadResponse.output" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Text response including requested parameters.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.BootloaderInformationReadRequest" class="doc doc-heading">
+            <code>BootloaderInformationReadRequest</code>
+
+
+<a href="#smp.os_management.BootloaderInformationReadRequest" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadRequest" href="../message/#smp.message.ReadRequest">ReadRequest</a></code></p>
+
+
+        <p>Request bootloader information.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-234">234</a></span>
+<span class="normal"><a href="#__codelineno-0-235">235</a></span>
+<span class="normal"><a href="#__codelineno-0-236">236</a></span>
+<span class="normal"><a href="#__codelineno-0-237">237</a></span>
+<span class="normal"><a href="#__codelineno-0-238">238</a></span>
+<span class="normal"><a href="#__codelineno-0-239">239</a></span>
+<span class="normal"><a href="#__codelineno-0-240">240</a></span>
+<span class="normal"><a href="#__codelineno-0-241">241</a></span>
+<span class="normal"><a href="#__codelineno-0-242">242</a></span>
+<span class="normal"><a href="#__codelineno-0-243">243</a></span>
+<span class="normal"><a href="#__codelineno-0-244">244</a></span>
+<span class="normal"><a href="#__codelineno-0-245">245</a></span>
+<span class="normal"><a href="#__codelineno-0-246">246</a></span>
+<span class="normal"><a href="#__codelineno-0-247">247</a></span>
+<span class="normal"><a href="#__codelineno-0-248">248</a></span>
+<span class="normal"><a href="#__codelineno-0-249">249</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="k">class</span> <span class="nc">BootloaderInformationReadRequest</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadRequest</span><span class="p">):</span>
+</span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Request bootloader information.&quot;&quot;&quot;</span>
+</span><span id="__span-0-236"><a id="__codelineno-0-236" name="__codelineno-0-236"></a>
+</span><span id="__span-0-237"><a id="__codelineno-0-237" name="__codelineno-0-237"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-238"><a id="__codelineno-0-238" name="__codelineno-0-238"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">BOOTLOADER_INFO</span>
+</span><span id="__span-0-239"><a id="__codelineno-0-239" name="__codelineno-0-239"></a>
+</span><span id="__span-0-240"><a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-241"><a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Is string representing query for parameters.</span>
+</span><span id="__span-0-242"><a id="__codelineno-0-242" name="__codelineno-0-242"></a>
+</span><span id="__span-0-243"><a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    With no restrictions how the query looks like as processing of query is left</span>
+</span><span id="__span-0-244"><a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    for bootloader backend. If there is no query, then response will return string</span>
+</span><span id="__span-0-245"><a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    identifying the bootloader.</span>
+</span><span id="__span-0-246"><a id="__codelineno-0-246" name="__codelineno-0-246"></a>
+</span><span id="__span-0-247"><a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    MCUboot supports the query string,&quot;mode&quot;.  The response to mode is of type</span>
+</span><span id="__span-0-248"><a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    `MCUbootMode`.</span>
+</span><span id="__span-0-249"><a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.BootloaderInformationReadRequest.query" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.BootloaderInformationReadRequest.query" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Is string representing query for parameters.</p>
+<p>With no restrictions how the query looks like as processing of query is left
+for bootloader backend. If there is no query, then response will return string
+identifying the bootloader.</p>
+<p>MCUboot supports the query string,"mode".  The response to mode is of type
+<code>MCUbootMode</code>.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MCUbootMode" class="doc doc-heading">
+            <code>MCUbootMode</code>
+
+
+<a href="#smp.os_management.MCUbootMode" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="enum.IntEnum">IntEnum</span></code></p>
+
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-252">252</a></span>
+<span class="normal"><a href="#__codelineno-0-253">253</a></span>
+<span class="normal"><a href="#__codelineno-0-254">254</a></span>
+<span class="normal"><a href="#__codelineno-0-255">255</a></span>
+<span class="normal"><a href="#__codelineno-0-256">256</a></span>
+<span class="normal"><a href="#__codelineno-0-257">257</a></span>
+<span class="normal"><a href="#__codelineno-0-258">258</a></span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-252"><a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="nd">@unique</span>
+</span><span id="__span-0-253"><a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="k">class</span> <span class="nc">MCUbootMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+</span><span id="__span-0-254"><a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</span><span id="__span-0-255"><a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="n">APPLICATION</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-0-256"><a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">SWAP_USING_SCRATCH</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="__span-0-257"><a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="n">OVERWRITE_ONLY</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span id="__span-0-258"><a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="n">SWAP_WITHOUT_SCRATCH</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span id="__span-0-259"><a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">DIRECT_XIP_WITHOUT_REVERT</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span id="__span-0-260"><a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="n">DIRECT_XIP_WITH_REVERT</span> <span class="o">=</span> <span class="mi">5</span>
+</span><span id="__span-0-261"><a id="__codelineno-0-261" name="__codelineno-0-261"></a>    <span class="n">RAM_LOADER</span> <span class="o">=</span> <span class="mi">6</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.UNKNOWN" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">UNKNOWN</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.UNKNOWN" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.APPLICATION" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">APPLICATION</span> <span class="o">=</span> <span class="mi">0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.APPLICATION" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.SWAP_USING_SCRATCH" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SWAP_USING_SCRATCH</span> <span class="o">=</span> <span class="mi">1</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.SWAP_USING_SCRATCH" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.OVERWRITE_ONLY" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">OVERWRITE_ONLY</span> <span class="o">=</span> <span class="mi">2</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.OVERWRITE_ONLY" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.SWAP_WITHOUT_SCRATCH" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">SWAP_WITHOUT_SCRATCH</span> <span class="o">=</span> <span class="mi">3</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.SWAP_WITHOUT_SCRATCH" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.DIRECT_XIP_WITHOUT_REVERT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DIRECT_XIP_WITHOUT_REVERT</span> <span class="o">=</span> <span class="mi">4</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITHOUT_REVERT" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.DIRECT_XIP_WITH_REVERT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">DIRECT_XIP_WITH_REVERT</span> <span class="o">=</span> <span class="mi">5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.DIRECT_XIP_WITH_REVERT" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootMode.RAM_LOADER" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">RAM_LOADER</span> <span class="o">=</span> <span class="mi">6</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootMode.RAM_LOADER" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.MCUbootModeQueryResponse" class="doc doc-heading">
+            <code>MCUbootModeQueryResponse</code>
+
+
+<a href="#smp.os_management.MCUbootModeQueryResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+        <p>Response to a MCUboot mode query.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-264">264</a></span>
+<span class="normal"><a href="#__codelineno-0-265">265</a></span>
+<span class="normal"><a href="#__codelineno-0-266">266</a></span>
+<span class="normal"><a href="#__codelineno-0-267">267</a></span>
+<span class="normal"><a href="#__codelineno-0-268">268</a></span>
+<span class="normal"><a href="#__codelineno-0-269">269</a></span>
+<span class="normal"><a href="#__codelineno-0-270">270</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-264"><a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="k">class</span> <span class="nc">MCUbootModeQueryResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-265"><a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Response to a MCUboot mode query.&quot;&quot;&quot;</span>
+</span><span id="__span-0-266"><a id="__codelineno-0-266" name="__codelineno-0-266"></a>
+</span><span id="__span-0-267"><a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-0-268"><a id="__codelineno-0-268" name="__codelineno-0-268"></a>
+</span><span id="__span-0-269"><a id="__codelineno-0-269" name="__codelineno-0-269"></a>    <span class="n">mode</span><span class="p">:</span> <span class="n">MCUbootMode</span>
+</span><span id="__span-0-270"><a id="__codelineno-0-270" name="__codelineno-0-270"></a>    <span class="n">no_downgrade</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">alias</span><span class="o">=</span><span class="s2">&quot;no-downgrade&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootModeQueryResponse.model_config" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s1">&#39;forbid&#39;</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootModeQueryResponse.model_config" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootModeQueryResponse.mode" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">mode</span><span class="p">:</span> <span class="n">MCUbootMode</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootModeQueryResponse.mode" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.MCUbootModeQueryResponse.no_downgrade" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">no_downgrade</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">alias</span><span class="o">=</span><span class="s1">&#39;no-downgrade&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.MCUbootModeQueryResponse.no_downgrade" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.BootloaderInformationReadResponse" class="doc doc-heading">
+            <code>BootloaderInformationReadResponse</code>
+
+
+<a href="#smp.os_management.BootloaderInformationReadResponse" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.message.ReadResponse" href="../message/#smp.message.ReadResponse">ReadResponse</a></code></p>
+
+
+        <p>Success response to a bootloader information request.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-273">273</a></span>
+<span class="normal"><a href="#__codelineno-0-274">274</a></span>
+<span class="normal"><a href="#__codelineno-0-275">275</a></span>
+<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+<span class="normal"><a href="#__codelineno-0-277">277</a></span>
+<span class="normal"><a href="#__codelineno-0-278">278</a></span>
+<span class="normal"><a href="#__codelineno-0-279">279</a></span>
+<span class="normal"><a href="#__codelineno-0-280">280</a></span>
+<span class="normal"><a href="#__codelineno-0-281">281</a></span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span>
+<span class="normal"><a href="#__codelineno-0-285">285</a></span>
+<span class="normal"><a href="#__codelineno-0-286">286</a></span>
+<span class="normal"><a href="#__codelineno-0-287">287</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-273"><a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="k">class</span> <span class="nc">BootloaderInformationReadResponse</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">ReadResponse</span><span class="p">):</span>
+</span><span id="__span-0-274"><a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Success response to a bootloader information request.&quot;&quot;&quot;</span>
+</span><span id="__span-0-275"><a id="__codelineno-0-275" name="__codelineno-0-275"></a>
+</span><span id="__span-0-276"><a id="__codelineno-0-276" name="__codelineno-0-276"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span><span id="__span-0-277"><a id="__codelineno-0-277" name="__codelineno-0-277"></a>    <span class="n">_COMMAND_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">CommandId</span><span class="o">.</span><span class="n">OSManagement</span><span class="o">.</span><span class="n">BOOTLOADER_INFO</span>
+</span><span id="__span-0-278"><a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+</span><span id="__span-0-279"><a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="n">bootloader</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-280"><a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;String identifying the bootloader.  For MCUboot it will be &quot;MCUboot&quot;.&quot;&quot;&quot;</span>
+</span><span id="__span-0-281"><a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="n">response</span><span class="p">:</span> <span class="n">MCUbootModeQueryResponse</span> <span class="o">|</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-0-282"><a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Response to “query”.</span>
+</span><span id="__span-0-283"><a id="__codelineno-0-283" name="__codelineno-0-283"></a>
+</span><span id="__span-0-284"><a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    This is optional and may be left out in case when query yields no response,</span>
+</span><span id="__span-0-285"><a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    SMP version 2 error code of `OS_MGMT_ERR_QUERY_YIELDS_NO_ANSWER` is</span>
+</span><span id="__span-0-286"><a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    expected. Response may have more than one parameter reported back or it may</span>
+</span><span id="__span-0-287"><a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    be a map, that is dependent on bootloader backend and query.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.BootloaderInformationReadResponse.bootloader" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">bootloader</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.BootloaderInformationReadResponse.bootloader" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>String identifying the bootloader.  For MCUboot it will be "MCUboot".</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.BootloaderInformationReadResponse.response" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">response</span><span class="p">:</span> <span class="n">MCUbootModeQueryResponse</span> <span class="o">|</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.BootloaderInformationReadResponse.response" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Response to “query”.</p>
+<p>This is optional and may be left out in case when query yields no response,
+SMP version 2 error code of <code>OS_MGMT_ERR_QUERY_YIELDS_NO_ANSWER</code> is
+expected. Response may have more than one parameter reported back or it may
+be a map, that is dependent on bootloader backend and query.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.OS_MGMT_RET_RC" class="doc doc-heading">
+            <code>OS_MGMT_RET_RC</code>
+
+
+<a href="#smp.os_management.OS_MGMT_RET_RC" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="enum.IntEnum">IntEnum</span></code></p>
+
+
+        <p>OS Management return codes.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-290">290</a></span>
+<span class="normal"><a href="#__codelineno-0-291">291</a></span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span>
+<span class="normal"><a href="#__codelineno-0-295">295</a></span>
+<span class="normal"><a href="#__codelineno-0-296">296</a></span>
+<span class="normal"><a href="#__codelineno-0-297">297</a></span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span>
+<span class="normal"><a href="#__codelineno-0-299">299</a></span>
+<span class="normal"><a href="#__codelineno-0-300">300</a></span>
+<span class="normal"><a href="#__codelineno-0-301">301</a></span>
+<span class="normal"><a href="#__codelineno-0-302">302</a></span>
+<span class="normal"><a href="#__codelineno-0-303">303</a></span>
+<span class="normal"><a href="#__codelineno-0-304">304</a></span>
+<span class="normal"><a href="#__codelineno-0-305">305</a></span>
+<span class="normal"><a href="#__codelineno-0-306">306</a></span>
+<span class="normal"><a href="#__codelineno-0-307">307</a></span>
+<span class="normal"><a href="#__codelineno-0-308">308</a></span>
+<span class="normal"><a href="#__codelineno-0-309">309</a></span>
+<span class="normal"><a href="#__codelineno-0-310">310</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-290"><a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="nd">@unique</span>
+</span><span id="__span-0-291"><a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="k">class</span> <span class="nc">OS_MGMT_RET_RC</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+</span><span id="__span-0-292"><a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;OS Management return codes.&quot;&quot;&quot;</span>
+</span><span id="__span-0-293"><a id="__codelineno-0-293" name="__codelineno-0-293"></a>
+</span><span id="__span-0-294"><a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="n">OK</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-0-295"><a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;No error, this is implied if there is no ret value in the response.&quot;&quot;&quot;</span>
+</span><span id="__span-0-296"><a id="__codelineno-0-296" name="__codelineno-0-296"></a>
+</span><span id="__span-0-297"><a id="__codelineno-0-297" name="__codelineno-0-297"></a>    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span id="__span-0-298"><a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Unknown error occurred.&quot;&quot;&quot;</span>
+</span><span id="__span-0-299"><a id="__codelineno-0-299" name="__codelineno-0-299"></a>
+</span><span id="__span-0-300"><a id="__codelineno-0-300" name="__codelineno-0-300"></a>    <span class="n">INVALID_FORMAT</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span id="__span-0-301"><a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;The provided format value is not valid.&quot;&quot;&quot;</span>
+</span><span id="__span-0-302"><a id="__codelineno-0-302" name="__codelineno-0-302"></a>
+</span><span id="__span-0-303"><a id="__codelineno-0-303" name="__codelineno-0-303"></a>    <span class="n">QUERY_YIELDS_NO_ANSWER</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Query was not recognized.&quot;&quot;&quot;</span>
+</span><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a>
+</span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a>    <span class="n">RTC_NOT_SET</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span id="__span-0-307"><a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;RTC is not set.&quot;&quot;&quot;</span>
+</span><span id="__span-0-308"><a id="__codelineno-0-308" name="__codelineno-0-308"></a>
+</span><span id="__span-0-309"><a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="n">RTC_COMMAND_FAILED</span> <span class="o">=</span> <span class="mi">5</span>
+</span><span id="__span-0-310"><a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;RTC command failed.&quot;&quot;&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.OK" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">OK</span> <span class="o">=</span> <span class="mi">0</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.OK" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>No error, this is implied if there is no ret value in the response.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.UNKNOWN" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">1</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.UNKNOWN" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Unknown error occurred.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.INVALID_FORMAT" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">INVALID_FORMAT</span> <span class="o">=</span> <span class="mi">2</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.INVALID_FORMAT" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>The provided format value is not valid.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.QUERY_YIELDS_NO_ANSWER" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">QUERY_YIELDS_NO_ANSWER</span> <span class="o">=</span> <span class="mi">3</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.QUERY_YIELDS_NO_ANSWER" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Query was not recognized.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.RTC_NOT_SET" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">RTC_NOT_SET</span> <span class="o">=</span> <span class="mi">4</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.RTC_NOT_SET" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>RTC is not set.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="smp.os_management.OS_MGMT_RET_RC.RTC_COMMAND_FAILED" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">RTC_COMMAND_FAILED</span> <span class="o">=</span> <span class="mi">5</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+<a href="#smp.os_management.OS_MGMT_RET_RC.RTC_COMMAND_FAILED" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>RTC command failed.</p>
+    </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.OSManagementErrorV1" class="doc doc-heading">
+            <code>OSManagementErrorV1</code>
+
+
+<a href="#smp.os_management.OSManagementErrorV1" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.error.ErrorV1" href="../error/#smp.error.ErrorV1">ErrorV1</a></code></p>
+
+
+        <p>OS Management error response.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-313">313</a></span>
+<span class="normal"><a href="#__codelineno-0-314">314</a></span>
+<span class="normal"><a href="#__codelineno-0-315">315</a></span>
+<span class="normal"><a href="#__codelineno-0-316">316</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-313"><a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="k">class</span> <span class="nc">OSManagementErrorV1</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">ErrorV1</span><span class="p">):</span>
+</span><span id="__span-0-314"><a id="__codelineno-0-314" name="__codelineno-0-314"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;OS Management error response.&quot;&quot;&quot;</span>
+</span><span id="__span-0-315"><a id="__codelineno-0-315" name="__codelineno-0-315"></a>
+</span><span id="__span-0-316"><a id="__codelineno-0-316" name="__codelineno-0-316"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="smp.os_management.OSManagementErrorV2" class="doc doc-heading">
+            <code>OSManagementErrorV2</code>
+
+
+<a href="#smp.os_management.OSManagementErrorV2" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="smp.error.ErrorV2" href="../error/#smp.error.ErrorV2">ErrorV2</a>[<a class="autorefs autorefs-internal" title="smp.os_management.OS_MGMT_RET_RC" href="#smp.os_management.OS_MGMT_RET_RC">OS_MGMT_RET_RC</a>]</code></p>
+
+
+        <p>OS Management error response.</p>
+
+              <details class="quote">
+                <summary>Source code in <code>smp/os_management.py</code></summary>
+                <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-319">319</a></span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-319"><a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="k">class</span> <span class="nc">OSManagementErrorV2</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">ErrorV2</span><span class="p">[</span><span class="n">OS_MGMT_RET_RC</span><span class="p">]):</span>
+</span><span id="__span-0-320"><a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;OS Management error response.&quot;&quot;&quot;</span>
+</span><span id="__span-0-321"><a id="__codelineno-0-321" name="__codelineno-0-321"></a>
+</span><span id="__span-0-322"><a id="__codelineno-0-322" name="__codelineno-0-322"></a>    <span class="n">_GROUP_ID</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">GroupId</span><span class="o">.</span><span class="n">OS_MANAGEMENT</span>
+</span></code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d6f25eb3.min.js"></script>
+      
+    
+  </body>
+</html>
