@@ -99,6 +99,9 @@ jobs:
       - github-release
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write # IMPORTANT: mandatory for deploying to GitHub Pages
+
     steps:
       - uses: actions/checkout@v4
 
