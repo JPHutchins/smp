@@ -1,0 +1,3 @@
+# SMP Exceptions
+
+::: smp.exceptions
