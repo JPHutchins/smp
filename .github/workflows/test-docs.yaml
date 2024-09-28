@@ -19,6 +19,6 @@ jobs:
           python-version: "3.x"
           cache: "poetry"
 
-      - run: poetry install --with docs
+      - run: poetry install --only doc
 
       - run: poetry run mkdocs build
