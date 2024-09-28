@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class _MessageBase(ABC, BaseModel):
+    """The base class for SMP messages."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     _OP: ClassVar[smpheader.OP]
@@ -167,7 +169,7 @@ class _MessageBase(ABC, BaseModel):
 
 
 class Request(_MessageBase, ABC):
-    ...
+    """Base class for SMP Requests."""
 
 
 @unique
@@ -180,6 +182,8 @@ class ResponseType(IntEnum):
 
 
 class Response(_MessageBase, ABC):
+    """Base class for SMP Responses."""
+
     RESPONSE_TYPE: ClassVar[ResponseType]
 
 

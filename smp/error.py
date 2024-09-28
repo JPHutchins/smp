@@ -64,6 +64,8 @@ class MGMT_ERR(IntEnum):
 
 
 class ErrorV1(message.Response):
+    """SMP error response version 1."""
+
     RESPONSE_TYPE = message.ResponseType.ERROR_V1
 
     rc: MGMT_ERR
@@ -74,6 +76,8 @@ class ErrorV1(message.Response):
 
 
 class Err(BaseModel, Generic[T]):
+    """SMP error response version 2 `err` map."""
+
     model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
 
     group: GroupId
@@ -81,6 +85,8 @@ class Err(BaseModel, Generic[T]):
 
 
 class ErrorV2(message.Response, Generic[T]):
+    """SMP error response version 2."""
+
     RESPONSE_TYPE = message.ResponseType.ERROR_V2
 
     err: Err[T]
