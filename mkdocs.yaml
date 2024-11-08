@@ -11,6 +11,7 @@ nav:
   - Settings Management: settings_management.md
   - Shell Management: shell_management.md
   - Statistics Management: statistics_management.md
+  - Enumeration Management: enumeration_management.md
   - Zephyr Management: zephyr_management.md
   - User Groups:
       - Intercreate: user/intercreate.md

@@ -57,6 +57,13 @@ class CommandId:
         FILE_CLOSE = 4
 
     @unique
+    class EnumManagement(IntEnum):
+        GROUP_COUNT = 0
+        LIST_OF_GROUPS = 1
+        GROUP_ID = 2
+        GROUP_DETAILS = 3
+
+    @unique
     class ZephyrManagement(IntEnum):
         ERASE_STORAGE = 0
 
@@ -80,6 +87,7 @@ class GroupId(IntEnum):
     TEST_CRASH = 7
     FILE_MANAGEMENT = 8
     SHELL_MANAGEMENT = 9
+    ENUM_MANAGEMENT = 10
     ZEPHYR_MANAGEMENT = 63
 
 
