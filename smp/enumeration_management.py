@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Tuple
+from typing import Annotated, Tuple
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 import smp.error as smperr
 import smp.header as smphdr
 import smp.message as smpmsg
+
+GroupIdField = Annotated[
+    smphdr.GroupId | smphdr.UserGroupId | int, Field(union_mode="left_to_right")
+]
 
 
 class GroupCountRequest(smpmsg.ReadRequest):
@@ -41,7 +45,7 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.LIST_OF_GROUPS
 
-    groups: Tuple[int, ...]
+    groups: Tuple[GroupIdField, ...]
 
 
 class GroupIdRequest(smpmsg.ReadRequest):
@@ -59,7 +63,7 @@ class GroupIdResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_ID
 
-    group: int
+    group: GroupIdField
     end: bool | None = None
 
 
@@ -69,7 +73,7 @@ class GroupDetailsRequest(smpmsg.ReadRequest):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
-    groups: Tuple[int, ...]
+    groups: Tuple[GroupIdField, ...]
 
 
 class GroupDetails(BaseModel):
@@ -77,7 +81,7 @@ class GroupDetails(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: int
+    id: GroupIdField
     name: str | None = None
     handlers: int | None = None
 

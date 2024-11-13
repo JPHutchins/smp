@@ -77,9 +77,21 @@ def test_ListOfGroupsResponse() -> None:
         smpenum.ListOfGroupsResponse,
         smphdr.OP.READ_RSP,
         smphdr.CommandId.EnumManagement.LIST_OF_GROUPS,
-        {"groups": (2, 5, 15)},
+        {"groups": (2, smphdr.GroupId.RUNTIME_TESTS, 15, 64)},
     )
-    assert r.groups == (2, 5, 15)
+    assert r.groups == (2, 5, 15, 64)
+
+    assert type(r.groups[0]) is smphdr.GroupId
+    assert r.groups[0] == smphdr.GroupId.STATISTICS_MANAGEMENT
+
+    assert type(r.groups[1]) is smphdr.GroupId
+    assert r.groups[1] == smphdr.GroupId.RUNTIME_TESTS
+
+    assert type(r.groups[2]) is int
+    assert r.groups[2] == 15
+
+    assert type(r.groups[3]) is smphdr.UserGroupId
+    assert r.groups[3] == smphdr.UserGroupId.INTERCREATE
 
 
 @pytest.mark.parametrize("index", [0, 1, None])
@@ -99,7 +111,8 @@ def test_GroupIdResponse() -> None:
         smphdr.CommandId.EnumManagement.GROUP_ID,
         {"group": 2},
     )
-    assert r.group == 2
+    assert r.group == smphdr.GroupId.STATISTICS_MANAGEMENT
+    assert type(r.group) is smphdr.GroupId
     assert not r.end
 
 
@@ -108,7 +121,7 @@ def test_GroupDetailsRequest() -> None:
         smpenum.GroupDetailsRequest,
         smphdr.OP.READ,
         smphdr.CommandId.EnumManagement.GROUP_DETAILS,
-        {"groups": (2, 5, 15)},
+        {"groups": (smphdr.GroupId.STATISTICS_MANAGEMENT, smphdr.GroupId.RUNTIME_TESTS, 15)},
     )
 
 
@@ -122,6 +135,7 @@ def test_GroupDetailsResponse() -> None:
                 {"id": 2, "name": "group2", "handlers": 2},
                 {"id": 5, "name": "group5", "handlers": 5},
                 {"id": 15, "name": "group15", "handlers": 15},
+                {"id": 64, "name": "group64", "handlers": 64},
             )
         },
         nested_model=smpenum.GroupDetails,
@@ -130,4 +144,9 @@ def test_GroupDetailsResponse() -> None:
         smpenum.GroupDetails(id=2, name="group2", handlers=2),
         smpenum.GroupDetails(id=5, name="group5", handlers=5),
         smpenum.GroupDetails(id=15, name="group15", handlers=15),
+        smpenum.GroupDetails(id=64, name="group64", handlers=64),
     )
+    assert type(r.groups[0].id) is smphdr.GroupId
+    assert type(r.groups[1].id) is smphdr.GroupId
+    assert type(r.groups[2].id) is int
+    assert type(r.groups[3].id) is smphdr.UserGroupId
