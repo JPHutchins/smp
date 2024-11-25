@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Annotated, Tuple
+from typing import Tuple, Union
 
 from pydantic import BaseModel, ConfigDict, Field
+from typing_extensions import Annotated
 
 import smp.error as smperr
 import smp.header as smphdr
 import smp.message as smpmsg
 
+# We can't 'or' types until a later python
 GroupIdField = Annotated[
-    smphdr.GroupId | smphdr.UserGroupId | int, Field(union_mode="left_to_right")
+    Union[smphdr.GroupId, smphdr.UserGroupId, int], Field(union_mode="left_to_right")
 ]
 
 
