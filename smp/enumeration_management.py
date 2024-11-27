@@ -12,14 +12,17 @@ import smp.error as smperr
 import smp.header as smphdr
 import smp.message as smpmsg
 
-# We can't 'or' types until a later python
 GroupIdField = Annotated[
     Union[smphdr.GroupId, smphdr.UserGroupId, int], Field(union_mode="left_to_right")
 ]
 
 
 class GroupCountRequest(smpmsg.ReadRequest):
-    """Read the number of SMP server groups."""
+    """Read the number of SMP server groups.
+
+    Count of supported groups returns the total number of SMP command groups
+    that a device supports.
+    """
 
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_COUNT
@@ -32,6 +35,7 @@ class GroupCountResponse(smpmsg.ReadResponse):
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_COUNT
 
     count: int
+    """Contains the total number of supported SMP groups on the device."""
 
 
 class ListOfGroupsRequest(smpmsg.ReadRequest):
@@ -48,15 +52,23 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
     _COMMAND_ID = smphdr.CommandId.EnumManagement.LIST_OF_GROUPS
 
     groups: Tuple[GroupIdField, ...]
+    """Contains a list of the supported SMP group IDs on the device."""
 
 
 class GroupIdRequest(smpmsg.ReadRequest):
-    """List a SMP group by index."""
+    """List a SMP group by index.
+
+    Fetch single group ID command allows listing the group IDs of supported SMP
+    groups on the device, one by one.
+    """
 
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_ID
 
     index: int | None = None
+    """Contains the (0-based) index of the group to return information on, can
+    be omitted to return the first group's details.
+"""
 
 
 class GroupIdResponse(smpmsg.ReadResponse):
@@ -66,16 +78,35 @@ class GroupIdResponse(smpmsg.ReadResponse):
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_ID
 
     group: GroupIdField
+    """The Group ID at the requested index."""
     end: bool | None = None
+    """Will be set to true if the listed group is the final supported group on
+    the device, otherwise will be omitted.
+    """
 
 
 class GroupDetailsRequest(smpmsg.ReadRequest):
-    """List a SMP group by index."""
+    """Request the details of the supported SMP groups.
+
+    Details on supported groups command allows fetching details on each
+    supported SMP group, such as the name and number of handlers. A device can
+    specify an allow list of groups to return details on or details on all
+    groups can be returned.
+
+    This command is optional, it can be enabled using
+    `CONFIG_MCUMGR_GRP_ENUM_DETAILS`. The optional name and number of handlers
+    can be enabled/disabled with `CONFIG_MCUMGR_GRP_ENUM_DETAILS_NAME` and
+    `CONFIG_MCUMGR_GRP_ENUM_DETAILS_HANDLERS`.
+    """
 
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
-    groups: Tuple[GroupIdField, ...]
+    groups: Tuple[GroupIdField, ...] | None = None
+    """Contains a list of the SMP group IDs to fetch details on.
+
+    If omitted, details on all supported groups will be returned.
+    """
 
 
 class GroupDetails(BaseModel):
@@ -84,8 +115,11 @@ class GroupDetails(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: GroupIdField
+    """The group ID of the SMP command group."""
     name: str | None = None
+    """The name of the SMP command group."""
     handlers: int | None = None
+    """The number of handlers that the SMP command group supports."""
 
 
 class GroupDetailsResponse(smpmsg.ReadResponse):
@@ -95,6 +129,7 @@ class GroupDetailsResponse(smpmsg.ReadResponse):
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
     groups: Tuple[GroupDetails, ...]
+    """Contains a list of the requested SMP group details."""
 
 
 @unique
