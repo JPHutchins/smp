@@ -124,6 +124,13 @@ def test_GroupDetailsRequest() -> None:
         {"groups": (smphdr.GroupId.STATISTICS_MANAGEMENT, smphdr.GroupId.RUNTIME_TESTS, 15)},
     )
 
+    _do_test(
+        smpenum.GroupDetailsRequest,
+        smphdr.OP.READ,
+        smphdr.CommandId.EnumManagement.GROUP_DETAILS,
+        {},
+    )
+
 
 def test_GroupDetailsResponse() -> None:
     r = _do_test(
