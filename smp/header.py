@@ -103,9 +103,6 @@ class UserGroupId(IntEnum):
 GroupIdField = Annotated[Union[GroupId, UserGroupId, int], Field(union_mode="left_to_right")]
 
 
-AnyGroupId: TypeAlias = Union[IntEnum, int]
-
-
 @unique
 class OP(IntEnum):
     READ = 0
@@ -141,7 +138,7 @@ class Header:
     version: Version
     flags: Flag
     length: int
-    group_id: Union[AnyGroupId, GroupId, UserGroupId]
+    group_id: GroupIdField
     sequence: int
     command_id: Union[
         AnyCommandId,
