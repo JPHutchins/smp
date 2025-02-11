@@ -3,18 +3,13 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Tuple, Union
+from typing import Tuple
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Annotated
+from pydantic import BaseModel, ConfigDict
 
 import smp.error as smperr
 import smp.header as smphdr
 import smp.message as smpmsg
-
-GroupIdField = Annotated[
-    Union[smphdr.GroupId, smphdr.UserGroupId, int], Field(union_mode="left_to_right")
-]
 
 
 class GroupCountRequest(smpmsg.ReadRequest):
@@ -51,7 +46,7 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.LIST_OF_GROUPS
 
-    groups: Tuple[GroupIdField, ...]
+    groups: Tuple[smphdr.GroupIdField, ...]
     """Contains a list of the supported SMP group IDs on the device."""
 
 
@@ -77,7 +72,7 @@ class GroupIdResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_ID
 
-    group: GroupIdField
+    group: smphdr.GroupIdField
     """The Group ID at the requested index."""
     end: bool | None = None
     """Will be set to true if the listed group is the final supported group on
@@ -102,7 +97,7 @@ class GroupDetailsRequest(smpmsg.ReadRequest):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
-    groups: Tuple[GroupIdField, ...] | None = None
+    groups: Tuple[smphdr.GroupIdField, ...] | None = None
     """Contains a list of the SMP group IDs to fetch details on.
 
     If omitted, details on all supported groups will be returned.
@@ -114,7 +109,7 @@ class GroupDetails(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: GroupIdField
+    id: smphdr.GroupIdField
     """The group ID of the SMP command group."""
     name: str | None = None
     """The name of the SMP command group."""

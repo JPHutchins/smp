@@ -8,7 +8,7 @@ from typing import Generic, TypeVar
 from pydantic import BaseModel, ConfigDict
 
 from smp import message
-from smp.header import GroupId
+from smp.header import GroupIdField
 
 T = TypeVar("T", bound=IntEnum)
 
@@ -80,7 +80,7 @@ class Err(BaseModel, Generic[T]):
 
     model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
 
-    group: GroupId
+    group: GroupIdField
     rc: T
 
 
