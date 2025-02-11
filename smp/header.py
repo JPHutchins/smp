@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag, unique
 from typing import ClassVar, Dict, Type, Union
 
-from typing_extensions import TypeAlias
+from pydantic import Field
+from typing_extensions import Annotated, TypeAlias
 
 
 class CommandId:
@@ -97,6 +98,9 @@ class UserGroupId(IntEnum):
     It is optional to register them here."""
 
     INTERCREATE = 64
+
+
+GroupIdField = Annotated[Union[GroupId, UserGroupId, int], Field(union_mode="left_to_right")]
 
 
 AnyGroupId: TypeAlias = Union[IntEnum, int]
