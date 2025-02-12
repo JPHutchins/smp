@@ -17,7 +17,7 @@ jobs:
 
       - run: git fetch --prune --unshallow --tags
 
-      - run: pipx install poetry
+      - run: pipx install poetry==1.8.5
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -77,21 +77,11 @@ jobs:
           name: python-package-distributions
           path: dist/
       - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v2.1.1
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
           inputs: >-
             ./dist/*.tar.gz
             ./dist/*.whl
-      - name: Upload artifact signatures to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        # Upload to GitHub Release using the `gh` CLI.
-        # `dist/` contains the built packages, and the
-        # sigstore-produced signatures and certificates.
-        run: >-
-          gh release upload
-          '${{ github.ref_name }}' dist/**
-          --repo '${{ github.repository }}'
 
   publish-docs:
     name: Publish documentation 📚 to GitHub Pages
@@ -107,7 +97,7 @@ jobs:
 
       - run: git fetch --prune --unshallow --tags
 
-      - run: pipx install poetry
+      - run: pipx install poetry==1.8.5
 
       - name: Set up Python
         uses: actions/setup-python@v5
