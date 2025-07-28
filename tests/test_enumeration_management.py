@@ -153,7 +153,7 @@ def test_GroupDetailsResponse() -> None:
         smpenum.GroupDetails(group=15, name="group15", handlers=15),
         smpenum.GroupDetails(group=64, name="group64", handlers=64),
     )
-    assert type(r.groups[0].id) is smphdr.GroupId
-    assert type(r.groups[1].id) is smphdr.GroupId
-    assert type(r.groups[2].id) is int
-    assert type(r.groups[3].id) is smphdr.UserGroupId
+    assert type(r.groups[0].group) is smphdr.GroupId
+    assert type(r.groups[1].group) is smphdr.GroupId
+    assert type(r.groups[2].group) is int
+    assert type(r.groups[3].group) is smphdr.UserGroupId
