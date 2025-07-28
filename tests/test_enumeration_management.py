@@ -139,19 +139,19 @@ def test_GroupDetailsResponse() -> None:
         smphdr.CommandId.EnumManagement.GROUP_DETAILS,
         {
             "groups": (
-                {"id": 2, "name": "group2", "handlers": 2},
-                {"id": 5, "name": "group5", "handlers": 5},
-                {"id": 15, "name": "group15", "handlers": 15},
-                {"id": 64, "name": "group64", "handlers": 64},
+                {"group": 2, "name": "group2", "handlers": 2},
+                {"group": 5, "name": "group5", "handlers": 5},
+                {"group": 15, "name": "group15", "handlers": 15},
+                {"group": 64, "name": "group64", "handlers": 64},
             )
         },
         nested_model=smpenum.GroupDetails,
     )
     assert r.groups == (
-        smpenum.GroupDetails(id=2, name="group2", handlers=2),
-        smpenum.GroupDetails(id=5, name="group5", handlers=5),
-        smpenum.GroupDetails(id=15, name="group15", handlers=15),
-        smpenum.GroupDetails(id=64, name="group64", handlers=64),
+        smpenum.GroupDetails(group=2, name="group2", handlers=2),
+        smpenum.GroupDetails(group=5, name="group5", handlers=5),
+        smpenum.GroupDetails(group=15, name="group15", handlers=15),
+        smpenum.GroupDetails(group=64, name="group64", handlers=64),
     )
     assert type(r.groups[0].id) is smphdr.GroupId
     assert type(r.groups[1].id) is smphdr.GroupId
