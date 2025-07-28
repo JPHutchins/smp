@@ -109,7 +109,7 @@ class GroupDetails(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: smphdr.GroupIdField
+    group: smphdr.GroupIdField
     """The group ID of the SMP command group."""
     name: str | None = None
     """The name of the SMP command group."""
