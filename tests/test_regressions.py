@@ -24,8 +24,8 @@ def test_smpclient_41() -> None:
     assert r.header.sequence == 2
     assert r.header.command_id == smphdr.CommandId.ImageManagement.UPLOAD
 
-    assert r.off == 165
-    assert r.rc == 0
+    assert r.smp_data.off == 165
+    assert r.smp_data.rc == 0
 
     with pytest.raises(ValueError):
         smpimg.ImageManagementErrorV1.loads(RESPONSE)

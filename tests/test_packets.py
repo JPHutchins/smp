@@ -33,7 +33,7 @@ def _assert_header(frame: bytes) -> None:
 
 def _assert_payload(frame: bytes, data: bytes) -> None:
     # deserialize the original request itself
-    r = image_management.ImageUploadWriteRequest.loads(frame)
+    _, r = image_management.ImageUploadWriteRequest.loads(frame)
     assert off == r.off
     assert image == r.image
     assert length == r.len
@@ -51,10 +51,10 @@ def test_encode(line_length: int, line_length_ratio: float) -> None:
 
     r = image_management.ImageUploadWriteRequest(
         off=off, data=data, image=image, len=length, sha=sha, upgrade=upgrade
-    )
+    ).to_frame()
 
     reconstruct = bytearray([])
-    for i, p in enumerate(encode(r.BYTES, line_length=line_length)):
+    for i, p in enumerate(encode(bytes(r), line_length=line_length)):
         # assert that packet delimiters are correct
         if i == 0:
             assert bytes([6, 9]) == p[:2]
@@ -90,9 +90,9 @@ def test_decode(line_length: int, line_length_ratio: float) -> None:
 
     req = image_management.ImageUploadWriteRequest(
         off=off, data=data, image=image, len=length, sha=sha, upgrade=upgrade
-    )
+    ).to_frame()
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req), line_length=line_length):
         packets.append(p)
 
     decoder = decode()
@@ -112,9 +112,9 @@ def test_decode(line_length: int, line_length_ratio: float) -> None:
 def test_decode_raises_SMPBadStartDelimiter() -> None:
     req = image_management.ImageUploadWriteRequest(
         off=off, data=b"hello!", image=image, len=length, sha=sha, upgrade=upgrade
-    )
+    ).to_frame()
     packets = []
-    for p in encode(req.BYTES):
+    for p in encode(bytes(req)):
         packets.append(p)
 
     # malform the start delimiter
@@ -142,9 +142,9 @@ def test_decode_raises_SMPBadContinueDelimiter() -> None:
         len=length,
         sha=sha,
         upgrade=upgrade,
-    )
+    ).to_frame()
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req), line_length=line_length):
         packets.append(p)
 
     assert len(packets) > 1
@@ -176,10 +176,10 @@ def test_decode_raises_SMPBadCRC(j: int, i: int) -> None:
         len=length,
         sha=sha,
         upgrade=upgrade,
-    )
+    ).to_frame()
 
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req), line_length=line_length):
         packets.append(p)
 
     assert len(packets) == 4
