@@ -65,7 +65,7 @@ def test_custom_ReadRequest() -> None:
 )
 @pytest.mark.parametrize("group_id", [USER_GROUP_ID_MIN, 0xFFFF])
 @pytest.mark.parametrize("command_id", [0, 1, 0xFF])
-def test_custom_message(cls: Type[smpmsg._MessageBase], group_id: int, command_id: int) -> None:
+def test_custom_message(cls: Type[smpmsg.SMPData], group_id: int, command_id: int) -> None:
     """Test ReadRequest inheritance."""
 
     class CustomInts(cls):  # type: ignore
@@ -87,7 +87,7 @@ def test_invalid_group_id() -> None:
             _GROUP_ID = 0x10000
             _COMMAND_ID = 0
 
-        A()
+        bytes(A().to_frame())
 
     with pytest.raises(struct.error):
 
@@ -95,7 +95,7 @@ def test_invalid_group_id() -> None:
             _GROUP_ID = -1
             _COMMAND_ID = 0
 
-        B()
+        bytes(B().to_frame())
 
 
 def test_invalid_command_id() -> None:
@@ -107,7 +107,7 @@ def test_invalid_command_id() -> None:
             _GROUP_ID = USER_GROUP_ID_MIN
             _COMMAND_ID = 0x100
 
-        A()
+        bytes(A().to_frame())
 
     with pytest.raises(struct.error):
 
@@ -115,4 +115,4 @@ def test_invalid_command_id() -> None:
             _GROUP_ID = USER_GROUP_ID_MIN
             _COMMAND_ID = -1
 
-        B()
+        bytes(B().to_frame())

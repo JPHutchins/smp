@@ -2,46 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Type, TypeVar
-
-import cbor2
 import pytest
-from pydantic import BaseModel
 
 from smp import enumeration_management as smpenum
 from smp import header as smphdr
-from smp import message as smpmsg
-from tests.helpers import make_assert_header
+from tests.helpers import make_do_test
 
-T = TypeVar("T", bound=smpmsg._MessageBase)
-
-
-def _do_test(
-    msg: Type[T],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.EnumManagement,
-    data: Dict[str, Any],
-    nested_model: Type[BaseModel] | None = None,
-) -> T:
-    cbor = cbor2.dumps(data, canonical=True)
-    assert_header = make_assert_header(smphdr.GroupId.ENUM_MANAGEMENT, op, command_id, len(cbor))
-
-    def _assert_common(r: smpmsg._MessageBase) -> None:
-        assert_header(r)
-        for k, v in data.items():
-            if type(v) is tuple and nested_model is not None:
-                for v2 in v:
-                    assert v2 == nested_model(**v2).model_dump()
-            else:
-                assert v == getattr(r, k)
-        assert cbor == r.BYTES[8:]
-
-    r = msg(**data)
-
-    _assert_common(r)  # serialize
-    _assert_common(msg.loads(r.BYTES))  # deserialize
-
-    return r
+_do_test = make_do_test(smphdr.GroupId.ENUM_MANAGEMENT)
 
 
 def test_GroupCountRequest() -> None:

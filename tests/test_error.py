@@ -48,7 +48,7 @@ def test_ErrorV1(rc: MGMT_ERR, rsn: str | None) -> None:
             FakeErrorV1.loads(h.BYTES + d)
         return
 
-    e = FakeErrorV1.loads(h.BYTES + d)
+    _, e = FakeErrorV1.loads(h.BYTES + d)
     assert MGMT_ERR is type(e.rc)
     assert rc == e.rc
     if rsn is not None:
@@ -73,7 +73,7 @@ def test_ErrorV2(rc: FAKE_ERR, group: smpheader.GroupId) -> None:
             FakeErrorV2.loads(h.BYTES + d)
         return
 
-    e = FakeErrorV2.loads(h.BYTES + d)
+    _, e = FakeErrorV2.loads(h.BYTES + d)
     assert FAKE_ERR is type(e.err.rc)
     assert rc == e.err.rc
     assert group == e.err.group
