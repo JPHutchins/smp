@@ -106,7 +106,7 @@ def test_ImageStatesReadResponse(
             assert active == image_state.active
             assert permanent == image_state.permanent
 
-            for f in image_state.model_fields:
+            for f in type(image_state).model_fields:
                 if getattr(image_state, f) is None:
                     assert f not in d["images"][i]
 
