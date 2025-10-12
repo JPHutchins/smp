@@ -27,7 +27,7 @@ crc16_func: Final = mkPredefinedCrcFun("xmodem")
 logger: Final = logging.getLogger(__name__)
 
 
-def encode(request: bytes, line_length: int = 8192) -> Generator[bytes, None, None]:
+def encode(request: bytes, line_length: int = 127) -> Generator[bytes, None, None]:
     """Iteratively pack an SMP bytes to packets of `line_length` size.
 
     Note: only the USB/serial transport uses this encoding and fragmentation.
