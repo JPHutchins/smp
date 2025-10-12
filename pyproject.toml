@@ -3,8 +3,8 @@ name = "smp"
 version = "0"
 description = "Simple Management Protocol (SMP) for remotely managing MCU firmware"
 authors = [
-    "J.P. Hutchins <jphutchins@gmail.com>",
-    "J.P. Hutchins <jp@intercreate.io>",
+"J.P. Hutchins <jphutchins@gmail.com>",
+"J.P. Hutchins <jp@intercreate.io>",
 ]
 readme = "README.md"
 license = "Apache-2.0"
