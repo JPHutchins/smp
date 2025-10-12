@@ -16,7 +16,7 @@ packages = [{ include = "smp" }]
 source = "git-tag"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1"
+python = ">=3.9"
 cbor2 = "^5.5.1"
 crcmod = "^1.7"
 pydantic = "^2.6"
@@ -59,7 +59,6 @@ legacy_tox_ini = """
     [tox]
     min_version = 4.15
     env_list =
-        py38
         py39
         py310
         py311
