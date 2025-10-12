@@ -44,7 +44,9 @@ def _assert_payload(frame: bytes, data: bytes) -> None:
     assert data == r.data
 
 
-@pytest.mark.parametrize("line_length", [16, 20, 89, 128, 251, 313, 512, 1024, 1609, 4096, 8192])
+@pytest.mark.parametrize(
+    "line_length", [16, 20, 89, 127, 128, 251, 313, 512, 1024, 1609, 4096, 8192]
+)
 @pytest.mark.parametrize("line_length_ratio", [0.1, 1 / 3, 0.5, 1, 2, 3, 4, 7])
 def test_encode(line_length: int, line_length_ratio: float) -> None:
     data = bytes([i % 0xFF for i in range(round(line_length * line_length_ratio))])
@@ -83,7 +85,9 @@ def test_encode(line_length: int, line_length_ratio: float) -> None:
         remaining = remaining[frame_length + 2 :]
 
 
-@pytest.mark.parametrize("line_length", [16, 20, 89, 128, 251, 313, 512, 1024, 1609, 4096, 8192])
+@pytest.mark.parametrize(
+    "line_length", [16, 20, 89, 127, 128, 251, 313, 512, 1024, 1609, 4096, 8192]
+)
 @pytest.mark.parametrize("line_length_ratio", [0.1, 1 / 3, 0.5, 1, 2, 3, 4, 7])
 def test_decode(line_length: int, line_length_ratio: float) -> None:
     data = bytes([i % 0xFF for i in range(round(line_length * line_length_ratio))])
