@@ -86,7 +86,7 @@ class TaskStatistics(BaseModel):
 
     The unit is system dependent and in case of Zephyr this is number of 4 byte words.
     """
-    stksize: int
+    stksiz: int
     """Stack size.
 
     The unit is system dependent and in case of Zephyr this is number of 4 byte words.
