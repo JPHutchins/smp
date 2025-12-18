@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -101,13 +101,48 @@ class TaskStatistics(BaseModel):
     """Set to 0 by Zephyr."""
 
 
+class TaskStatisticsZephyr(BaseModel):
+    """Task statistics for Zephyr when CONFIG_MCUMGR_GRP_OS_TASKSTAT_ONLY_SUPPORTED_STATS=y.
+
+    In this configuration, Zephyr may omit fields that are not supported by the underlying RTOS.
+    Only prio, tid, and state are guaranteed to be present.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    prio: int
+    """Task priority."""
+    tid: int
+    """Numeric task ID."""
+    state: int
+    """Numeric task state."""
+    stkuse: int | None = None
+    """Stack usage.
+
+    The unit is system dependent and in case of Zephyr this is number of 4 byte words.
+    """
+    stksiz: int | None = None
+    """Stack size.
+
+    The unit is system dependent and in case of Zephyr this is number of 4 byte words.
+    """
+    cswcnt: int | None = None
+    """Number of context switches."""
+    runtime: int | None = None
+    """Runtime in ticks."""
+    last_checkin: int | None = None
+    """Set to 0 by Zephyr."""
+    next_checkin: int | None = None
+    """Set to 0 by Zephyr."""
+
+
 class TaskStatisticsReadResponse(message.ReadResponse):
     """Task statistics response."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
-    tasks: Dict[str, TaskStatistics]
+    tasks: Dict[str, Union[TaskStatistics, TaskStatisticsZephyr]]
     """Task statistics map."""
 
 

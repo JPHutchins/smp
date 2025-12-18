@@ -219,3 +219,119 @@ def test_BootloaderInformationReadResponse() -> None:
     assert type(r.response) is dict
     assert r.response["mode"] == smpos.MCUbootMode.SWAP_WITHOUT_SCRATCH
     assert r.response["no-downgrade"] is True
+
+
+def test_TaskStatisticsReadResponse_all_fields() -> None:
+    """Test TaskStatistics with all fields present."""
+    data: Dict[str, Any] = {
+        "tasks": {
+            "task": {
+                "prio": 1,
+                "tid": 2,
+                "state": 3,
+                "stkuse": 4,
+                "stksiz": 5,
+                "cswcnt": 6,
+                "runtime": 7,
+                "last_checkin": 0,
+                "next_checkin": 0,
+            }
+        }
+    }
+    cbor = cbor2.dumps(data, canonical=True)
+    assert_header = make_assert_header(
+        smphdr.GroupId.OS_MANAGEMENT, smphdr.OP.READ_RSP, oscmd.TASK_STATS, len(cbor)
+    )
+
+    m = smpos.TaskStatisticsReadResponse(**data)
+    assert_header(m)
+    assert isinstance(m.tasks["task"], smpos.TaskStatistics)
+    assert m.tasks["task"].prio == 1
+    assert m.tasks["task"].tid == 2
+    assert m.tasks["task"].state == 3
+    assert m.tasks["task"].stkuse == 4
+    assert m.tasks["task"].stksiz == 5
+    assert m.tasks["task"].cswcnt == 6
+    assert m.tasks["task"].runtime == 7
+    assert m.tasks["task"].last_checkin == 0
+    assert m.tasks["task"].next_checkin == 0
+    assert cbor == m.BYTES[8:]
+
+    # Test deserialization
+    m2 = smpos.TaskStatisticsReadResponse.loads(m.BYTES)
+    assert_header(m2)
+    assert isinstance(m2.tasks["task"], smpos.TaskStatistics)
+
+
+def test_TaskStatisticsZephyrReadResponse_only_required() -> None:
+    """Test TaskStatisticsZephyr with only required fields (prio, tid, state)."""
+    data: Dict[str, Any] = {
+        "tasks": {
+            "zephyr_task": {
+                "prio": 10,
+                "tid": 20,
+                "state": 30,
+            }
+        }
+    }
+    cbor = cbor2.dumps(data, canonical=True)
+    assert_header = make_assert_header(
+        smphdr.GroupId.OS_MANAGEMENT, smphdr.OP.READ_RSP, oscmd.TASK_STATS, len(cbor)
+    )
+
+    m = smpos.TaskStatisticsReadResponse(**data)
+    assert_header(m)
+    assert isinstance(m.tasks["zephyr_task"], smpos.TaskStatisticsZephyr)
+    assert m.tasks["zephyr_task"].prio == 10
+    assert m.tasks["zephyr_task"].tid == 20
+    assert m.tasks["zephyr_task"].state == 30
+    assert m.tasks["zephyr_task"].stkuse is None
+    assert m.tasks["zephyr_task"].stksiz is None
+    assert m.tasks["zephyr_task"].cswcnt is None
+    assert m.tasks["zephyr_task"].runtime is None
+    assert m.tasks["zephyr_task"].last_checkin is None
+    assert m.tasks["zephyr_task"].next_checkin is None
+    assert cbor == m.BYTES[8:]
+
+    # Test deserialization
+    m2 = smpos.TaskStatisticsReadResponse.loads(m.BYTES)
+    assert_header(m2)
+    assert isinstance(m2.tasks["zephyr_task"], smpos.TaskStatisticsZephyr)
+
+
+def test_TaskStatisticsZephyrReadResponse_partial_fields() -> None:
+    """Test TaskStatisticsZephyr with some optional fields present."""
+    data: Dict[str, Any] = {
+        "tasks": {
+            "partial_task": {
+                "prio": 5,
+                "tid": 15,
+                "state": 25,
+                "stksiz": 100,
+                "stkuse": 50,
+            }
+        }
+    }
+    cbor = cbor2.dumps(data, canonical=True)
+    assert_header = make_assert_header(
+        smphdr.GroupId.OS_MANAGEMENT, smphdr.OP.READ_RSP, oscmd.TASK_STATS, len(cbor)
+    )
+
+    m = smpos.TaskStatisticsReadResponse(**data)
+    assert_header(m)
+    assert isinstance(m.tasks["partial_task"], smpos.TaskStatisticsZephyr)
+    assert m.tasks["partial_task"].prio == 5
+    assert m.tasks["partial_task"].tid == 15
+    assert m.tasks["partial_task"].state == 25
+    assert m.tasks["partial_task"].stksiz == 100
+    assert m.tasks["partial_task"].stkuse == 50
+    assert m.tasks["partial_task"].cswcnt is None
+    assert m.tasks["partial_task"].runtime is None
+    assert m.tasks["partial_task"].last_checkin is None
+    assert m.tasks["partial_task"].next_checkin is None
+    assert cbor == m.BYTES[8:]
+
+    # Test deserialization
+    m2 = smpos.TaskStatisticsReadResponse.loads(m.BYTES)
+    assert_header(m2)
+    assert isinstance(m2.tasks["partial_task"], smpos.TaskStatisticsZephyr)
