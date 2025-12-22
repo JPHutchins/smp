@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smp"
-version = "0"
+version = "4.0.2+forward-tree"
 description = "Simple Management Protocol (SMP) for remotely managing MCU firmware"
 authors = [
 "J.P. Hutchins <jphutchins@gmail.com>",
