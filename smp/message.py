@@ -6,7 +6,7 @@ import itertools
 import logging
 from abc import ABC
 from enum import IntEnum, unique
-from typing import ClassVar, Type, TypeVar, cast
+from typing import ClassVar, Final, Generic, NamedTuple, Type, TypeVar, cast
 
 import cbor2
 from pydantic import BaseModel, ConfigDict
@@ -14,20 +14,20 @@ from pydantic import BaseModel, ConfigDict
 from smp import header as smpheader
 from smp.exceptions import SMPMalformed, SMPMismatchedGroupId
 
-T = TypeVar("T", bound='_MessageBase')
+T = TypeVar("T", bound='SMPData')
 
 
 _counter = itertools.count()
 logger = logging.getLogger(__name__)
 
 
-class _MessageBase(ABC, BaseModel):
-    """The base class for SMP messages."""
+class SMPData(ABC, BaseModel):
+    """Base class for SMP data."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    # metadata for generating a matching header - provided by implementations
     _OP: ClassVar[smpheader.OP]
-    _FLAGS: ClassVar[smpheader.Flag] = smpheader.Flag(0)
     _GROUP_ID: ClassVar[smpheader.GroupIdField]
     _COMMAND_ID: ClassVar[
         smpheader.AnyCommandId
@@ -38,137 +38,85 @@ class _MessageBase(ABC, BaseModel):
         | smpheader.CommandId.FileManagement
     ]
 
-    # This is is a dummy header that will be replaced in model_post_init
-    header: smpheader.Header = None  # type: ignore
-    version: smpheader.Version = smpheader.Version.V2
-    sequence: int = None  # type: ignore
-    smp_data: bytes = None  # type: ignore
-
     def __bytes__(self) -> bytes:
-        return self.smp_data
+        """Serialize the SMP data to bytes."""
+        return cbor2.dumps(self.model_dump(exclude_unset=True, exclude_none=True), canonical=True)
 
-    @property
-    def BYTES(self) -> bytes:
-        return self.smp_data
+    def to_frame(
+        self: T,
+        version: smpheader.Version = smpheader.Version.V2,
+        flags: smpheader.Flag = smpheader.Flag(0),
+        sequence: int | None = None,
+    ) -> Frame[T]:
+        """Create the SMP Frame.
 
-    @classmethod
-    def loads(cls: Type[T], data: bytes) -> T:
-        """Deserialize the SMP message."""
-        message = cls(
-            header=smpheader.Header.loads(data[: smpheader.Header.SIZE]),
-            **cast(dict, cbor2.loads(data[smpheader.Header.SIZE :])),
-            smp_data=data,
+        Params:
+        - version: The SMP version. Defaults to `smp.header.Version.V2`.
+        - flags: The SMP flags. Defaults to `smp.header.Flag(0)`.
+        - sequence: The sequence number of the message. If not provided, it will
+            be automatically generated using a global counter.
+
+        """
+        smp_data: Final = bytes(self)
+
+        return Frame(
+            header=smpheader.Header(
+                op=self._OP,
+                version=version,
+                flags=flags,
+                length=len(smp_data),
+                group_id=self._GROUP_ID,
+                sequence=next(_counter) % 0xFF if sequence is None else sequence,
+                command_id=self._COMMAND_ID,
+            ),
+            smp_data=self,
         )
-        if message.header is None:  # pragma: no cover
-            raise ValueError
-        if message.header.group_id != cls._GROUP_ID:  # pragma: no cover
-            raise SMPMismatchedGroupId(
-                f"{cls.__name__} has {cls._GROUP_ID}, header has {message.header.group_id}"
-            )
-        return message
 
     @classmethod
-    def load(cls: Type[T], header: smpheader.Header, data: dict) -> T:
-        """Load an SMP header and CBOR dict."""
+    def loads(cls: Type[T], frame: bytes) -> Frame[T]:
+        """Deserialize the SMP message."""
+        header = smpheader.Header.loads(frame[: smpheader.Header.SIZE])
+
         if header.group_id != cls._GROUP_ID:  # pragma: no cover
             raise SMPMismatchedGroupId(
                 f"{cls.__name__} has {cls._GROUP_ID}, header has {header.group_id}"
             )
-        return cls(header=header, **data)
 
-    def model_post_init(self, _: None) -> None:
-        data_bytes = cbor2.dumps(
-            self.model_dump(
-                exclude_unset=True,
-                exclude={'header', 'version', 'sequence', 'smp_data'},
-                exclude_none=True,
-            ),
-            canonical=True,
-        )
-        if self.header is None:  # create the header
-            object.__setattr__(
-                self,
-                'header',
-                smpheader.Header(
-                    op=self._OP,
-                    version=self.version,
-                    flags=smpheader.Flag(self._FLAGS),
-                    length=len(data_bytes),
-                    group_id=self._GROUP_ID,
-                    sequence=next(_counter) % 0xFF if self.sequence is None else self.sequence,
-                    command_id=self._COMMAND_ID,
-                ),
+        if header.length != len(frame) - smpheader.Header.SIZE:  # pragma: no cover
+            raise SMPMalformed(
+                f"header.length {header.length} != len(frame) {len(frame) - smpheader.Header.SIZE}"
             )
-            object.__setattr__(self, 'sequence', self.header.sequence)
-        else:  # validate the header and update version & sequence
-            if self.smp_data is None and self.header.length != len(data_bytes):
-                raise SMPMalformed(
-                    f"header.length {self.header.length} != len(data_bytes) {len(data_bytes)}"
-                )
-            if self.sequence is not None:  # pragma: no cover
-                raise ValueError(
-                    f"{self.sequence=} {self.header.sequence=} "
-                    "Do not use the sequence attribute when the header is provided."
-                )
-            object.__setattr__(self, 'sequence', self.header.sequence)
-            if self.version != self.header.version:
-                logger.warning(
-                    f"Overriding {self.version=} with {self.header.version=} "
-                    "from the provided header."
-                )
-            object.__setattr__(self, 'version', self.header.version)
-        if self.smp_data is None:
-            object.__setattr__(self, 'smp_data', bytes(self.header) + data_bytes)
 
-    # # Uncomment this to create a record for a de/serialization regression lock
-    #     self._log_serialized_bytes()
+        return Frame(
+            header=header, smp_data=cls(**cast(dict, cbor2.loads(frame[smpheader.Header.SIZE :])))
+        )
 
-    # def _log_serialized_bytes(self) -> None:
-    #     import json
-    #     import os
-
-    #     from smp.image_management import HashBytes
-
-    #     kwargs = self.model_dump(
-    #         exclude_unset=True,
-    #         exclude={'header', 'version', 'sequence', 'smp_data'},
-    #         exclude_none=True,
-    #     )
-
-    #     message = f"{self.__class__.__module__}.{self.__class__.__qualname__}"
-
-    #     log_dir = "serialization_logs"
-    #     os.makedirs(log_dir, exist_ok=True)
-    #     log_file = os.path.join(log_dir, f"{message}.json")
-
-    #     def convert_bytes(obj: dict) -> dict:
-    #         if isinstance(obj, dict):
-    #             return {k: convert_bytes(v) for k, v in obj.items()}
-    #         elif isinstance(obj, list):
-    #             return [convert_bytes(i) for i in obj]
-    #         elif isinstance(obj, tuple):
-    #             return tuple(convert_bytes(i) for i in obj)
-    #         elif isinstance(obj, bytes) or isinstance(obj, HashBytes):
-    #             return obj.hex()
-    #         else:
-    #             return obj
-
-    #     log_data = {
-    #         "message": message,
-    #         "version": self.version,
-    #         "sequence": self.sequence,
-    #         "kwargs": convert_bytes(kwargs),
-    #         "bytes": self.BYTES.hex(),
-    #     }
-
-    #     try:
-    #         with open(log_file, "a") as f:
-    #             f.write(json.dumps(log_data) + "\n")
-    #     except OSError as e:
-    #         print(f"Failed to write to {log_file}: {e}")
+    @classmethod
+    def load(cls: Type[T], header: smpheader.Header, data: dict) -> Frame[T]:
+        """Load an SMP header and CBOR dict into a Frame."""
+        if header.group_id != cls._GROUP_ID:  # pragma: no cover
+            raise SMPMismatchedGroupId(
+                f"{cls.__name__} has {cls._GROUP_ID}, header has {header.group_id}"
+            )
+        if header.command_id != cls._COMMAND_ID:  # pragma: no cover
+            raise SMPMalformed(
+                f"{cls.__name__} has {cls._COMMAND_ID}, header has {header.command_id}"
+            )
+        return Frame(header=header, smp_data=cls(**data))
 
 
-class Request(_MessageBase, ABC):
+class Frame(NamedTuple, Generic[T]):
+    """A deserialized SMP message frame."""
+
+    header: smpheader.Header
+    smp_data: T
+
+    def __bytes__(self) -> bytes:
+        """Serialize the SMP message frame to bytes."""
+        return bytes(self.header) + bytes(self.smp_data)
+
+
+class Request(SMPData, ABC):
     """Base class for SMP Requests."""
 
 
@@ -181,7 +129,7 @@ class ResponseType(IntEnum):
     ERROR_V2 = 2
 
 
-class Response(_MessageBase, ABC):
+class Response(SMPData, ABC):
     """Base class for SMP Responses."""
 
     RESPONSE_TYPE: ClassVar[ResponseType]

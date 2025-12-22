@@ -25,7 +25,7 @@ for file in list(Path("tests", "binary_regressions", "records").rglob("*.json"))
         records.extend(map(lambda x: Record(**json.loads(x)), f.readlines()))
 
 
-def import_class(full_class_path: str) -> smpmsg._MessageBase:
+def import_class(full_class_path: str) -> smpmsg.SMPData:
     module_path, class_name = full_class_path.rsplit('.', 1)
     return getattr(importlib.import_module(module_path), class_name)
 
@@ -70,7 +70,7 @@ def test_binary_lock(record: Record) -> None:
         record.kwargs["output"] = bytes.fromhex(record.kwargs["output"])
 
     # Test serialization match
-    serialized_message = cls(version=record.version, sequence=record.sequence, **record.kwargs)  # type: ignore # noqa
+    serialized_message = cls(**record.kwargs).to_frame(version=record.version, sequence=record.sequence)  # type: ignore # noqa
     assert bytes(serialized_message) == bytes.fromhex(record.bytes)
 
     # Test deserialization match
@@ -79,5 +79,5 @@ def test_binary_lock(record: Record) -> None:
     assert serialized_message == deserialized_message
 
     for k, v in record.kwargs.items():
-        actual_value: Any = getattr(deserialized_message, k)
+        actual_value: Any = getattr(deserialized_message.smp_data, k)
         compare_values(v, actual_value)

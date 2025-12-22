@@ -34,15 +34,14 @@ load a `smp.os_management.EchoWriteResponse`:
 from smp.os_management import EchoWriteResponse
 
 data = bytes.fromhex("0b00000700008c00a1617263486921")  # data from the transport
-response = EchoWriteResponse.loads(data)
-print(response)
+header, response = EchoWriteResponse.loads(data)
+print(header, response)
 ```
 
 Prints the deserialized SMP message representation:
 ```
-header=Header(op=<OP.WRITE_RSP: 3>, version=<Version.V2: 1>, flags=<Flag: 0>,
-length=7, group_id=0, sequence=140, command_id=0) version=<Version.V2: 1>
-sequence=140 smp_data=b'\\x0b\\x00\\x00\\x07\\x00\\x00\\x8c\\x00\\xa1arcHi!' r='Hi!'
+Header(op=<OP.WRITE_RSP: 3>, version=<Version.V2: 1>, flags=<Flag.UNUSED: 0>,
+length=7, group_id=0, sequence=140, command_id=0) r='Hi!'
 ```
 Generally, the `header` can be ignored and the message-specific attributes are
 what you are interested in.
@@ -55,14 +54,18 @@ mypy linting and by Pydantic at runtime.
 
 ## Serialization
 
-There are a few optional arguments that are common to all SMP messages when they
-are created.
+An smp.message.Frame consists of:
+-   `header` the SMP header.
+-   `smp_data` the SMP data - the specific message.
 
--   `header` is the SMP header.  Typically this can be left as `None` and will be
-    so that the header is created automatically.
+Typically, the Frame is created by calling the `to_frame()` method on the
+SMPData. A few optional header params can be passed to `to_frame()`:
 -   `version` is the SMP version.  This defaults to `smp.header.Version.V2`.
+-   `flags` defaults to 0 (no flags set).
 -   `sequence` is the sequence number of the message.  If not provided, it will
     be automatically generated using an incrementing counter.
+
+The Frame is serialized using `bytes(my_frame)`.
 
 Take a look at `smp.message` for more information on the base classes.
 
@@ -71,8 +74,8 @@ Take a look at `smp.message` for more information on the base classes.
 If you are writing an SMP client, then you already know the type of the
 incoming message because it must be a Response to your Request, or an
 `smp.error.ErrorV1` or `smp.error.ErrorV2`.  You can use the
-`smp.message._MessageBase.loads()` method that is common to all SMP
-messages to deserialize and validate the message.
+`smp.message.SMPData.loads()` method that is common to all SMP
+messages to deserialize and validate the message to a Frame.
 
 If you are writing an SMP server, then Python and SMP are odd choices!  Yet, you
 can narrow the type by first loading the header with `smp.header.Header.loads()`.

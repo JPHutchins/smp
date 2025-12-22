@@ -2,41 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Type, TypeVar
-
-import cbor2
-
 from smp import header as smphdr
-from smp import message as smpmsg
 from smp import settings_management as smpset
-from tests.helpers import make_assert_header
+from tests.helpers import make_do_test
 
-T = TypeVar("T", bound=smpmsg._MessageBase)
-
-
-def _do_test(
-    msg: Type[T],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.SettingsManagement,
-    data: Dict[str, Any],
-) -> T:
-    cbor = cbor2.dumps(data, canonical=True)
-    assert_header = make_assert_header(
-        smphdr.GroupId.SETTINGS_MANAGEMENT, op, command_id, len(cbor)
-    )
-
-    def _assert_common(r: smpmsg._MessageBase) -> None:
-        assert_header(r)
-        for k, v in data.items():
-            assert v == getattr(r, k)
-        assert cbor == r.BYTES[8:]
-
-    r = msg(**data)
-
-    _assert_common(r)  # serialize
-    _assert_common(msg.loads(r.BYTES))  # deserialize
-
-    return r
+_do_test = make_do_test(smphdr.GroupId.SETTINGS_MANAGEMENT)
 
 
 def test_ReadSettingRequest() -> None:
