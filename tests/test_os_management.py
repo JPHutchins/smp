@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import Any, Dict, Type, TypeVar
 
 import cbor2
-from pydantic import BaseModel
+import pytest
+from pydantic import BaseModel, ValidationError
 
 from smp import header as smphdr
 from smp import message as smpmsg
@@ -72,6 +73,49 @@ def test_ResetWriteRequest() -> None:
 
 def test_ResetWriteResponse() -> None:
     _do_test(smpos.ResetWriteResponse, smphdr.OP.WRITE_RSP, oscmd.RESET, {})
+
+
+def test_ResetWriteRequest_boot_mode_normal() -> None:
+    r = _do_test(smpos.ResetWriteRequest, smphdr.OP.WRITE, oscmd.RESET, {"boot_mode": 0})
+    assert r.boot_mode is smpos.BootMode.NORMAL
+
+
+def test_ResetWriteRequest_boot_mode_bootloader() -> None:
+    r = _do_test(smpos.ResetWriteRequest, smphdr.OP.WRITE, oscmd.RESET, {"boot_mode": 1})
+    assert r.boot_mode is smpos.BootMode.BOOTLOADER
+
+
+def test_ResetWriteRequest_boot_mode_passes_through_unknown_int() -> None:
+    """A wire-valid but unrecognized boot mode stays a plain int."""
+    r = _do_test(smpos.ResetWriteRequest, smphdr.OP.WRITE, oscmd.RESET, {"boot_mode": 5})
+    assert r.boot_mode == 5
+    assert type(r.boot_mode) is int
+
+
+def test_ResetWriteRequest_force_and_boot_mode() -> None:
+    r = _do_test(
+        smpos.ResetWriteRequest,
+        smphdr.OP.WRITE,
+        oscmd.RESET,
+        {"force": 1, "boot_mode": 1},
+    )
+    assert r.force == 1
+    assert r.boot_mode is smpos.BootMode.BOOTLOADER
+
+
+def test_ResetWriteRequest_boot_mode_accepts_enum_member() -> None:
+    """Constructing with a BootMode member serializes identically to its int value."""
+    from_enum = smpos.ResetWriteRequest(boot_mode=smpos.BootMode.BOOTLOADER)
+    from_int = smpos.ResetWriteRequest(boot_mode=1)
+    assert from_enum.BYTES[8:] == from_int.BYTES[8:]
+    assert from_enum.boot_mode is smpos.BootMode.BOOTLOADER
+
+
+@pytest.mark.parametrize("boot_mode", [-1, 256])
+def test_ResetWriteRequest_boot_mode_rejects_out_of_range(boot_mode: int) -> None:
+    """boot_mode is a uint8_t on the wire; values outside [0, 255] are invalid."""
+    with pytest.raises(ValidationError):
+        smpos.ResetWriteRequest(boot_mode=boot_mode)
 
 
 def test_TaskStatisticsReadRequest() -> None:

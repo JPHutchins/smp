@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Any, Dict, Literal, Union
+from typing import Annotated, Any, Dict, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -30,6 +30,21 @@ class EchoWriteResponse(message.WriteResponse):
     """Echoed string."""
 
 
+@unique
+class BootMode(IntEnum):
+    """Boot mode requested by the OS management reset command.
+
+    Mirrors Zephyr's `enum BOOT_MODE_TYPES` in
+    `include/zephyr/retention/bootmode.h`.
+    """
+
+    NORMAL = 0
+    """Default (normal) boot, to the user application."""
+
+    BOOTLOADER = 1
+    """Bootloader boot mode, e.g. serial recovery for MCUboot."""
+
+
 class ResetWriteRequest(message.WriteRequest):
     """Performs reset of system.
 
@@ -53,6 +68,22 @@ class ResetWriteRequest(message.WriteRequest):
     Normally the command sends an empty CBOR map as data, but if a previous
     reset attempt has responded with “rc” equal to MGMT_ERR_EBUSY then the
     following map may be sent to force a reset
+    """
+
+    boot_mode: Union[BootMode, Annotated[int, Field(ge=0, le=255)], None] = Field(
+        default=None, union_mode="left_to_right"
+    )
+    """Boot mode to set via the retention boot mode module before resetting.
+
+    A value of `BootMode.BOOTLOADER` (1) requests, for example, that an MCUboot
+    built with `CONFIG_BOOT_SERIAL_BOOT_MODE` enter serial recovery on the next
+    boot. The server casts the value to a `uint8_t`, so any value in `[0, 255]`
+    is accepted and passed to `bootmode_set()`; known values are surfaced as
+    `BootMode` members.
+
+    Requires the server to be built with `CONFIG_MCUMGR_GRP_OS_RESET_BOOT_MODE`,
+    which depends on `CONFIG_RETENTION_BOOT_MODE`. Added to the SMP OS
+    management group in Zephyr v4.2.0 (zephyrproject-rtos/zephyr#91510).
     """
 
 
