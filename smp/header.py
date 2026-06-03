@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import struct
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, unique
-from typing import ClassVar, Dict, Type, Union
+from typing import ClassVar, Dict, List, Type, Union
 
 from pydantic import Field
 from typing_extensions import Annotated, TypeAlias
@@ -130,6 +130,7 @@ class _VERSION_BIT:
 @unique
 class Flag(IntFlag):
     UNUSED = 0
+    FORWARD_TREE = 0x80
 
 
 @dataclass(frozen=True)
@@ -240,3 +241,79 @@ class Header:
             sequence,
             command_id,
         )
+
+
+@dataclass
+class ForwardTree:
+    ft: List[int] = field(default_factory=list)
+
+    _STRUCT: ClassVar[struct.Struct] = struct.Struct(">Q")
+    SIZE: ClassVar[int] = _STRUCT.size
+
+    @staticmethod
+    def _get_int(nimbles: List[int]) -> int:
+        """Get the 64-bits data from the 16 nibbles"""
+        hops = nimbles[0]
+        if hops > 15:
+            raise ValueError("ForwardTree max hops is 15")
+
+        data = ForwardTree._set_nibble(15, 0, hops)
+        for i in range(hops):
+            data = ForwardTree._set_nibble(hops - i - 1, data, nimbles[i + 1])
+
+        return data
+
+    @staticmethod
+    def _get_nibbles(value: int) -> List[int]:
+        """Get all 16 nibbles"""
+        nibbles = []
+        for i in range(16):
+            nibbles.append(ForwardTree._get_nibble(i, value))
+        return nibbles
+
+    @staticmethod
+    def _get_nibble(index: int, value: int) -> int:
+        """Get specific nibble (0-15)"""
+        if not 0 <= index < 16:
+            raise IndexError("Nibble index must be 0-15")
+        return (value >> ((15 - index) * 4)) & 0xF
+
+    @staticmethod
+    def _set_nibble(index: int, data: int, value: int) -> int:
+        """Set specific nibble (0-15)"""
+        if not 0 <= index < 16:
+            raise IndexError("Nibble index must be 0-15")
+        if not 0 <= value <= 15:
+            raise ValueError("Nibble value must be 0-15")
+
+        # Clear the target nibble
+        mask = ~(0xF << (index * 4))
+        data &= mask
+        # Set the new value
+        data |= (value & 0xF) << (index * 4)
+        return data
+
+    def __post_init__(self) -> None:
+        self._bytes: bytes
+        object.__setattr__(
+            self,
+            '_bytes',
+            self._STRUCT.pack(ForwardTree._get_int(self.ft)),
+        )
+
+    def __bytes__(self) -> bytes:
+        return self._bytes
+
+    @property
+    def BYTES(self) -> bytes:
+        return self._bytes
+
+    @staticmethod
+    def loads(forward: bytes) -> 'ForwardTree':
+        """Deserialize the payload bytes to a `ForwardTree`."""
+        assert len(forward) == 8, "The ForwardTree is specified as 8 bytes"
+
+        data64 = ForwardTree._STRUCT.unpack(forward)
+        nimbles = ForwardTree._get_nibbles(data64)
+
+        return ForwardTree(nimbles)
