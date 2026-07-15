@@ -3,22 +3,15 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install poetry
-        run: pipx install poetry==1.8.5
-
-      - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-          cache: "poetry"
+          fetch-depth: 0
 
-      - run: poetry install --only doc
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
-      - run: poetry run mkdocs build
+      - run: uv run camas docs

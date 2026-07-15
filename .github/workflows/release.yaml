@@ -14,22 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - run: git fetch --prune --unshallow --tags
-
-      - run: pipx install poetry==1.8.5
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-          cache: "poetry"
+          fetch-depth: 0
 
-      - run: poetry install
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
-      - run: poetry self add poetry-version-plugin
-
-      - run: poetry build
+      - run: uv build
 
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
@@ -94,18 +84,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - run: git fetch --prune --unshallow --tags
-
-      - run: pipx install poetry==1.8.5
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-          cache: "poetry"
+          fetch-depth: 0
 
-      - run: poetry install --only doc
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
       - name: Configure git for gh-pages
         run: |
@@ -116,4 +98,4 @@ jobs:
         run: echo "GIT_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
 
       - name: Build and deploy documentation
-        run: poetry run mike deploy --push --update-aliases ${GIT_TAG} latest
+        run: uv run --group doc mike deploy --push --update-aliases ${GIT_TAG} latest

@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import cbor2
-from pydantic import BaseModel
 
 from smp import header as smphdr
 from smp import message as smpmsg
 from smp import shell_management as smpshell
 from tests.helpers import make_assert_header
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
 
 shellcmd = smphdr.CommandId.ShellManagement
 
@@ -19,11 +21,11 @@ T = TypeVar("T", bound=smpmsg._MessageBase)
 
 
 def _do_test(
-    msg: Type[T],
+    msg: type[T],
     op: smphdr.OP,
     command_id: smphdr.CommandId.ShellManagement,
-    data: Dict[str, Any],
-    nested_model: Type[BaseModel] | None = None,
+    data: dict[str, Any],
+    nested_model: type[BaseModel] | None = None,
 ) -> T:
     cbor = cbor2.dumps(data, canonical=True)
     assert_header = make_assert_header(smphdr.GroupId.SHELL_MANAGEMENT, op, command_id, len(cbor))

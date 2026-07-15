@@ -6,7 +6,7 @@ import itertools
 import logging
 from abc import ABC
 from enum import IntEnum, unique
-from typing import ClassVar, Type, TypeVar, cast
+from typing import ClassVar, TypeVar, cast
 
 import cbor2
 from pydantic import BaseModel, ConfigDict
@@ -52,11 +52,11 @@ class _MessageBase(ABC, BaseModel):
         return self.smp_data
 
     @classmethod
-    def loads(cls: Type[T], data: bytes) -> T:
+    def loads(cls: type[T], data: bytes) -> T:
         """Deserialize the SMP message."""
         message = cls(
             header=smpheader.Header.loads(data[: smpheader.Header.SIZE]),
-            **cast(dict, cbor2.loads(data[smpheader.Header.SIZE :])),
+            **cast("dict", cbor2.loads(data[smpheader.Header.SIZE :])),
             smp_data=data,
         )
         if message.header is None:  # pragma: no cover
@@ -68,7 +68,7 @@ class _MessageBase(ABC, BaseModel):
         return message
 
     @classmethod
-    def load(cls: Type[T], header: smpheader.Header, data: dict) -> T:
+    def load(cls: type[T], header: smpheader.Header, data: dict) -> T:
         """Load an SMP header and CBOR dict."""
         if header.group_id != cls._GROUP_ID:  # pragma: no cover
             raise SMPMismatchedGroupId(

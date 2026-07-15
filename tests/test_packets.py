@@ -16,19 +16,19 @@ crc16_func = mkPredefinedCrcFun("xmodem")
 off = 42
 image = 0
 length = 13
-sha = "trust me bro".encode()
+sha = b"trust me bro"
 upgrade = False
 
 
 def _assert_header(frame: bytes) -> None:
     # deserialize the header
     h = header.Header.loads(frame[: header.Header.SIZE])
-    assert header.OP.WRITE == h.op
-    assert header.Version.V2 == h.version
-    assert 0 == h.flags
+    assert h.op == header.OP.WRITE
+    assert h.version == header.Version.V2
+    assert h.flags == 0
     assert h.length != 0  # TODO: unsure how to check length more specifically
-    assert header.GroupId.IMAGE_MANAGEMENT == h.group_id
-    assert header.CommandId.ImageManagement.UPLOAD == h.command_id
+    assert h.group_id == header.GroupId.IMAGE_MANAGEMENT
+    assert h.command_id == header.CommandId.ImageManagement.UPLOAD
 
 
 def _assert_payload(frame: bytes, data: bytes) -> None:
@@ -62,7 +62,7 @@ def test_encode(line_length: int, line_length_ratio: float) -> None:
             assert bytes([6, 9]) == p[:2]
         else:
             assert bytes([4, 20]) == p[:2]
-        assert b"\n" == bytes([p[-1]])
+        assert bytes([p[-1]]) == b"\n"
 
         # and reassemble
         reconstruct.extend(p[2:-1])
@@ -102,6 +102,7 @@ def test_decode(line_length: int, line_length_ratio: float) -> None:
     decoder = decode()
     next(decoder)
 
+    frame = b""
     for packet in packets:
         try:
             decoder.send(packet)
@@ -169,7 +170,7 @@ def test_decode_raises_SMPBadContinueDelimiter() -> None:
 
 
 @pytest.mark.parametrize("j", [0, 1, 2, 3])
-@pytest.mark.parametrize("i", [i for i in range(4, 124)])
+@pytest.mark.parametrize("i", list(range(4, 124)))
 def test_decode_raises_SMPBadCRC(j: int, i: int) -> None:
     line_length = 128
 
@@ -200,6 +201,7 @@ def test_decode_raises_SMPBadCRC(j: int, i: int) -> None:
         next(decoder)
 
         with pytest.raises((SMPBadCRC, ValidationError)):
+            frame = b""
             for packet in packets:
                 try:
                     decoder.send(packet)

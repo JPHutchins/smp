@@ -1,12 +1,12 @@
 """Tests for user-defined inheritance of classes."""
 
-
 import struct
 from enum import IntEnum
-from typing import Final, Type
+from typing import Final
 
 import pytest
 
+from smp import header as smphdr
 from smp import message as smpmsg
 
 USER_GROUP_ID_MIN: Final = 64
@@ -65,17 +65,17 @@ def test_custom_ReadRequest() -> None:
 )
 @pytest.mark.parametrize("group_id", [USER_GROUP_ID_MIN, 0xFFFF])
 @pytest.mark.parametrize("command_id", [0, 1, 0xFF])
-def test_custom_message(cls: Type[smpmsg._MessageBase], group_id: int, command_id: int) -> None:
+def test_custom_message(cls: type[smpmsg._MessageBase], group_id: int, command_id: int) -> None:
     """Test ReadRequest inheritance."""
 
     class CustomInts(cls):  # type: ignore
-        _OP = getattr(cls, "_OP", 0)
+        _OP = getattr(cls, "_OP", smphdr.OP.READ)
         _GROUP_ID = group_id
         _COMMAND_ID = command_id
 
     m = CustomInts()
-    assert m._GROUP_ID == group_id
-    assert m._COMMAND_ID == command_id
+    assert group_id == m._GROUP_ID
+    assert command_id == m._COMMAND_ID
 
 
 def test_invalid_group_id() -> None:

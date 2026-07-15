@@ -1,8 +1,6 @@
 """The Simple Management Protocol (SMP) Statistics Management group."""
 
-
 from enum import IntEnum, unique
-from typing import Dict, Tuple
 
 import smp.error as smperr
 import smp.header as smphdr
@@ -25,7 +23,7 @@ class GroupDataResponse(smpmsg.ReadResponse):
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
 
     name: str
-    fields: Dict[str, int]
+    fields: dict[str, int]
 
 
 class ListOfGroupsRequest(smpmsg.ReadRequest):
@@ -41,7 +39,7 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
 
-    stat_list: Tuple[str, ...]
+    stat_list: tuple[str, ...]
 
 
 @unique

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Annotated, Any, Dict, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -70,7 +70,7 @@ class ResetWriteRequest(message.WriteRequest):
     following map may be sent to force a reset
     """
 
-    boot_mode: Union[BootMode, Annotated[int, Field(ge=0, le=255)], None] = Field(
+    boot_mode: BootMode | Annotated[int, Field(ge=0, le=255)] | None = Field(
         default=None, union_mode="left_to_right"
     )
     """Boot mode to set via the retention boot mode module before resetting.
@@ -173,7 +173,7 @@ class TaskStatisticsReadResponse(message.ReadResponse):
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
 
-    tasks: Dict[str, Union[TaskStatistics, TaskStatisticsZephyr]]
+    tasks: dict[str, TaskStatistics | TaskStatisticsZephyr]
     """Task statistics map."""
 
 

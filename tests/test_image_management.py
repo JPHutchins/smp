@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from typing import cast
 
 import cbor2
@@ -23,15 +22,15 @@ def test_ImageStatesReadRequest() -> None:
     r = smpimg.ImageStatesReadRequest()
 
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageStatesReadRequest.loads(r.BYTES)
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageStatesReadRequest.load(r.header, {})
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
 
 @pytest.mark.parametrize("slot", [0, 1])
@@ -94,7 +93,7 @@ def test_ImageStatesReadResponse(
     assert_header(r1)
 
     def assert_response(r: smpimg.ImageStatesReadResponse) -> None:
-        d = cast(dict, cbor2.loads(r.BYTES[8:]))
+        d = cast("dict", cbor2.loads(r.BYTES[8:]))
         for i, image_state in enumerate(r.images):
             assert slot == image_state.slot
             assert version == image_state.version
@@ -135,15 +134,15 @@ def test_ImageEraseRequest() -> None:
     r = smpimg.ImageEraseRequest()
 
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageEraseRequest.loads(r.BYTES)
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageEraseRequest.load(r.header, {})
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     assert_header = make_assert_header(
         smpheader.GroupId.IMAGE_MANAGEMENT,
@@ -171,15 +170,15 @@ def test_ImageEraseResponse() -> None:
     r = smpimg.ImageEraseResponse()
 
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageEraseResponse.loads(r.BYTES)
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
     r = smpimg.ImageEraseResponse.load(r.header, {})
     assert_header(r)
-    assert smpheader.Header.SIZE + 1 == len(r.BYTES)
+    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
 
 def test_ImageUploadWriteRequest() -> None:
@@ -262,18 +261,11 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None) -> None:
     assert r.off == off
     assert r.match == match
 
-    if sys.version_info >= (3, 9):
-        cbor_dict = (
-            {}
-            | ({"off": off} if off is not None else {})
-            | ({"match": match} if match is not None else {})
-        )
-    else:
-        cbor_dict = {}
-        if off is not None:
-            cbor_dict["off"] = off
-        if match is not None:
-            cbor_dict["match"] = match
+    cbor_dict = (
+        {}
+        | ({"off": off} if off is not None else {})
+        | ({"match": match} if match is not None else {})
+    )
 
     r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
     assert_header(r)
@@ -306,21 +298,12 @@ def test_legacy_ImageUploadWriteResponse(
     assert r.match == match
     assert r.rc == rc
 
-    if sys.version_info >= (3, 9):
-        cbor_dict = (
-            {}
-            | ({"off": off} if off is not None else {})
-            | ({"match": match} if match is not None else {})
-            | ({"rc": rc} if rc is not None else {})
-        )
-    else:
-        cbor_dict = {}
-        if off is not None:
-            cbor_dict["off"] = off
-        if match is not None:
-            cbor_dict["match"] = match
-        if rc is not None:
-            cbor_dict["rc"] = rc
+    cbor_dict = (
+        {}
+        | ({"off": off} if off is not None else {})
+        | ({"match": match} if match is not None else {})
+        | ({"rc": rc} if rc is not None else {})
+    )
 
     r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
     assert_header(r)

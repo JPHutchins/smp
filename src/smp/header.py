@@ -5,10 +5,9 @@ from __future__ import annotations
 import struct
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, unique
-from typing import ClassVar, Dict, Type, Union
+from typing import Annotated, ClassVar, TypeAlias
 
 from pydantic import Field
-from typing_extensions import Annotated, TypeAlias
 
 
 class CommandId:
@@ -73,7 +72,7 @@ class CommandId:
         UPLOAD = 1
 
 
-AnyCommandId: TypeAlias = Union[IntEnum, int]
+AnyCommandId: TypeAlias = IntEnum | int
 
 
 @unique
@@ -100,7 +99,7 @@ class UserGroupId(IntEnum):
     INTERCREATE = 64
 
 
-GroupIdField = Annotated[Union[GroupId, UserGroupId, int], Field(union_mode="left_to_right")]
+GroupIdField = Annotated[GroupId | UserGroupId | int, Field(union_mode="left_to_right")]
 
 
 @unique
@@ -140,16 +139,16 @@ class Header:
     length: int
     group_id: GroupIdField
     sequence: int
-    command_id: Union[
-        AnyCommandId,
-        CommandId.OSManagement,
-        CommandId.ImageManagement,
-        CommandId.ShellManagement,
-        CommandId.Intercreate,
-        CommandId.FileManagement,
-    ]
+    command_id: (
+        AnyCommandId
+        | CommandId.OSManagement
+        | CommandId.ImageManagement
+        | CommandId.ShellManagement
+        | CommandId.Intercreate
+        | CommandId.FileManagement
+    )
 
-    _MAP_GROUP_ID_TO_COMMAND_ID_ENUM: ClassVar[Dict[int, Type[IntEnum]]] = {
+    _MAP_GROUP_ID_TO_COMMAND_ID_ENUM: ClassVar[dict[int, type[IntEnum]]] = {
         GroupId.OS_MANAGEMENT: CommandId.OSManagement,
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
@@ -194,7 +193,7 @@ class Header:
                 raise ValueError(
                     f"Command ID {command_id} is not valid for Group ID {group_id}"
                     f" ({GroupId(group_id).name})"
-                )
+                ) from None
 
     def __post_init__(self) -> None:
         Header._validate_command_id(self.group_id, self.command_id)
@@ -221,7 +220,7 @@ class Header:
         return self._bytes
 
     @staticmethod
-    def loads(header: bytes) -> 'Header':
+    def loads(header: bytes) -> Header:
         """Deserialize the header bytes to a `Header`."""
         assert len(header) == 8, "The header is specified as 8 bytes"
 

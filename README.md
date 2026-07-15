@@ -13,7 +13,7 @@ If you need an SMP CLI application to interact with device firmware, then try
 
 ## Install
 
-`smp` is [distributed by PyPI](https://pypi.org/project/smp/) and can be installed with `poetry`, `pip`, and other dependency managers.
+`smp` is [distributed by PyPI](https://pypi.org/project/smp/) and can be installed with `uv`, `pip`, and other dependency managers.
 
 ## User Documentation
 
@@ -24,60 +24,40 @@ An online version is generated and available [here](https://jphutchins.github.io
 
 > Assumes that you've already [setup your development environment](#development-environment-setup).
 
-1. activate [envr](https://github.com/JPhutchins/envr), the environment manager for **bash**, **zsh**, and **PS**:
+Tasks are defined in [`tasks.py`](tasks.py) and run with [camas](https://github.com/JPHutchins/camas).
+
+1. run `uv sync` when pulling in new changes
+2. run `uv run camas fix` to auto-format and apply lint fixes
+3. run `uv run camas` to run the default checks
+4. run `uv run camas matrix` to check against all supported Python versions
+5. add library dependencies with `uv`:
    ```
-   . ./envr.ps1
+   uv add <my_new_dependency>
    ```
-2. run `poetry install` when pulling in new changes
-3. run `lint` after making changes
-4. run `test` after making changes
-5. add library dependencies with `poetry`:
+6. add development dependencies:
    ```
-   poetry add <my_new_dependency>
-   ```
-6. add test or other development dependencies using [poetry groups](https://python-poetry.org/docs/managing-dependencies#dependency-groups):
-   ```
-   poetry add -G dev <my_dev_dependency>
-   ```
-7.  run tests for all supported python versions:
-   ```
-   tox
+   uv add --group dev <my_dev_dependency>
    ```
 
 ## Development Environment Setup
 
 ### Install Dependencies
 
-- poetry==1.8.5: https://python-poetry.org/docs/#installation
+- uv: https://docs.astral.sh/uv/getting-started/installation/
 
 ### Create the venv
 
 ```
-poetry install
-```
-
-The `venv` should be installed to `.venv`.
-
-### Activate envr
-
-> [envr](https://github.com/JPhutchins/envr) supports **bash**, **zsh**, and **PS** in Linux, MacOS, and Windows.  If you are using an unsupported shell, you can activate the `.venv` environment manually, use `poetry run` and `poetry shell`, and refer to `envr-default` for useful aliases.
-
-```
-. ./envr.ps1
+uv sync
 ```
 
 ### Verify Your Setup
 
-To verify the installation, make sure that all of the tests are passing using these envr aliases:
-
 ```
-lint
-test
+uv run camas
 ```
 
 ### Enable the githooks
-
-> The pre-commit hook will run the linters but not the unit tests.
 
 ```
 git config core.hooksPath .githooks

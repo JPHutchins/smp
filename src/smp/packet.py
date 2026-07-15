@@ -3,7 +3,8 @@
 import logging
 import struct
 from base64 import b64decode, b64encode
-from typing import Final, Generator
+from collections.abc import Generator
+from typing import Final
 
 from crcmod.predefined import mkPredefinedCrcFun  # type: ignore
 
@@ -184,4 +185,4 @@ def decode() -> Generator[None, bytes, bytes]:
     if packet_crc16 != calculated_crc16:
         raise SMPBadCRC(f"Packet CRC {hex(packet_crc16)} != calculated CRC {hex(calculated_crc16)}")
 
-    return complete_frame
+    return bytes(complete_frame)

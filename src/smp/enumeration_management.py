@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Tuple
 
 from pydantic import BaseModel, ConfigDict
 
@@ -46,7 +45,7 @@ class ListOfGroupsResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.LIST_OF_GROUPS
 
-    groups: Tuple[smphdr.GroupIdField, ...]
+    groups: tuple[smphdr.GroupIdField, ...]
     """Contains a list of the supported SMP group IDs on the device."""
 
 
@@ -97,7 +96,7 @@ class GroupDetailsRequest(smpmsg.ReadRequest):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
-    groups: Tuple[smphdr.GroupIdField, ...] | None = None
+    groups: tuple[smphdr.GroupIdField, ...] | None = None
     """Contains a list of the SMP group IDs to fetch details on.
 
     If omitted, details on all supported groups will be returned.
@@ -123,7 +122,7 @@ class GroupDetailsResponse(smpmsg.ReadResponse):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
 
-    groups: Tuple[GroupDetails, ...]
+    groups: tuple[GroupDetails, ...]
     """Contains a list of the requested SMP group details."""
 
 
