@@ -1,8 +1,6 @@
 """The Simple Management Protocol (SMP) Shell Management group."""
 
-
 from enum import IntEnum, unique
-from typing import List
 
 from smp import error, header, message
 
@@ -13,7 +11,7 @@ class ExecuteRequest(message.WriteRequest):
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
     _COMMAND_ID = header.CommandId.ShellManagement.EXECUTE
 
-    argv: List[str]
+    argv: list[str]
 
 
 class ExecuteResponse(message.WriteResponse):

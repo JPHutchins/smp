@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, TypeVar
 
 import cbor2
 
@@ -17,10 +17,10 @@ T = TypeVar("T", bound=smpmsg._MessageBase)
 
 
 def _do_test(
-    msg: Type[T],
+    msg: type[T],
     op: smphdr.OP,
     command_id: smphdr.CommandId.ZephyrManagement,
-    data: Dict[str, Any],
+    data: dict[str, Any],
 ) -> T:
     cbor = cbor2.dumps(data, canonical=True)
     assert_header = make_assert_header(smphdr.GroupId.ZEPHYR_MANAGEMENT, op, command_id, len(cbor))

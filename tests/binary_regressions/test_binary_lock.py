@@ -3,7 +3,7 @@
 import importlib
 import json
 from pathlib import Path
-from typing import Any, Final, List, NamedTuple
+from typing import Any, Final, NamedTuple
 
 import pytest
 
@@ -19,10 +19,10 @@ class Record(NamedTuple):
     bytes: str
 
 
-records: Final[List[Record]] = []
+records: Final[list[Record]] = []
 for file in list(Path("tests", "binary_regressions", "records").rglob("*.json")):
     with open(file) as f:
-        records.extend(map(lambda x: Record(**json.loads(x)), f.readlines()))
+        records.extend(Record(**json.loads(x)) for x in f.readlines())
 
 
 def import_class(full_class_path: str) -> smpmsg._MessageBase:
@@ -39,10 +39,10 @@ def compare_values(expected: Any, actual: Any) -> None:
             assert k in actual, f"Key {k} not found in actual"
             compare_values(v, actual[k])
     elif isinstance(expected, (list, tuple)):
-        assert len(expected) == len(
-            actual
-        ), f"Expected list of length {len(expected)}, got {len(actual)}"
-        for e, a in zip(expected, actual):
+        assert len(expected) == len(actual), (
+            f"Expected list of length {len(expected)}, got {len(actual)}"
+        )
+        for e, a in zip(expected, actual, strict=True):
             compare_values(e, a)
     else:
         assert expected == actual, f"Expected {expected}, got {actual}"
@@ -70,7 +70,7 @@ def test_binary_lock(record: Record) -> None:
         record.kwargs["output"] = bytes.fromhex(record.kwargs["output"])
 
     # Test serialization match
-    serialized_message = cls(version=record.version, sequence=record.sequence, **record.kwargs)  # type: ignore # noqa
+    serialized_message = cls(version=record.version, sequence=record.sequence, **record.kwargs)  # type: ignore
     assert bytes(serialized_message) == bytes.fromhex(record.bytes)
 
     # Test deserialization match

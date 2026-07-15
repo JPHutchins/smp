@@ -1,6 +1,5 @@
 """The Simple Management Protocol (SMP) Zephyr Management group."""
 
-
 from enum import IntEnum, unique
 
 import smp.error as smperr

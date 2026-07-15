@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "PostToolBatch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run camas mcp fix"
+          }
+        ]
+      }
+    ]
+  }
+}

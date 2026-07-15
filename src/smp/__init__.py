@@ -1,4 +1,4 @@
-# flake8: noqa
+# ruff: noqa
 
 """The Simple Management Protocol (SMP) for remotely managing MCU firmware.
 
@@ -27,7 +27,7 @@ Prints the serialized SMP Frame:
 b'\\n\\x00\\x00\\x10\\x00\\x00\\x00\\x00\\xa1adlHello world!'
 ```
 
-All messages can be deserialized and validated using the `loads()` method.  To 
+All messages can be deserialized and validated using the `loads()` method.  To
 load a `smp.os_management.EchoWriteResponse`:
 
 ```python
@@ -80,7 +80,7 @@ can narrow the type by first loading the header with `smp.header.Header.loads()`
 ## Encoding & Decoding
 
 The USB and serial transports defined by Zephyr use a base64 encoding and
-framing.  The encoding/fragmentation and decoding/reassembly is provided by 
+framing.  The encoding/fragmentation and decoding/reassembly is provided by
 `smp.packet.encode()` and `smp.packet.decode()`.
 
 More information is at the [Zephyr docs](https://docs.zephyrproject.org/latest/services/device_mgmt/smp_transport.html#uart-serial-and-console)

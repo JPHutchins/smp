@@ -1,9 +1,13 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import TYPE_CHECKING
 
 from smp import header as smpheader
-from smp.message import _MessageBase
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from smp.message import _MessageBase
 
 
 def make_assert_header(
@@ -19,8 +23,8 @@ def make_assert_header(
     ) -> None:
         h = r.header
         assert op == h.op
-        assert smpheader.Version.V2 == h.version
-        assert 0 == h.flags
+        assert h.version == smpheader.Version.V2
+        assert h.flags == 0
         if length is not None:
             assert length == h.length
         else:
@@ -29,6 +33,6 @@ def make_assert_header(
         assert 0 <= h.sequence <= 0xFF
         assert command_id == h.command_id
 
-        assert r.BYTES == bytes(r)
+        assert bytes(r) == r.BYTES
 
     return f

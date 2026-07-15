@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Dict, Literal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -180,7 +180,7 @@ class SupportedFileHashChecksumTypesResponse(message.ReadResponse):
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
     _COMMAND_ID = header.CommandId.FileManagement.SUPPORTED_FILE_HASH_CHECKSUM_TYPES
 
-    types: Dict[Literal["crc32", "sha256"], HashChecksumType]
+    types: dict[Literal["crc32", "sha256"], HashChecksumType]
     """The map of supported hash/checksum types."""
 
 

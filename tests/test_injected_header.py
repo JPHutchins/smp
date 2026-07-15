@@ -1,6 +1,5 @@
 """Test the case where the user forms the header separately."""
 
-
 import pytest
 
 from smp import header as smphdr

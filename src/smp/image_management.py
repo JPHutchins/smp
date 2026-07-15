@@ -25,11 +25,14 @@ follows:
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Generator, List
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from smp import error, header, message
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 class HashBytes(bytes):  # pragma: no cover
@@ -117,7 +120,7 @@ class ImageStatesReadResponse(message.ReadResponse):
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.STATE
 
-    images: List[ImageState]
+    images: list[ImageState]
     """List of images with their current state."""
     splitStatus: int | None = None
     """States whether loader of split image is compatible with application part.
@@ -237,7 +240,7 @@ class ImageUploadWriteResponse(message.WriteResponse):
     that the SMP specification.
 
     Zephyr source code reference: https://github.com/zephyrproject-rtos/zephyr/blob/91a1e706535b2f99433280513c5bc66dfb918506/subsys/mgmt/mcumgr/grp/img_mgmt/src/img_mgmt.c#L397-L400
-    """  # noqa: E501
+    """
 
 
 class ImageEraseRequest(message.WriteRequest):

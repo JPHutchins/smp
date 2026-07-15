@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, TypeVar
 
 import cbor2
 import pytest
@@ -20,11 +20,11 @@ T = TypeVar("T", bound=smpmsg._MessageBase)
 
 
 def _do_test(
-    msg: Type[T],
+    msg: type[T],
     op: smphdr.OP,
     command_id: smphdr.CommandId.OSManagement,
-    data: Dict[str, Any],
-    nested_model: Type[BaseModel] | None = None,
+    data: dict[str, Any],
+    nested_model: type[BaseModel] | None = None,
 ) -> T:
     cbor = cbor2.dumps(data, canonical=True)
     assert_header = make_assert_header(smphdr.GroupId.OS_MANAGEMENT, op, command_id, len(cbor))
@@ -267,7 +267,7 @@ def test_BootloaderInformationReadResponse() -> None:
 
 def test_TaskStatisticsReadResponse_all_fields() -> None:
     """Test TaskStatistics with all fields present."""
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "tasks": {
             "task": {
                 "prio": 1,
@@ -309,7 +309,7 @@ def test_TaskStatisticsReadResponse_all_fields() -> None:
 
 def test_TaskStatisticsZephyrReadResponse_only_required() -> None:
     """Test TaskStatisticsZephyr with only required fields (prio, tid, state)."""
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "tasks": {
             "zephyr_task": {
                 "prio": 10,
@@ -345,7 +345,7 @@ def test_TaskStatisticsZephyrReadResponse_only_required() -> None:
 
 def test_TaskStatisticsZephyrReadResponse_partial_fields() -> None:
     """Test TaskStatisticsZephyr with some optional fields present."""
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "tasks": {
             "partial_task": {
                 "prio": 5,

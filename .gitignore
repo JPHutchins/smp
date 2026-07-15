@@ -1,8 +1,11 @@
-.venv
+.venv*
 __pycache__
 .coverage
+.coverage.*
+coverage.xml
 .mypy_cache
 .pytest_cache
+.ruff_cache
+.camas
 dist
-.tox
 site
