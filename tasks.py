@@ -14,12 +14,13 @@ mypy = Task("uv run mypy src tests")
 pyright = Task("uv run pyright src tests")
 typecheck = Parallel(mypy, pyright)
 test = Task("uv run pytest")
+fast_test = Task("uv run pytest -m 'not slow' --ignore=tests/binary_regressions")
 coverage = Task("uv run pytest --cov=smp --cov-report=term-missing --cov-report=xml")
 docs = Task("uv run --group doc mkdocs build")
 
 check = Parallel(format_check, lint, typecheck, test)
 gate = Parallel(format_check, lint, typecheck, coverage)
-fast = Sequential(format_check, Parallel(lint, typecheck))
+fast = Sequential(format_check, Parallel(lint, typecheck, fast_test))
 all = Sequential(fix, Parallel(typecheck, coverage))
 
 matrix = Parallel(
