@@ -25,27 +25,14 @@ follows:
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
+import msgspec
 
 from smp import error, header, message
 
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
-
-class HashBytes(bytes):  # pragma: no cover
-    """Only to print something useful to the `rich` console."""
-
-    def __rich_repr__(self) -> Generator[str, None, None]:
-        yield self.hex().upper()
-
-
-class ImageState(BaseModel):
+class ImageState(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """The state of an image in a slot."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
 
     slot: int
     """Slot number within “image”.
@@ -62,7 +49,7 @@ class ImageState(BaseModel):
     The field is not required when only one image is supported by the running
     application.
     """
-    hash: HashBytes | bytes | None = None
+    hash: bytes | None = None
     """SHA256 hash of the image header and body.
 
     Note that this will not be the same as the SHA256 of the whole file, it is
@@ -98,13 +85,6 @@ class ImageState(BaseModel):
 
     This does not have to be present if false.
     """
-
-    @field_validator("hash")
-    @classmethod
-    def cast_bytes(cls, v: bytes | None, _: ValidationInfo) -> HashBytes | None:
-        if v is None:
-            return None
-        return HashBytes(v)
 
 
 class ImageStatesReadRequest(message.ReadRequest):

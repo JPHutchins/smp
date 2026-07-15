@@ -5,9 +5,7 @@ from __future__ import annotations
 import struct
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, unique
-from typing import Annotated, ClassVar, TypeAlias
-
-from pydantic import Field
+from typing import ClassVar, TypeAlias
 
 
 class CommandId:
@@ -99,7 +97,7 @@ class UserGroupId(IntEnum):
     INTERCREATE = 64
 
 
-GroupIdField = Annotated[GroupId | UserGroupId | int, Field(union_mode="left_to_right")]
+GroupIdField: TypeAlias = GroupId | UserGroupId | int
 
 
 @unique

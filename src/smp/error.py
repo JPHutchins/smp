@@ -5,10 +5,9 @@ from __future__ import annotations
 from enum import IntEnum, unique
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+import msgspec
 
 from smp import message
-from smp.header import GroupIdField
 
 T = TypeVar("T", bound=IntEnum)
 
@@ -75,12 +74,10 @@ class ErrorV1(message.Response):
     """Error reason."""
 
 
-class Err(BaseModel, Generic[T]):
+class Err(msgspec.Struct, Generic[T], frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """SMP error response version 2 `err` map."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
-
-    group: GroupIdField
+    group: int
     rc: T
 
 
