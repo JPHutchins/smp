@@ -10,6 +10,8 @@ import pytest
 import smp.message as smpmsg
 from smp.file_management import FileHashChecksumResponse
 
+pytestmark = pytest.mark.slow
+
 
 class Record(NamedTuple):
     message: str

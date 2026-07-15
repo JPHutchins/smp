@@ -83,6 +83,9 @@ exclude = ['\.venv']
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+"slow: exhaustive combinatorial sweeps; deselected by the fast_test task",
+]
 
 [tool.coverage.run]
 source = ["smp"]

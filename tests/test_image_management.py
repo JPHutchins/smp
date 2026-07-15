@@ -33,6 +33,7 @@ def test_ImageStatesReadRequest() -> None:
     assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("slot", [0, 1])
 @pytest.mark.parametrize("version", ["0.1.0"])
 @pytest.mark.parametrize("image", [0, 1, None])

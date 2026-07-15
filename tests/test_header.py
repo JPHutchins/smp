@@ -6,6 +6,8 @@ import pytest
 
 from smp.header import OP, Flag, GroupId, Header, Version
 
+pytestmark = pytest.mark.slow
+
 
 @pytest.mark.parametrize("op", [OP.READ, OP.READ_RSP, OP.WRITE, OP.WRITE_RSP])
 @pytest.mark.parametrize("version", [Version.V1, Version.V2])
