@@ -10,192 +10,6 @@ import msgspec
 from smp import error, header, message
 
 
-class FileDownloadRequest(message.ReadRequest, frozen=True):
-    """Download contents of an existing file from specified path.
-
-    Client applications must keep track of data they have already downloaded and
-    where their position in the file is, and issue subsequent requests, with
-    modified offset, to gather the entire file.
-
-    Request does not carry size of requested chunk, the size is specified by
-    application itself. Note that file handles will remain open for consecutive
-    requests (as long as an idle timeout has not been reached and another
-    transport does not make use of uploading/downloading files using fs_mgmt),
-    but files are not exclusively owned by SMP, for the time of download
-    session, and may change between requests or even be removed.
-    """
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
-
-    off: int
-    """Offset in the file to read from."""
-    name: str
-    """Name of the file to download."""
-
-
-class FileDownloadResponse(message.ReadResponse, frozen=True):
-    """Success response to a file download request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
-
-    off: int
-    """Offset that this response is for."""
-    data: bytes
-    """Data read from the file."""
-    len: int | None = None
-    """The length of the file, only mandatory if “off” is 0."""
-
-
-class FileUploadRequest(message.WriteRequest, frozen=True):
-    """Upload a file to a specified location.
-
-    Command will automatically overwrite existing file or create a new one if it
-    does not exist at specified path. The protocol supports stateless upload
-    where each requests carries different chunk of a file and it is client side
-    responsibility to track progress of upload.
-
-    Note that file handles will remain open for consecutive requests (as long as
-    an idle timeout has not been reached, but files are not exclusively owned by
-    SMP, for the time of download session, and may change between requests or
-    even be removed. Note that file handles will remain open for consecutive
-    requests (as long as an idle timeout has not been reached and another
-    transport does not make use of uploading/downloading files using fs_mgmt),
-    but files are not exclusively owned by MCUmgr, for the time of download
-    session, and may change between requests or even be removed.
-    """
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
-
-    off: int
-    """Offset to start/continue writing to."""
-    data: bytes
-    """Data to write to the file."""
-    name: str
-    """Name of the file to upload."""
-    len: int | None = None
-    """The length of the file, only mandatory if “off” is 0."""
-
-
-class FileUploadResponse(message.WriteResponse, frozen=True):
-    """Success response to a file upload request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
-
-    off: int
-    """Offset of the file."""
-
-
-class FileStatusRequest(message.ReadRequest, frozen=True):
-    """Retrieve status of an existing file from specified path of a target device."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_STATUS
-
-    name: str
-
-
-class FileStatusResponse(message.ReadResponse, frozen=True):
-    """Success response to a file status request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_STATUS
-
-    len: int
-
-
-class FileHashChecksumRequest(message.ReadRequest, frozen=True):
-    """Generate a hash/checksum of an existing file at a specified path on a target device.
-
-    Note that kernel heap memory is required for buffers to be allocated for
-    this to function, and large stack memory buffers are required for generation
-    of the output hash/checksum. Requires `CONFIG_MCUMGR_GRP_FS_CHECKSUM_HASH` to
-    be enabled for the base functionality, supported hash/checksum are opt-in
-    with `CONFIG_MCUMGR_GRP_FS_CHECKSUM_IEEE_CRC32` or
-    `CONFIG_MCUMGR_GRP_FS_HASH_SHA256`.
-    """
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_HASH_CHECKSUM
-
-    name: str
-    """Absolute path to the file to generate hash/checksum for."""
-    type: Literal["crc32", "sha256"] | None = None
-    """Type of hash/checksum to generate, if not provided, default is used."""
-    off: int | None = None
-    """Offset to start hash/checksum generation from, default 0."""
-    len: int | None = None
-    """Maximum length of the file to generate hash/checksum for, default is entire file."""
-
-
-class FileHashChecksumResponse(message.ReadResponse, frozen=True):
-    """Success response to a file hash/checksum request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_HASH_CHECKSUM
-
-    type: Literal["crc32", "sha256"]
-    len: int
-    """Length of input data used to generate hash/checksum."""
-    output: int | bytes
-    """Output hash/checksum, depending on the type requested."""
-    off: int | None = None
-    """Only present if not 0."""
-
-
-class SupportedFileHashChecksumTypesRequest(message.ReadRequest, frozen=True):
-    """List the hash and checksum types are available on a device.
-
-    Requires Kconfig `CONFIG_MCUMGR_GRP_FS_CHECKSUM_HASH_SUPPORTED_CMD` to be enabled.
-    """
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.SUPPORTED_FILE_HASH_CHECKSUM_TYPES
-
-
-class HashChecksumFormat(IntEnum):
-    """Format that the hash/checksum returns where 0 is for numerical and 1 is for byte array."""
-
-    NUMERICAL = 0
-    BYTE_ARRAY = 1
-
-
-class HashChecksumType(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
-    """Hash and checksum type supported by the device."""
-
-    format: HashChecksumFormat
-    """Format that the hash/checksum returns where 0 is for numerical and 1 is for byte array."""
-    size: int
-    """Size of the hash/checksum in bytes."""
-
-
-class SupportedFileHashChecksumTypesResponse(message.ReadResponse, frozen=True):
-    """Success response to a supported file hash/checksum types request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.SUPPORTED_FILE_HASH_CHECKSUM_TYPES
-
-    types: dict[Literal["crc32", "sha256"], HashChecksumType]
-    """The map of supported hash/checksum types."""
-
-
-class FileCloseRequest(message.WriteRequest, frozen=True):
-    """Close all open file handles held by fs_mgmt upload/download requests."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_CLOSE
-
-
-class FileCloseResponse(message.WriteResponse, frozen=True):
-    """Success response to a file close request."""
-
-    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.FileManagement.FILE_CLOSE
-
-
 @unique
 class FS_MGMT_ERR(IntEnum):
     """File System Management error codes."""
@@ -266,3 +80,200 @@ class FileSystemManagementErrorV2(error.ErrorV2[FS_MGMT_ERR], frozen=True):
     """File System Management error response."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+
+
+class _FileGroupBase:
+    _ErrorV1 = FileSystemManagementErrorV1
+    _ErrorV2 = FileSystemManagementErrorV2
+
+
+class FileDownloadResponse(message.ReadResponse, frozen=True):
+    """Success response to a file download request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
+
+    off: int
+    """Offset that this response is for."""
+    data: bytes
+    """Data read from the file."""
+    len: int | None = None
+    """The length of the file, only mandatory if “off” is 0."""
+
+
+class FileDownloadRequest(message.ReadRequest, _FileGroupBase, frozen=True):
+    """Download contents of an existing file from specified path.
+
+    Client applications must keep track of data they have already downloaded and
+    where their position in the file is, and issue subsequent requests, with
+    modified offset, to gather the entire file.
+
+    Request does not carry size of requested chunk, the size is specified by
+    application itself. Note that file handles will remain open for consecutive
+    requests (as long as an idle timeout has not been reached and another
+    transport does not make use of uploading/downloading files using fs_mgmt),
+    but files are not exclusively owned by SMP, for the time of download
+    session, and may change between requests or even be removed.
+    """
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
+    _Response = FileDownloadResponse
+
+    off: int
+    """Offset in the file to read from."""
+    name: str
+    """Name of the file to download."""
+
+
+class FileUploadResponse(message.WriteResponse, frozen=True):
+    """Success response to a file upload request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
+
+    off: int
+    """Offset of the file."""
+
+
+class FileUploadRequest(message.WriteRequest, _FileGroupBase, frozen=True):
+    """Upload a file to a specified location.
+
+    Command will automatically overwrite existing file or create a new one if it
+    does not exist at specified path. The protocol supports stateless upload
+    where each requests carries different chunk of a file and it is client side
+    responsibility to track progress of upload.
+
+    Note that file handles will remain open for consecutive requests (as long as
+    an idle timeout has not been reached, but files are not exclusively owned by
+    SMP, for the time of download session, and may change between requests or
+    even be removed. Note that file handles will remain open for consecutive
+    requests (as long as an idle timeout has not been reached and another
+    transport does not make use of uploading/downloading files using fs_mgmt),
+    but files are not exclusively owned by MCUmgr, for the time of download
+    session, and may change between requests or even be removed.
+    """
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_DOWNLOAD_UPLOAD
+    _Response = FileUploadResponse
+
+    off: int
+    """Offset to start/continue writing to."""
+    data: bytes
+    """Data to write to the file."""
+    name: str
+    """Name of the file to upload."""
+    len: int | None = None
+    """The length of the file, only mandatory if “off” is 0."""
+
+
+class FileStatusResponse(message.ReadResponse, frozen=True):
+    """Success response to a file status request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_STATUS
+
+    len: int
+
+
+class FileStatusRequest(message.ReadRequest, _FileGroupBase, frozen=True):
+    """Retrieve status of an existing file from specified path of a target device."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_STATUS
+    _Response = FileStatusResponse
+
+    name: str
+
+
+class FileHashChecksumResponse(message.ReadResponse, frozen=True):
+    """Success response to a file hash/checksum request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_HASH_CHECKSUM
+
+    type: Literal["crc32", "sha256"]
+    len: int
+    """Length of input data used to generate hash/checksum."""
+    output: int | bytes
+    """Output hash/checksum, depending on the type requested."""
+    off: int | None = None
+    """Only present if not 0."""
+
+
+class FileHashChecksumRequest(message.ReadRequest, _FileGroupBase, frozen=True):
+    """Generate a hash/checksum of an existing file at a specified path on a target device.
+
+    Note that kernel heap memory is required for buffers to be allocated for
+    this to function, and large stack memory buffers are required for generation
+    of the output hash/checksum. Requires `CONFIG_MCUMGR_GRP_FS_CHECKSUM_HASH` to
+    be enabled for the base functionality, supported hash/checksum are opt-in
+    with `CONFIG_MCUMGR_GRP_FS_CHECKSUM_IEEE_CRC32` or
+    `CONFIG_MCUMGR_GRP_FS_HASH_SHA256`.
+    """
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_HASH_CHECKSUM
+    _Response = FileHashChecksumResponse
+
+    name: str
+    """Absolute path to the file to generate hash/checksum for."""
+    type: Literal["crc32", "sha256"] | None = None
+    """Type of hash/checksum to generate, if not provided, default is used."""
+    off: int | None = None
+    """Offset to start hash/checksum generation from, default 0."""
+    len: int | None = None
+    """Maximum length of the file to generate hash/checksum for, default is entire file."""
+
+
+class HashChecksumFormat(IntEnum):
+    """Format that the hash/checksum returns where 0 is for numerical and 1 is for byte array."""
+
+    NUMERICAL = 0
+    BYTE_ARRAY = 1
+
+
+class HashChecksumType(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
+    """Hash and checksum type supported by the device."""
+
+    format: HashChecksumFormat
+    """Format that the hash/checksum returns where 0 is for numerical and 1 is for byte array."""
+    size: int
+    """Size of the hash/checksum in bytes."""
+
+
+class SupportedFileHashChecksumTypesResponse(message.ReadResponse, frozen=True):
+    """Success response to a supported file hash/checksum types request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.SUPPORTED_FILE_HASH_CHECKSUM_TYPES
+
+    types: dict[Literal["crc32", "sha256"], HashChecksumType]
+    """The map of supported hash/checksum types."""
+
+
+class SupportedFileHashChecksumTypesRequest(message.ReadRequest, _FileGroupBase, frozen=True):
+    """List the hash and checksum types are available on a device.
+
+    Requires Kconfig `CONFIG_MCUMGR_GRP_FS_CHECKSUM_HASH_SUPPORTED_CMD` to be enabled.
+    """
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.SUPPORTED_FILE_HASH_CHECKSUM_TYPES
+    _Response = SupportedFileHashChecksumTypesResponse
+
+
+class FileCloseResponse(message.WriteResponse, frozen=True):
+    """Success response to a file close request."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_CLOSE
+
+
+class FileCloseRequest(message.WriteRequest, _FileGroupBase, frozen=True):
+    """Close all open file handles held by fs_mgmt upload/download requests."""
+
+    _GROUP_ID = header.GroupId.FILE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.FileManagement.FILE_CLOSE
+    _Response = FileCloseResponse
