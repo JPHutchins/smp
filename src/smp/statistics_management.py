@@ -7,7 +7,7 @@ import smp.header as smphdr
 import smp.message as smpmsg
 
 
-class GroupDataRequest(smpmsg.ReadRequest):
+class GroupDataRequest(smpmsg.ReadRequest, frozen=True):
     """Read the statistics group data."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
@@ -16,7 +16,7 @@ class GroupDataRequest(smpmsg.ReadRequest):
     name: str
 
 
-class GroupDataResponse(smpmsg.ReadResponse):
+class GroupDataResponse(smpmsg.ReadResponse, frozen=True):
     """Statistics group data response."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
@@ -26,14 +26,14 @@ class GroupDataResponse(smpmsg.ReadResponse):
     fields: dict[str, int]
 
 
-class ListOfGroupsRequest(smpmsg.ReadRequest):
+class ListOfGroupsRequest(smpmsg.ReadRequest, frozen=True):
     """List the available statistics groups."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
 
 
-class ListOfGroupsResponse(smpmsg.ReadResponse):
+class ListOfGroupsResponse(smpmsg.ReadResponse, frozen=True):
     """List of available statistics groups."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
@@ -65,13 +65,13 @@ class STAT_MGMT_ERR(IntEnum):
     """Walk through of statistics was aborted."""
 
 
-class StatisticsManagementErrorV1(smperr.ErrorV1):
+class StatisticsManagementErrorV1(smperr.ErrorV1, frozen=True):
     """Error response to a statistics management command."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
 
 
-class StatisticsManagementErrorV2(smperr.ErrorV2[STAT_MGMT_ERR]):
+class StatisticsManagementErrorV2(smperr.ErrorV2[STAT_MGMT_ERR], frozen=True):
     """Error response to a statistics management command."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT

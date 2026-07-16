@@ -7,7 +7,7 @@ from enum import IntEnum, unique
 from smp import error, header, message
 
 
-class ImageUploadWriteRequest(message.WriteRequest):
+class ImageUploadWriteRequest(message.WriteRequest, frozen=True):
     """Upload an image to an application-defined location like a secondary MCU."""
 
     _GROUP_ID = header.UserGroupId.INTERCREATE
@@ -29,7 +29,7 @@ class ImageUploadWriteRequest(message.WriteRequest):
     """The SHA-256 hash of the image; optional when off == 0, else ignored."""
 
 
-class ImageUploadWriteResponse(message.WriteResponse):
+class ImageUploadWriteResponse(message.WriteResponse, frozen=True):
     """Success response to an image upload request."""
 
     _GROUP_ID = header.UserGroupId.INTERCREATE
@@ -50,13 +50,13 @@ class IC_MGMT_ERR(IntEnum):
     """No image matched the image provided."""
 
 
-class ErrorV1(error.ErrorV1):
+class ErrorV1(error.ErrorV1, frozen=True):
     """Intercreate Management error response."""
 
     _GROUP_ID = header.UserGroupId.INTERCREATE
 
 
-class ErrorV2(error.ErrorV2[IC_MGMT_ERR]):
+class ErrorV2(error.ErrorV2[IC_MGMT_ERR], frozen=True):
     """Intercreate Management error response."""
 
     _GROUP_ID = header.UserGroupId.INTERCREATE

@@ -1,79 +1,49 @@
-"""Test the SMP Shell Management group."""
+"""Test the SMP Statistics Management group."""
 
 from __future__ import annotations
 
-from typing import Any, TypeVar
-
-import cbor2
-
 from smp import header as smphdr
-from smp import message as smpmsg
 from smp import statistics_management as smpstat
-from tests.helpers import make_assert_header
+from tests.helpers import assert_frame
 
-T = TypeVar("T", bound=smpmsg._MessageBase)
-
-
-def _do_test(
-    msg: type[T],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.StatisticsManagement,
-    data: dict[str, Any],
-) -> T:
-    cbor = cbor2.dumps(data, canonical=True)
-    assert_header = make_assert_header(
-        smphdr.GroupId.STATISTICS_MANAGEMENT, op, command_id, len(cbor)
-    )
-
-    def _assert_common(r: smpmsg._MessageBase) -> None:
-        assert_header(r)
-        for k, v in data.items():
-            assert v == getattr(r, k)
-        assert cbor == r.BYTES[8:]
-
-    r = msg(**data)
-
-    _assert_common(r)  # serialize
-    _assert_common(msg.loads(r.BYTES))  # deserialize
-
-    return r
+statcmd = smphdr.CommandId.StatisticsManagement
 
 
 def test_GroupDataRequest() -> None:
-    r = _do_test(
-        smpstat.GroupDataRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.StatisticsManagement.GROUP_DATA,
-        {"name": "example"},
+    frame = assert_frame(
+        smpstat.GroupDataRequest(name="example"),
+        op=smphdr.OP.READ,
+        group_id=smphdr.GroupId.STATISTICS_MANAGEMENT,
+        command_id=statcmd.GROUP_DATA,
     )
-    assert r.name == "example"
+    assert frame.data.name == "example"
 
 
 def test_GroupDataResponse() -> None:
-    r = _do_test(
-        smpstat.GroupDataResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.StatisticsManagement.GROUP_DATA,
-        {"name": "example", "fields": {"field1": 1, "field2": 2}},
+    frame = assert_frame(
+        smpstat.GroupDataResponse(name="example", fields={"field1": 1, "field2": 2}),
+        op=smphdr.OP.READ_RSP,
+        group_id=smphdr.GroupId.STATISTICS_MANAGEMENT,
+        command_id=statcmd.GROUP_DATA,
     )
-    assert r.name == "example"
-    assert r.fields == {"field1": 1, "field2": 2}
+    assert frame.data.name == "example"
+    assert frame.data.fields == {"field1": 1, "field2": 2}
 
 
 def test_ListOfGroupsRequest() -> None:
-    _do_test(
-        smpstat.ListOfGroupsRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS,
-        {},
+    assert_frame(
+        smpstat.ListOfGroupsRequest(),
+        op=smphdr.OP.READ,
+        group_id=smphdr.GroupId.STATISTICS_MANAGEMENT,
+        command_id=statcmd.LIST_OF_GROUPS,
     )
 
 
 def test_ListOfGroupsResponse() -> None:
-    r = _do_test(
-        smpstat.ListOfGroupsResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS,
-        {"stat_list": ("example1", "example2")},
+    frame = assert_frame(
+        smpstat.ListOfGroupsResponse(stat_list=("example1", "example2")),
+        op=smphdr.OP.READ_RSP,
+        group_id=smphdr.GroupId.STATISTICS_MANAGEMENT,
+        command_id=statcmd.LIST_OF_GROUPS,
     )
-    assert r.stat_list == ("example1", "example2")
+    assert frame.data.stat_list == ("example1", "example2")

@@ -9,7 +9,7 @@ import smp.header as smphdr
 import smp.message as smpmsg
 
 
-class ReadSettingRequest(smpmsg.ReadRequest):
+class ReadSettingRequest(smpmsg.ReadRequest, frozen=True):
     """Read setting."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
@@ -22,7 +22,7 @@ class ReadSettingRequest(smpmsg.ReadRequest):
     """The maximum size of the data to read."""
 
 
-class ReadSettingResponse(smpmsg.ReadResponse):
+class ReadSettingResponse(smpmsg.ReadResponse, frozen=True):
     """Read setting success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
@@ -44,7 +44,7 @@ class ReadSettingResponse(smpmsg.ReadResponse):
     """
 
 
-class WriteSettingRequest(smpmsg.WriteRequest):
+class WriteSettingRequest(smpmsg.WriteRequest, frozen=True):
     """Write setting."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
@@ -57,14 +57,14 @@ class WriteSettingRequest(smpmsg.WriteRequest):
     """Binary data to write."""
 
 
-class WriteSettingResponse(smpmsg.WriteResponse):
+class WriteSettingResponse(smpmsg.WriteResponse, frozen=True):
     """Write setting success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
 
 
-class DeleteSettingRequest(smpmsg.WriteRequest):
+class DeleteSettingRequest(smpmsg.WriteRequest, frozen=True):
     """Delete setting."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
@@ -74,14 +74,14 @@ class DeleteSettingRequest(smpmsg.WriteRequest):
     """The name of the setting to delete."""
 
 
-class DeleteSettingResponse(smpmsg.WriteResponse):
+class DeleteSettingResponse(smpmsg.WriteResponse, frozen=True):
     """Delete setting success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.DELETE_SETTING
 
 
-class CommitSettingsRequest(smpmsg.WriteRequest):
+class CommitSettingsRequest(smpmsg.WriteRequest, frozen=True):
     """Commit pending settings.
 
     Commit settings command allows committing all settings that have been set
@@ -92,35 +92,35 @@ class CommitSettingsRequest(smpmsg.WriteRequest):
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
 
 
-class CommitSettingsResponse(smpmsg.WriteResponse):
+class CommitSettingsResponse(smpmsg.WriteResponse, frozen=True):
     """Commit pending settings success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
 
 
-class LoadSettingsRequest(smpmsg.ReadRequest):
+class LoadSettingsRequest(smpmsg.ReadRequest, frozen=True):
     """Load settings from persistent storage."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
 
 
-class LoadSettingsResponse(smpmsg.ReadResponse):
+class LoadSettingsResponse(smpmsg.ReadResponse, frozen=True):
     """Load settings from persistent storage success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
 
 
-class SaveSettingsRequest(smpmsg.WriteRequest):
+class SaveSettingsRequest(smpmsg.WriteRequest, frozen=True):
     """Save settings to persistent storage."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
 
 
-class SaveSettingsResponse(smpmsg.WriteResponse):
+class SaveSettingsResponse(smpmsg.WriteResponse, frozen=True):
     """Save settings to persistent storage success response."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
@@ -156,13 +156,13 @@ class SETTINGS_MGMT_ERR(IntEnum):
     """The provided key name does not support being deleted."""
 
 
-class SettingsManagementErrorV1(smperr.ErrorV1):
+class SettingsManagementErrorV1(smperr.ErrorV1, frozen=True):
     """Error response to a settings management command."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
 
 
-class SettingsManagementErrorV2(smperr.ErrorV2[SETTINGS_MGMT_ERR]):
+class SettingsManagementErrorV2(smperr.ErrorV2[SETTINGS_MGMT_ERR], frozen=True):
     """Error response to a settings management command."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
