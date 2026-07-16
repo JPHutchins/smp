@@ -11,7 +11,8 @@ requires-python = ">=3.10"
 dependencies = [
 "cbor2>=6,<7",
 "crcmod>=1.7,<2",
-"pydantic>=2.6,<3",
+"msgspec>=0.21.1",
+"msgspec-cbor>=0.2,<0.3",
 ]
 dynamic = ["version"]
 classifiers = [
@@ -72,7 +73,7 @@ extend-select = [
 ]
 
 [tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-base-classes = ["msgspec.Struct"]
 
 [tool.ruff.format]
 quote-style = "preserve"
