@@ -5,12 +5,12 @@ from __future__ import annotations
 from enum import IntEnum, unique
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+import msgspec
 
 from smp import error, header, message
 
 
-class FileDownloadRequest(message.ReadRequest):
+class FileDownloadRequest(message.ReadRequest, frozen=True):
     """Download contents of an existing file from specified path.
 
     Client applications must keep track of data they have already downloaded and
@@ -34,7 +34,7 @@ class FileDownloadRequest(message.ReadRequest):
     """Name of the file to download."""
 
 
-class FileDownloadResponse(message.ReadResponse):
+class FileDownloadResponse(message.ReadResponse, frozen=True):
     """Success response to a file download request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -48,7 +48,7 @@ class FileDownloadResponse(message.ReadResponse):
     """The length of the file, only mandatory if “off” is 0."""
 
 
-class FileUploadRequest(message.WriteRequest):
+class FileUploadRequest(message.WriteRequest, frozen=True):
     """Upload a file to a specified location.
 
     Command will automatically overwrite existing file or create a new one if it
@@ -79,7 +79,7 @@ class FileUploadRequest(message.WriteRequest):
     """The length of the file, only mandatory if “off” is 0."""
 
 
-class FileUploadResponse(message.WriteResponse):
+class FileUploadResponse(message.WriteResponse, frozen=True):
     """Success response to a file upload request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -89,7 +89,7 @@ class FileUploadResponse(message.WriteResponse):
     """Offset of the file."""
 
 
-class FileStatusRequest(message.ReadRequest):
+class FileStatusRequest(message.ReadRequest, frozen=True):
     """Retrieve status of an existing file from specified path of a target device."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -98,7 +98,7 @@ class FileStatusRequest(message.ReadRequest):
     name: str
 
 
-class FileStatusResponse(message.ReadResponse):
+class FileStatusResponse(message.ReadResponse, frozen=True):
     """Success response to a file status request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -107,7 +107,7 @@ class FileStatusResponse(message.ReadResponse):
     len: int
 
 
-class FileHashChecksumRequest(message.ReadRequest):
+class FileHashChecksumRequest(message.ReadRequest, frozen=True):
     """Generate a hash/checksum of an existing file at a specified path on a target device.
 
     Note that kernel heap memory is required for buffers to be allocated for
@@ -131,22 +131,22 @@ class FileHashChecksumRequest(message.ReadRequest):
     """Maximum length of the file to generate hash/checksum for, default is entire file."""
 
 
-class FileHashChecksumResponse(message.ReadResponse):
+class FileHashChecksumResponse(message.ReadResponse, frozen=True):
     """Success response to a file hash/checksum request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
     _COMMAND_ID = header.CommandId.FileManagement.FILE_HASH_CHECKSUM
 
     type: Literal["crc32", "sha256"]
-    off: int | None = None
-    """Only present if not 0."""
     len: int
     """Length of input data used to generate hash/checksum."""
     output: int | bytes
     """Output hash/checksum, depending on the type requested."""
+    off: int | None = None
+    """Only present if not 0."""
 
 
-class SupportedFileHashChecksumTypesRequest(message.ReadRequest):
+class SupportedFileHashChecksumTypesRequest(message.ReadRequest, frozen=True):
     """List the hash and checksum types are available on a device.
 
     Requires Kconfig `CONFIG_MCUMGR_GRP_FS_CHECKSUM_HASH_SUPPORTED_CMD` to be enabled.
@@ -163,10 +163,8 @@ class HashChecksumFormat(IntEnum):
     BYTE_ARRAY = 1
 
 
-class HashChecksumType(BaseModel):
+class HashChecksumType(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """Hash and checksum type supported by the device."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     format: HashChecksumFormat
     """Format that the hash/checksum returns where 0 is for numerical and 1 is for byte array."""
@@ -174,7 +172,7 @@ class HashChecksumType(BaseModel):
     """Size of the hash/checksum in bytes."""
 
 
-class SupportedFileHashChecksumTypesResponse(message.ReadResponse):
+class SupportedFileHashChecksumTypesResponse(message.ReadResponse, frozen=True):
     """Success response to a supported file hash/checksum types request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -184,14 +182,14 @@ class SupportedFileHashChecksumTypesResponse(message.ReadResponse):
     """The map of supported hash/checksum types."""
 
 
-class FileCloseRequest(message.WriteRequest):
+class FileCloseRequest(message.WriteRequest, frozen=True):
     """Close all open file handles held by fs_mgmt upload/download requests."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
     _COMMAND_ID = header.CommandId.FileManagement.FILE_CLOSE
 
 
-class FileCloseResponse(message.WriteResponse):
+class FileCloseResponse(message.WriteResponse, frozen=True):
     """Success response to a file close request."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
@@ -258,13 +256,13 @@ class FS_MGMT_ERR(IntEnum):
     """The operation cannot be performed because the file is empty with no contents. """
 
 
-class FileSystemManagementErrorV1(error.ErrorV1):
+class FileSystemManagementErrorV1(error.ErrorV1, frozen=True):
     """File System Management error response."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT
 
 
-class FileSystemManagementErrorV2(error.ErrorV2[FS_MGMT_ERR]):
+class FileSystemManagementErrorV2(error.ErrorV2[FS_MGMT_ERR], frozen=True):
     """File System Management error response."""
 
     _GROUP_ID = header.GroupId.FILE_MANAGEMENT

@@ -25,27 +25,14 @@ follows:
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
+import msgspec
 
 from smp import error, header, message
 
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
-
-class HashBytes(bytes):  # pragma: no cover
-    """Only to print something useful to the `rich` console."""
-
-    def __rich_repr__(self) -> Generator[str, None, None]:
-        yield self.hex().upper()
-
-
-class ImageState(BaseModel):
+class ImageState(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """The state of an image in a slot."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
 
     slot: int
     """Slot number within “image”.
@@ -62,7 +49,7 @@ class ImageState(BaseModel):
     The field is not required when only one image is supported by the running
     application.
     """
-    hash: HashBytes | bytes | None = None
+    hash: bytes | None = None
     """SHA256 hash of the image header and body.
 
     Note that this will not be the same as the SHA256 of the whole file, it is
@@ -99,22 +86,15 @@ class ImageState(BaseModel):
     This does not have to be present if false.
     """
 
-    @field_validator("hash")
-    @classmethod
-    def cast_bytes(cls, v: bytes | None, _: ValidationInfo) -> HashBytes | None:
-        if v is None:
-            return None
-        return HashBytes(v)
 
-
-class ImageStatesReadRequest(message.ReadRequest):
+class ImageStatesReadRequest(message.ReadRequest, frozen=True):
     """Obtain list of images with their current state."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
     _COMMAND_ID = header.CommandId.ImageManagement.STATE
 
 
-class ImageStatesReadResponse(message.ReadResponse):
+class ImageStatesReadResponse(message.ReadResponse, frozen=True):
     """Response to an image state request."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
@@ -129,7 +109,7 @@ class ImageStatesReadResponse(message.ReadResponse):
     """
 
 
-class ImageStatesWriteRequest(message.WriteRequest):
+class ImageStatesWriteRequest(message.WriteRequest, frozen=True):
     """Set the state of an image.
 
     If “confirm” is false or not provided, an image with the “hash” will be set
@@ -156,11 +136,11 @@ class ImageStatesWriteRequest(message.WriteRequest):
     """
 
 
-class ImageStatesWriteResponse(ImageStatesReadResponse):
+class ImageStatesWriteResponse(ImageStatesReadResponse, frozen=True):
     """Success response to an image state write request."""
 
 
-class ImageUploadWriteRequest(message.WriteRequest):
+class ImageUploadWriteRequest(message.WriteRequest, frozen=True):
     """Upload an image to the device.
 
     The image is uploaded in chunks, with each chunk being sent in a separate
@@ -206,7 +186,7 @@ class ImageUploadWriteRequest(message.WriteRequest):
     """
 
 
-class ImageUploadWriteResponse(message.WriteResponse):
+class ImageUploadWriteResponse(message.WriteResponse, frozen=True):
     """Success response to an image upload request."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
@@ -243,7 +223,7 @@ class ImageUploadWriteResponse(message.WriteResponse):
     """
 
 
-class ImageEraseRequest(message.WriteRequest):
+class ImageEraseRequest(message.WriteRequest, frozen=True):
     """Erase an image from a slot."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
@@ -253,7 +233,7 @@ class ImageEraseRequest(message.WriteRequest):
     """The slot to erase. If not provided, slot 1 will be erased."""
 
 
-class ImageEraseResponse(message.WriteResponse):
+class ImageEraseResponse(message.WriteResponse, frozen=True):
     """Success response to an image erase request."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
@@ -367,13 +347,13 @@ class IMG_MGMT_ERR(IntEnum):
     """Setting test to active slot is not allowed"""
 
 
-class ImageManagementErrorV1(error.ErrorV1):
+class ImageManagementErrorV1(error.ErrorV1, frozen=True):
     """Image Management error response."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
 
 
-class ImageManagementErrorV2(error.ErrorV2[IMG_MGMT_ERR]):
+class ImageManagementErrorV2(error.ErrorV2[IMG_MGMT_ERR], frozen=True):
     """Image Management error response."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT

@@ -5,7 +5,7 @@ from enum import IntEnum, unique
 from smp import error, header, message
 
 
-class ExecuteRequest(message.WriteRequest):
+class ExecuteRequest(message.WriteRequest, frozen=True):
     """Execute a shell command."""
 
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
@@ -14,7 +14,7 @@ class ExecuteRequest(message.WriteRequest):
     argv: list[str]
 
 
-class ExecuteResponse(message.WriteResponse):
+class ExecuteResponse(message.WriteResponse, frozen=True):
     """Success response to a shell command execution."""
 
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
@@ -38,13 +38,13 @@ class SHELL_MGMT_RET_RC(IntEnum):
     """The provided format value is not valid."""
 
 
-class ShellManagementErrorV1(error.ErrorV1):
+class ShellManagementErrorV1(error.ErrorV1, frozen=True):
     """Error response to a shell command execution."""
 
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
 
 
-class ShellManagementErrorV2(error.ErrorV2[SHELL_MGMT_RET_RC]):
+class ShellManagementErrorV2(error.ErrorV2[SHELL_MGMT_RET_RC], frozen=True):
     """Error response to a shell command execution."""
 
     _GROUP_ID = header.GroupId.SHELL_MANAGEMENT
