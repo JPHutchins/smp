@@ -51,6 +51,7 @@ dev = [
     "pytest-cov>=7,<8",
     "camas[mcp]==0.1.25",
     "pyright>=1.1,<2",
+    "typing-extensions>=4,<5",
 ]
 doc = [
 "mkdocstrings[python]>=0.26.1,<1",
@@ -81,6 +82,10 @@ quote-style = "preserve"
 [tool.mypy]
 disallow_untyped_defs = true
 exclude = ['\.venv']
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

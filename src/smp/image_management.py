@@ -31,215 +31,6 @@ import msgspec
 from smp import error, header, message
 
 
-class ImageState(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
-    """The state of an image in a slot."""
-
-    slot: int
-    """Slot number within “image”.
-
-    Each image has two slots:
-    - primary (running one) = 0
-    - secondary (for DFU dual-bank purposes) = 1.
-    """
-    version: str
-    """Version of the image."""
-    image: int | None = None
-    """Semi-optional image number.
-
-    The field is not required when only one image is supported by the running
-    application.
-    """
-    hash: bytes | None = None
-    """SHA256 hash of the image header and body.
-
-    Note that this will not be the same as the SHA256 of the whole file, it is
-    the field in the MCUboot TLV section that contains a hash of the data which
-    is used for signature verification purposes. This field is optional but only
-    optional when using MCUboot's serial recovery feature with one pair of image
-    slots, `CONFIG_BOOT_SERIAL_IMG_GRP_HASH` can be disabled to remove
-    support for hashes in this configuration. SMP server in applications must
-    support sending hashes.
-    """
-    bootable: bool | None = None
-    """True if image has bootable flag set.
-
-    This field does not have to be present if false.
-    """
-    pending: bool | None = None
-    """True if image is set for next swap.
-
-    This field does not have to be present if false.
-    """
-    confirmed: bool | None = None
-    """True if image has been confirmed.
-
-    This field does not have to be present if false.
-    """
-    active: bool | None = None
-    """True if image is currently active application
-
-    This field does not have to be present if false.
-    """
-    permanent: bool | None = None
-    """True if image is to stay in primary slot after the next boot.
-
-    This does not have to be present if false.
-    """
-
-
-class ImageStatesReadRequest(message.ReadRequest, frozen=True):
-    """Obtain list of images with their current state."""
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.STATE
-
-
-class ImageStatesReadResponse(message.ReadResponse, frozen=True):
-    """Response to an image state request."""
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.STATE
-
-    images: list[ImageState]
-    """List of images with their current state."""
-    splitStatus: int | None = None
-    """States whether loader of split image is compatible with application part.
-
-    This is unused by Zephyr.
-    """
-
-
-class ImageStatesWriteRequest(message.WriteRequest, frozen=True):
-    """Set the state of an image.
-
-    If “confirm” is false or not provided, an image with the “hash” will be set
-    for test, which means that it will not be marked as permanent and upon hard
-    reset the previous application will be restored to the primary slot. In case
-    when “confirm” is true, the “hash” is optional as the currently running
-    application will be assumed as target for confirmation.
-    """
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.STATE
-
-    hash: bytes | None = None
-    """SHA256 hash of the image header and body."""
-    confirm: bool = False
-    """Confirm the image given by hash.
-
-    CAUTION: it is dangerous to confirm the image before it has been booted!
-
-    Setting this to true will mark the image as confirmed before it has been
-    booted, which can brick the device.  Zephyr provides hooks for confirming
-    the image from within the application, so this is not necessary for normal
-    operation.
-    """
-
-
-class ImageStatesWriteResponse(ImageStatesReadResponse, frozen=True):
-    """Success response to an image state write request."""
-
-
-class ImageUploadWriteRequest(message.WriteRequest, frozen=True):
-    """Upload an image to the device.
-
-    The image is uploaded in chunks, with each chunk being sent in a separate
-    request. The first request must include the image's length and image number.
-    """
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
-
-    off: int
-    """The offset of the data chunk in this request."""
-    data: bytes
-    """The data chunk to write."""
-    image: int | None = None
-    """Image number.
-
-    It does not have to appear in request at all, in which case it is assumed to
-    be 0. Should only be present when `off` is 0.
-    """
-    len: int | None = None
-    """The length of the image.
-
-    Required when `off` is 0, otherwise ignored.
-    """
-    sha: bytes | None = None
-    """SHA256 hash of the image.
-
-    This is used to identify an upload session (e.g. to allow to continue
-    a broken session), and for image verification purposes. This must be a full
-    SHA256 hash of the whole image being uploaded, or not included if the hash
-    is not available (in which case, upload session continuation and image
-    verification functionality will be unavailable). Should only be present when
-    “off” is 0.
-    """
-    upgrade: bool | None = None
-    """Optional flag that states that only upgrade should be allowed.
-
-    If the version of uploaded software is not higher then already on a device,
-    the image upload will be rejected. Zephyr compares major, minor and
-    revision (x.y.z) by default unless `CONFIG_MCUMGR_GRP_IMG_VERSION_CMP_USE_BUILD_NUMBER`
-    is set, whereby it will compare build numbers too. Should only be present
-    when “off” is 0.
-    """
-
-
-class ImageUploadWriteResponse(message.WriteResponse, frozen=True):
-    """Success response to an image upload request."""
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
-
-    off: int | None = None
-    """The portion of the upload that has been completed, in 8-bit bytes.
-
-    This is the offset of the next byte to be written. If the offset is equal to
-    the length of the image, the upload is complete.
-    """
-
-    match: bool | None = None
-    """Indicates if the uploaded data successfully matches the provided SHA256.
-
-    Only sent in the final packet if CONFIG_IMG_ENABLE_IMAGE_CHECK is enabled.
-    """
-
-    rc: int | None = None
-    """Legacy field that contains a return code; possibly `MGMT_ERR`.
-
-    This field may be present on old SMP server implementations or new SMP
-    server implementations that have set
-    `CONFIG_MCUMGR_SMP_LEGACY_RC_BEHAVIOUR=y` for backwards compatibility with
-    old SMP clients.
-
-    Note that we are not validating this field because we don't necessarily
-    trust the server to send us valid values. If this value is present, then it
-    indicates use of an SMP server that is out of spec and interpretation of the
-    value should be done with reference to that server's source code, rather
-    that the SMP specification.
-
-    Zephyr source code reference: https://github.com/zephyrproject-rtos/zephyr/blob/91a1e706535b2f99433280513c5bc66dfb918506/subsys/mgmt/mcumgr/grp/img_mgmt/src/img_mgmt.c#L397-L400
-    """
-
-
-class ImageEraseRequest(message.WriteRequest, frozen=True):
-    """Erase an image from a slot."""
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
-
-    slot: int | None = None
-    """The slot to erase. If not provided, slot 1 will be erased."""
-
-
-class ImageEraseResponse(message.WriteResponse, frozen=True):
-    """Success response to an image erase request."""
-
-    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
-    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
-
-
 @unique
 class IMG_MGMT_ERR(IntEnum):
     """Image management error codes."""
@@ -357,3 +148,221 @@ class ImageManagementErrorV2(error.ErrorV2[IMG_MGMT_ERR], frozen=True):
     """Image Management error response."""
 
     _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+
+
+class _ImageGroupBase:
+    _ErrorV1 = ImageManagementErrorV1
+    _ErrorV2 = ImageManagementErrorV2
+
+
+class ImageState(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
+    """The state of an image in a slot."""
+
+    slot: int
+    """Slot number within “image”.
+
+    Each image has two slots:
+    - primary (running one) = 0
+    - secondary (for DFU dual-bank purposes) = 1.
+    """
+    version: str
+    """Version of the image."""
+    image: int | None = None
+    """Semi-optional image number.
+
+    The field is not required when only one image is supported by the running
+    application.
+    """
+    hash: bytes | None = None
+    """SHA256 hash of the image header and body.
+
+    Note that this will not be the same as the SHA256 of the whole file, it is
+    the field in the MCUboot TLV section that contains a hash of the data which
+    is used for signature verification purposes. This field is optional but only
+    optional when using MCUboot's serial recovery feature with one pair of image
+    slots, `CONFIG_BOOT_SERIAL_IMG_GRP_HASH` can be disabled to remove
+    support for hashes in this configuration. SMP server in applications must
+    support sending hashes.
+    """
+    bootable: bool | None = None
+    """True if image has bootable flag set.
+
+    This field does not have to be present if false.
+    """
+    pending: bool | None = None
+    """True if image is set for next swap.
+
+    This field does not have to be present if false.
+    """
+    confirmed: bool | None = None
+    """True if image has been confirmed.
+
+    This field does not have to be present if false.
+    """
+    active: bool | None = None
+    """True if image is currently active application
+
+    This field does not have to be present if false.
+    """
+    permanent: bool | None = None
+    """True if image is to stay in primary slot after the next boot.
+
+    This does not have to be present if false.
+    """
+
+
+class ImageStatesReadResponse(message.ReadResponse, frozen=True):
+    """Response to an image state request."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.STATE
+
+    images: list[ImageState]
+    """List of images with their current state."""
+    splitStatus: int | None = None
+    """States whether loader of split image is compatible with application part.
+
+    This is unused by Zephyr.
+    """
+
+
+class ImageStatesReadRequest(message.ReadRequest, _ImageGroupBase, frozen=True):
+    """Obtain list of images with their current state."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.STATE
+    _Response = ImageStatesReadResponse
+
+
+class ImageStatesWriteResponse(ImageStatesReadResponse, frozen=True):
+    """Success response to an image state write request."""
+
+
+class ImageStatesWriteRequest(message.WriteRequest, _ImageGroupBase, frozen=True):
+    """Set the state of an image.
+
+    If “confirm” is false or not provided, an image with the “hash” will be set
+    for test, which means that it will not be marked as permanent and upon hard
+    reset the previous application will be restored to the primary slot. In case
+    when “confirm” is true, the “hash” is optional as the currently running
+    application will be assumed as target for confirmation.
+    """
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.STATE
+    _Response = ImageStatesWriteResponse
+
+    hash: bytes | None = None
+    """SHA256 hash of the image header and body."""
+    confirm: bool = False
+    """Confirm the image given by hash.
+
+    CAUTION: it is dangerous to confirm the image before it has been booted!
+
+    Setting this to true will mark the image as confirmed before it has been
+    booted, which can brick the device.  Zephyr provides hooks for confirming
+    the image from within the application, so this is not necessary for normal
+    operation.
+    """
+
+
+class ImageUploadWriteResponse(message.WriteResponse, frozen=True):
+    """Success response to an image upload request."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
+
+    off: int | None = None
+    """The portion of the upload that has been completed, in 8-bit bytes.
+
+    This is the offset of the next byte to be written. If the offset is equal to
+    the length of the image, the upload is complete.
+    """
+
+    match: bool | None = None
+    """Indicates if the uploaded data successfully matches the provided SHA256.
+
+    Only sent in the final packet if CONFIG_IMG_ENABLE_IMAGE_CHECK is enabled.
+    """
+
+    rc: int | None = None
+    """Legacy field that contains a return code; possibly `MGMT_ERR`.
+
+    This field may be present on old SMP server implementations or new SMP
+    server implementations that have set
+    `CONFIG_MCUMGR_SMP_LEGACY_RC_BEHAVIOUR=y` for backwards compatibility with
+    old SMP clients.
+
+    Note that we are not validating this field because we don't necessarily
+    trust the server to send us valid values. If this value is present, then it
+    indicates use of an SMP server that is out of spec and interpretation of the
+    value should be done with reference to that server's source code, rather
+    that the SMP specification.
+
+    Zephyr source code reference: https://github.com/zephyrproject-rtos/zephyr/blob/91a1e706535b2f99433280513c5bc66dfb918506/subsys/mgmt/mcumgr/grp/img_mgmt/src/img_mgmt.c#L397-L400
+    """
+
+
+class ImageUploadWriteRequest(message.WriteRequest, _ImageGroupBase, frozen=True):
+    """Upload an image to the device.
+
+    The image is uploaded in chunks, with each chunk being sent in a separate
+    request. The first request must include the image's length and image number.
+    """
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.UPLOAD
+    _Response = ImageUploadWriteResponse
+
+    off: int
+    """The offset of the data chunk in this request."""
+    data: bytes
+    """The data chunk to write."""
+    image: int | None = None
+    """Image number.
+
+    It does not have to appear in request at all, in which case it is assumed to
+    be 0. Should only be present when `off` is 0.
+    """
+    len: int | None = None
+    """The length of the image.
+
+    Required when `off` is 0, otherwise ignored.
+    """
+    sha: bytes | None = None
+    """SHA256 hash of the image.
+
+    This is used to identify an upload session (e.g. to allow to continue
+    a broken session), and for image verification purposes. This must be a full
+    SHA256 hash of the whole image being uploaded, or not included if the hash
+    is not available (in which case, upload session continuation and image
+    verification functionality will be unavailable). Should only be present when
+    “off” is 0.
+    """
+    upgrade: bool | None = None
+    """Optional flag that states that only upgrade should be allowed.
+
+    If the version of uploaded software is not higher then already on a device,
+    the image upload will be rejected. Zephyr compares major, minor and
+    revision (x.y.z) by default unless `CONFIG_MCUMGR_GRP_IMG_VERSION_CMP_USE_BUILD_NUMBER`
+    is set, whereby it will compare build numbers too. Should only be present
+    when “off” is 0.
+    """
+
+
+class ImageEraseResponse(message.WriteResponse, frozen=True):
+    """Success response to an image erase request."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
+
+
+class ImageEraseRequest(message.WriteRequest, _ImageGroupBase, frozen=True):
+    """Erase an image from a slot."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.ERASE
+    _Response = ImageEraseResponse
+
+    slot: int | None = None
+    """The slot to erase. If not provided, slot 1 will be erased."""

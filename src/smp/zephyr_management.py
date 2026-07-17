@@ -7,20 +7,6 @@ import smp.header as smphdr
 import smp.message as smpmsg
 
 
-class EraseStorageRequest(smpmsg.WriteRequest, frozen=True):
-    """Erase the storage area."""
-
-    _GROUP_ID = smphdr.GroupId.ZEPHYR_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.ZephyrManagement.ERASE_STORAGE
-
-
-class EraseStorageResponse(smpmsg.WriteResponse, frozen=True):
-    """Success response to a storage area erase."""
-
-    _GROUP_ID = smphdr.GroupId.ZEPHYR_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.ZephyrManagement.ERASE_STORAGE
-
-
 @unique
 class ZEPHYRBASIC_MGMT_ERR(IntEnum):
     """Return codes for the Zephyr Management group."""
@@ -51,3 +37,23 @@ class ZephyrManagementErrorV2(smperr.ErrorV2[ZEPHYRBASIC_MGMT_ERR], frozen=True)
     """Error response to a Zephyr Management command."""
 
     _GROUP_ID = smphdr.GroupId.ZEPHYR_MANAGEMENT
+
+
+class _ZephyrGroupBase:
+    _ErrorV1 = ZephyrManagementErrorV1
+    _ErrorV2 = ZephyrManagementErrorV2
+
+
+class EraseStorageResponse(smpmsg.WriteResponse, frozen=True):
+    """Success response to a storage area erase."""
+
+    _GROUP_ID = smphdr.GroupId.ZEPHYR_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.ZephyrManagement.ERASE_STORAGE
+
+
+class EraseStorageRequest(smpmsg.WriteRequest, _ZephyrGroupBase, frozen=True):
+    """Erase the storage area."""
+
+    _GROUP_ID = smphdr.GroupId.ZEPHYR_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.ZephyrManagement.ERASE_STORAGE
+    _Response = EraseStorageResponse

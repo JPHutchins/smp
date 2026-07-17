@@ -1997,6 +1997,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "typing-extensions" },
 ]
 doc = [
     { name = "mike" },
@@ -2021,6 +2022,7 @@ dev = [
     { name = "pytest", specifier = ">=9,<10" },
     { name = "pytest-cov", specifier = ">=7,<8" },
     { name = "ruff", specifier = ">=0.15,<1" },
+    { name = "typing-extensions", specifier = ">=4,<5" },
 ]
 doc = [
     { name = "mike", specifier = ">=2.1.3,<3" },

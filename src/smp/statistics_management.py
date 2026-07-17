@@ -7,41 +7,6 @@ import smp.header as smphdr
 import smp.message as smpmsg
 
 
-class GroupDataRequest(smpmsg.ReadRequest, frozen=True):
-    """Read the statistics group data."""
-
-    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
-
-    name: str
-
-
-class GroupDataResponse(smpmsg.ReadResponse, frozen=True):
-    """Statistics group data response."""
-
-    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
-
-    name: str
-    fields: dict[str, int]
-
-
-class ListOfGroupsRequest(smpmsg.ReadRequest, frozen=True):
-    """List the available statistics groups."""
-
-    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
-
-
-class ListOfGroupsResponse(smpmsg.ReadResponse, frozen=True):
-    """List of available statistics groups."""
-
-    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
-
-    stat_list: tuple[str, ...]
-
-
 @unique
 class STAT_MGMT_ERR(IntEnum):
     """Return codes for the statistics management group."""
@@ -75,3 +40,45 @@ class StatisticsManagementErrorV2(smperr.ErrorV2[STAT_MGMT_ERR], frozen=True):
     """Error response to a statistics management command."""
 
     _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
+
+
+class _StatisticsGroupBase:
+    _ErrorV1 = StatisticsManagementErrorV1
+    _ErrorV2 = StatisticsManagementErrorV2
+
+
+class GroupDataResponse(smpmsg.ReadResponse, frozen=True):
+    """Statistics group data response."""
+
+    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
+
+    name: str
+    fields: dict[str, int]
+
+
+class GroupDataRequest(smpmsg.ReadRequest, _StatisticsGroupBase, frozen=True):
+    """Read the statistics group data."""
+
+    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.GROUP_DATA
+    _Response = GroupDataResponse
+
+    name: str
+
+
+class ListOfGroupsResponse(smpmsg.ReadResponse, frozen=True):
+    """List of available statistics groups."""
+
+    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
+
+    stat_list: tuple[str, ...]
+
+
+class ListOfGroupsRequest(smpmsg.ReadRequest, _StatisticsGroupBase, frozen=True):
+    """List the available statistics groups."""
+
+    _GROUP_ID = smphdr.GroupId.STATISTICS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.StatisticsManagement.LIST_OF_GROUPS
+    _Response = ListOfGroupsResponse
