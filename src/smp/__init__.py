@@ -95,3 +95,33 @@ All models are validated in order to detect transport and SMP server errors.  It
 is impossible to create an invalid SMP message or deserialize an invalid SMP
 message.  If you find a way, please open an issue.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
+
+if TYPE_CHECKING:
+    from smp import error as smperror
+    from smp import message as smpmessage
+
+_TRep_co = TypeVar(
+    "_TRep_co", bound="smpmessage.ReadResponse | smpmessage.WriteResponse", covariant=True
+)
+_TEr1_co = TypeVar("_TEr1_co", bound="smperror.ErrorV1", covariant=True)
+_TEr2_co = TypeVar("_TEr2_co", bound="smperror.ErrorV2", covariant=True)
+
+
+class SMPRequest(Protocol[_TRep_co, _TEr1_co, _TEr2_co]):
+    """A `Request` bound to its expected `Response`, `ErrorV1`, and `ErrorV2`.
+
+    An `SMPRequest` binds a `Request` to the `Response`, `ErrorV1`, and `ErrorV2`
+    it may provoke, so that a request/response round trip is exhaustively typed.
+    """
+
+    @property
+    def _Response(self) -> type[_TRep_co]: ...
+    @property
+    def _ErrorV1(self) -> type[_TEr1_co]: ...
+    @property
+    def _ErrorV2(self) -> type[_TEr2_co]: ...
+    def to_frame(self) -> smpmessage.Frame[Any]: ...

@@ -9,124 +9,6 @@ import smp.header as smphdr
 import smp.message as smpmsg
 
 
-class ReadSettingRequest(smpmsg.ReadRequest, frozen=True):
-    """Read setting."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
-
-    name: str
-    """The name of the setting to read."""
-
-    max_size: int | None = None
-    """The maximum size of the data to read."""
-
-
-class ReadSettingResponse(smpmsg.ReadResponse, frozen=True):
-    """Read setting success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
-
-    val: bytes
-    """Binary string of the returned data.
-
-    Note that the underlying data type cannot be specified through this and must
-    be known by the client.
-    """
-
-    max_size: int | None = None
-    """The SMP server supports a smaller size than requested.
-
-    Will be set if the maximum supported data size is smaller than the maximum
-    requested data size, and contains the maximum data size which the device
-    supports, equivalent to `CONFIG_MCUMGR_GRP_SETTINGS_NAME_LEN`.
-    """
-
-
-class WriteSettingRequest(smpmsg.WriteRequest, frozen=True):
-    """Write setting."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
-
-    name: str
-    """The name of the setting to write."""
-
-    val: bytes
-    """Binary data to write."""
-
-
-class WriteSettingResponse(smpmsg.WriteResponse, frozen=True):
-    """Write setting success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
-
-
-class DeleteSettingRequest(smpmsg.WriteRequest, frozen=True):
-    """Delete setting."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.DELETE_SETTING
-
-    name: str
-    """The name of the setting to delete."""
-
-
-class DeleteSettingResponse(smpmsg.WriteResponse, frozen=True):
-    """Delete setting success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.DELETE_SETTING
-
-
-class CommitSettingsRequest(smpmsg.WriteRequest, frozen=True):
-    """Commit pending settings.
-
-    Commit settings command allows committing all settings that have been set
-    but not yet applied on a device.
-    """
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
-
-
-class CommitSettingsResponse(smpmsg.WriteResponse, frozen=True):
-    """Commit pending settings success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
-
-
-class LoadSettingsRequest(smpmsg.ReadRequest, frozen=True):
-    """Load settings from persistent storage."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
-
-
-class LoadSettingsResponse(smpmsg.ReadResponse, frozen=True):
-    """Load settings from persistent storage success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
-
-
-class SaveSettingsRequest(smpmsg.WriteRequest, frozen=True):
-    """Save settings to persistent storage."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
-
-
-class SaveSettingsResponse(smpmsg.WriteResponse, frozen=True):
-    """Save settings to persistent storage success response."""
-
-    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
-    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
-
-
 @unique
 class SETTINGS_MGMT_ERR(IntEnum):
     """Return codes for the settings management group."""
@@ -166,3 +48,132 @@ class SettingsManagementErrorV2(smperr.ErrorV2[SETTINGS_MGMT_ERR], frozen=True):
     """Error response to a settings management command."""
 
     _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+
+
+class _SettingsGroupBase:
+    _ErrorV1 = SettingsManagementErrorV1
+    _ErrorV2 = SettingsManagementErrorV2
+
+
+class ReadSettingResponse(smpmsg.ReadResponse, frozen=True):
+    """Read setting success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
+
+    val: bytes
+    """Binary string of the returned data.
+
+    Note that the underlying data type cannot be specified through this and must
+    be known by the client.
+    """
+
+    max_size: int | None = None
+    """The SMP server supports a smaller size than requested.
+
+    Will be set if the maximum supported data size is smaller than the maximum
+    requested data size, and contains the maximum data size which the device
+    supports, equivalent to `CONFIG_MCUMGR_GRP_SETTINGS_NAME_LEN`.
+    """
+
+
+class ReadSettingRequest(smpmsg.ReadRequest, _SettingsGroupBase, frozen=True):
+    """Read setting."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
+    _Response = ReadSettingResponse
+
+    name: str
+    """The name of the setting to read."""
+
+    max_size: int | None = None
+    """The maximum size of the data to read."""
+
+
+class WriteSettingResponse(smpmsg.WriteResponse, frozen=True):
+    """Write setting success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
+
+
+class WriteSettingRequest(smpmsg.WriteRequest, _SettingsGroupBase, frozen=True):
+    """Write setting."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING
+    _Response = WriteSettingResponse
+
+    name: str
+    """The name of the setting to write."""
+
+    val: bytes
+    """Binary data to write."""
+
+
+class DeleteSettingResponse(smpmsg.WriteResponse, frozen=True):
+    """Delete setting success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.DELETE_SETTING
+
+
+class DeleteSettingRequest(smpmsg.WriteRequest, _SettingsGroupBase, frozen=True):
+    """Delete setting."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.DELETE_SETTING
+    _Response = DeleteSettingResponse
+
+    name: str
+    """The name of the setting to delete."""
+
+
+class CommitSettingsResponse(smpmsg.WriteResponse, frozen=True):
+    """Commit pending settings success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
+
+
+class CommitSettingsRequest(smpmsg.WriteRequest, _SettingsGroupBase, frozen=True):
+    """Commit pending settings.
+
+    Commit settings command allows committing all settings that have been set
+    but not yet applied on a device.
+    """
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS
+    _Response = CommitSettingsResponse
+
+
+class LoadSettingsResponse(smpmsg.ReadResponse, frozen=True):
+    """Load settings from persistent storage success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
+
+
+class LoadSettingsRequest(smpmsg.ReadRequest, _SettingsGroupBase, frozen=True):
+    """Load settings from persistent storage."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
+    _Response = LoadSettingsResponse
+
+
+class SaveSettingsResponse(smpmsg.WriteResponse, frozen=True):
+    """Save settings to persistent storage success response."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
+
+
+class SaveSettingsRequest(smpmsg.WriteRequest, _SettingsGroupBase, frozen=True):
+    """Save settings to persistent storage."""
+
+    _GROUP_ID = smphdr.GroupId.SETTINGS_MANAGEMENT
+    _COMMAND_ID = smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS
+    _Response = SaveSettingsResponse
