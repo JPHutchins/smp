@@ -1,24 +1,58 @@
-"""Static request/response narrowing assertions for `smp.generics`.
+"""Static request/response narrowing assertions for `smp.SMPRequest`.
 
 These functions are verified by mypy and pyright (the `typecheck` task); they
 encode the exhaustiveness contract binding each `Request` to its `Response`,
 `ErrorV1`, and `ErrorV2`. They are not executed as runtime tests.
+
+The `TypeIs` narrowing helpers and the `_request` stub below stand in for an SMP
+client: they demonstrate that `SMPRequest` and all of its implementations
+support exhaustive narrowing, without the `smp` library having to ship them.
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any, TypeVar
+
 from typing_extensions import assert_never, assert_type
 
+from smp import SMPRequest
 from smp import enumeration_management as enum
 from smp import file_management as fs
 from smp import image_management as img
+from smp import message as smpmessage
 from smp import os_management as os
 from smp import settings_management as settings
 from smp import shell_management as shell
 from smp import statistics_management as stat
 from smp import zephyr_management as zephyr
-from smp.generics import SMPRequest, TEr1, TEr2, TRep, error, error_v1, error_v2, success
 from smp.user import intercreate as ic
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeIs
+
+    from smp import error as smperror
+
+TRep = TypeVar("TRep", bound="smpmessage.ReadResponse | smpmessage.WriteResponse")
+TEr1 = TypeVar("TEr1", bound="smperror.ErrorV1")
+TEr2 = TypeVar("TEr2", bound="smperror.ErrorV2")
+
+
+def success(
+    response: smpmessage.Response,
+) -> TypeIs[smpmessage.ReadResponse | smpmessage.WriteResponse]:
+    return response.RESPONSE_TYPE == smpmessage.ResponseType.SUCCESS
+
+
+def error_v1(response: smpmessage.Response) -> TypeIs[smperror.ErrorV1]:
+    return response.RESPONSE_TYPE == smpmessage.ResponseType.ERROR_V1
+
+
+def error_v2(response: smpmessage.Response) -> TypeIs[smperror.ErrorV2[Any]]:
+    return response.RESPONSE_TYPE == smpmessage.ResponseType.ERROR_V2
+
+
+def error(response: smpmessage.Response) -> TypeIs[smperror.ErrorV1 | smperror.ErrorV2[Any]]:
+    return error_v1(response) or error_v2(response)
 
 
 def _request(request: SMPRequest[TRep, TEr1, TEr2]) -> TRep | TEr1 | TEr2:

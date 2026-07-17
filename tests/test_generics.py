@@ -1,11 +1,11 @@
-"""Runtime behavior of the `smp.generics` type-narrowing helpers."""
+"""Runtime behavior of the request/response type-narrowing helpers."""
 
 from __future__ import annotations
 
 from smp import error, header
 from smp import image_management as img
-from smp.generics import error as is_error
-from smp.generics import error_v1, error_v2, success
+from tests.test_generics_typing import error as is_error
+from tests.test_generics_typing import error_v1, error_v2, success
 
 _SUCCESS = img.ImageStatesReadResponse(images=[])
 _ERR_V1 = img.ImageManagementErrorV1(rc=error.MGMT_ERR.EUNKNOWN)
