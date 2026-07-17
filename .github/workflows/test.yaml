@@ -7,7 +7,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  matrix:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.emit.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+
+      - id: emit
+        run: echo "matrix=$(uv run camas matrix --github-matrix)" >> "$GITHUB_OUTPUT"
+
+  check:
+    needs: discover
     strategy:
       matrix:
         os:
@@ -15,6 +30,7 @@ jobs:
           - ubuntu-24.04-arm
           - macos-latest
           - windows-latest
+        python: ${{ fromJSON(needs.discover.outputs.matrix).PY }}
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -24,7 +40,9 @@ jobs:
 
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
-      - run: uv run camas matrix
+      - run: uv run camas
+        env:
+          UV_PYTHON: ${{ matrix.python }}
 
   coverage:
     runs-on: ubuntu-latest
