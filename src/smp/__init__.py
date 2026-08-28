@@ -58,9 +58,10 @@ mypy linting and by Pydantic at runtime.
 `to_frame()` synthesizes the SMP header for a payload and takes a few arguments
 that are common to all SMP messages.
 
--   `sequence` is required.  The sequence space belongs to the SMP client, which
-    is the only thing that can know which sequence numbers are in flight; it is
-    the caller's job to keep the value within the header's 8 bit field.
+-   `sequence` is required and is a `types_bits.u8`, so the header's 8 bit field
+    is enforced by your type checker rather than by a `struct.error` at runtime.
+    The sequence space belongs to the SMP client, which is the only thing that
+    can know which sequence numbers are in flight.
 -   `version` is the SMP version.  This defaults to `smp.header.Version.V2`.
 -   `flags` default to the flags of the message type.
 
@@ -104,6 +105,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 if TYPE_CHECKING:
+    from types_bits import u8
+
     from smp import error as smperror
     from smp import header as smpheader
     from smp import message as smpmessage
@@ -129,5 +132,5 @@ class SMPRequest(Protocol[_TRep_co, _TEr1_co, _TEr2_co]):
     @property
     def _ErrorV2(self) -> type[_TEr2_co]: ...
     def to_frame(
-        self, sequence: int, version: smpheader.Version = ..., flags: smpheader.Flag | None = ...
+        self, sequence: u8, version: smpheader.Version = ..., flags: smpheader.Flag | None = ...
     ) -> smpmessage.Frame[Any]: ...

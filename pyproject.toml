@@ -13,6 +13,7 @@ dependencies = [
 "crcmod>=1.7,<2",
 "msgspec>=0.21.1",
 "msgspec-cbor>=0.2,<0.3",
+"types-bits>=0.2,<0.3",
 ]
 dynamic = ["version"]
 classifiers = [
@@ -81,6 +82,7 @@ quote-style = "preserve"
 
 [tool.mypy]
 disallow_untyped_defs = true
+warn_unused_ignores = true
 exclude = ['\.venv']
 
 [tool.pyright]

@@ -29,6 +29,7 @@ from smp import zephyr_management as zephyr
 from smp.user import intercreate as ic
 
 if TYPE_CHECKING:
+    from types_bits import u8
     from typing_extensions import TypeIs
 
     from smp import error as smperror
@@ -64,7 +65,7 @@ def _request(request: SMPRequest[TRep, TEr1, TEr2]) -> TRep | TEr1 | TEr2:
 def _client_owned_frame(
     request: SMPRequest[TRep, TEr1, TEr2],
     *,
-    sequence: int,
+    sequence: u8,
     version: smpheader.Version,
     flags: smpheader.Flag,
 ) -> smpmessage.Frame[Any]:

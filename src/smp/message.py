@@ -6,13 +6,16 @@ An SMP message is a `Frame`: an SMP `Header` and its CBOR payload `Data`.
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Any, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
 import msgspec
 import msgspec_cbor
 
 from smp import header as smpheader
 from smp.exceptions import SMPMalformed, SMPMismatchedGroupId
+
+if TYPE_CHECKING:
+    from types_bits import u8
 
 T = TypeVar("T", bound="Data")
 
@@ -37,7 +40,7 @@ class Data(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_field
 
     def to_frame(
         self: T,
-        sequence: int,
+        sequence: u8,
         version: smpheader.Version = smpheader.Version.V2,
         flags: smpheader.Flag | None = None,
     ) -> Frame[T]:
