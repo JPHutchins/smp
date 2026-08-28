@@ -55,14 +55,18 @@ mypy linting and by Pydantic at runtime.
 
 ## Serialization
 
-There are a few optional arguments that are common to all SMP messages when they
-are created.
+`to_frame()` synthesizes the SMP header for a payload and takes a few arguments
+that are common to all SMP messages.
 
--   `header` is the SMP header.  Typically this can be left as `None` and will be
-    so that the header is created automatically.
+-   `sequence` is required and is a `types_bits.u8`, so the header's 8 bit field
+    is enforced by your type checker rather than by a `struct.error` at runtime.
+    The sequence space belongs to the SMP client, which is the only thing that
+    can know which sequence numbers are in flight.
 -   `version` is the SMP version.  This defaults to `smp.header.Version.V2`.
--   `sequence` is the sequence number of the message.  If not provided, it will
-    be automatically generated using an incrementing counter.
+-   `flags` default to the flags of the message type.
+
+If you have already formed a header, pair it with its payload using `load()`
+rather than `to_frame()`.
 
 Take a look at `smp.message` for more information on the base classes.
 
@@ -101,7 +105,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 if TYPE_CHECKING:
+    from types_bits import u8
+
     from smp import error as smperror
+    from smp import header as smpheader
     from smp import message as smpmessage
 
 _TRep_co = TypeVar(
@@ -124,4 +131,6 @@ class SMPRequest(Protocol[_TRep_co, _TEr1_co, _TEr2_co]):
     def _ErrorV1(self) -> type[_TEr1_co]: ...
     @property
     def _ErrorV2(self) -> type[_TEr2_co]: ...
-    def to_frame(self) -> smpmessage.Frame[Any]: ...
+    def to_frame(
+        self, sequence: u8, version: smpheader.Version = ..., flags: smpheader.Flag | None = ...
+    ) -> smpmessage.Frame[Any]: ...

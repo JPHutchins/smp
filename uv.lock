@@ -6,8 +6,8 @@ resolution-markers = [
     "python_full_version == '3.14.*' and sys_platform == 'win32'",
     "python_full_version == '3.14.*' and sys_platform != 'win32'",
     "python_full_version >= '3.11' and python_full_version < '3.14' and sys_platform == 'win32'",
-    "python_full_version < '3.11' and sys_platform == 'win32'",
     "python_full_version >= '3.11' and python_full_version < '3.14' and sys_platform != 'win32'",
+    "python_full_version < '3.11' and sys_platform == 'win32'",
     "python_full_version < '3.11' and sys_platform != 'win32'",
 ]
 
@@ -1986,6 +1986,7 @@ dependencies = [
     { name = "crcmod" },
     { name = "msgspec" },
     { name = "msgspec-cbor" },
+    { name = "types-bits" },
 ]
 
 [package.dev-dependencies]
@@ -2011,6 +2012,7 @@ requires-dist = [
     { name = "crcmod", specifier = ">=1.7,<2" },
     { name = "msgspec", specifier = ">=0.21.1" },
     { name = "msgspec-cbor", specifier = ">=0.2,<0.3" },
+    { name = "types-bits", specifier = ">=0.2,<0.3" },
 ]
 
 [package.metadata.requires-dev]
@@ -2146,6 +2148,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b1/13/e5feb138888de1e95037c843571bbbd4ac21bf0a190507468098599a321f/ty-0.0.59-py3-none-win32.whl", hash = "sha256:cf8abb4b8095c5fe39102b8127f5886db308c8d4600909ddbc905512ce9c8163", size = 11179249, upload-time = "2026-07-12T20:21:55.752Z" },
     { url = "https://files.pythonhosted.org/packages/76/dd/52914dcbeeba92c207de40ef7109a58dcb5527aeb21c8f8feb7402aa9e29/ty-0.0.59-py3-none-win_amd64.whl", hash = "sha256:1dde20a82243d24407869e5a608c2f15efddd5cefc662aef461a5af84bfb3f8b", size = 12251079, upload-time = "2026-07-12T20:21:58.1Z" },
     { url = "https://files.pythonhosted.org/packages/d4/8f/ac36fde77e223297454c1e0aeb8888c169eaacf3163bb609e3af942c88cb/ty-0.0.59-py3-none-win_arm64.whl", hash = "sha256:987043ee9e021f49493d9135891ac69c1affeee0d4ad4480c5fa4d9c975fc91b", size = 11650921, upload-time = "2026-07-12T20:22:00.348Z" },
+]
+
+[[package]]
+name = "types-bits"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b3/f6/2a6f942fd4b9324fa2cead74f7b85a21ccbdd0ddddce6de87bf00ac528e7/types_bits-0.2.0.tar.gz", hash = "sha256:0e9a45d6614551043880e5f47c70981b39d78bc1c2a018d1ad4324bccf60079c", size = 119348, upload-time = "2026-08-28T22:19:19.983Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/41/cf41a0415d18b66378abc956034e417acccef3462888c173c8d53ed4ff87/types_bits-0.2.0-py3-none-any.whl", hash = "sha256:810b8e773b0ffd80fb589185abc21641fddba234a8ebbb7ce55f3f5d6dc8cf6d", size = 13716, upload-time = "2026-08-28T22:19:18.886Z" },
 ]
 
 [[package]]

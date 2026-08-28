@@ -18,6 +18,7 @@ from typing_extensions import assert_never, assert_type
 from smp import SMPRequest
 from smp import enumeration_management as enum
 from smp import file_management as fs
+from smp import header as smpheader
 from smp import image_management as img
 from smp import message as smpmessage
 from smp import os_management as os
@@ -28,6 +29,7 @@ from smp import zephyr_management as zephyr
 from smp.user import intercreate as ic
 
 if TYPE_CHECKING:
+    from types_bits import u8
     from typing_extensions import TypeIs
 
     from smp import error as smperror
@@ -58,6 +60,37 @@ def error(response: smpmessage.Response) -> TypeIs[smperror.ErrorV1 | smperror.E
 def _request(request: SMPRequest[TRep, TEr1, TEr2]) -> TRep | TEr1 | TEr2:
     """Stand-in for `smpclient.SMPClient.request` that drives the static checks."""
     raise NotImplementedError
+
+
+def _client_owned_frame(
+    request: SMPRequest[TRep, TEr1, TEr2],
+    *,
+    sequence: u8,
+    version: smpheader.Version,
+    flags: smpheader.Flag,
+) -> smpmessage.Frame[Any]:
+    """An SMP client owning its sequence space and its SMP version.
+
+    The sequence space belongs to the client, so `SMPRequest` must expose the
+    header knobs that `Data.to_frame` accepts; hiding them forced every client
+    onto one process-global counter.
+    """
+    return request.to_frame(sequence, version=version, flags=flags)
+
+
+def _check_client_owned_frame() -> None:
+    _client_owned_frame(
+        os.EchoWriteRequest(d="hello"),
+        sequence=0,
+        version=smpheader.Version.V1,
+        flags=smpheader.Flag.UNUSED,
+    )
+    _client_owned_frame(
+        img.ImageStatesReadRequest(),
+        sequence=0xFF,
+        version=smpheader.Version.V2,
+        flags=smpheader.Flag.UNUSED,
+    )
 
 
 def _check_read_narrowing() -> None:

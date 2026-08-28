@@ -12,6 +12,8 @@ import pytest
 from smp import header
 
 if TYPE_CHECKING:
+    from types_bits import u8
+
     from smp.message import Data
 
 pytestmark = pytest.mark.slow
@@ -20,7 +22,7 @@ pytestmark = pytest.mark.slow
 class Record(NamedTuple):
     message: str
     version: int
-    sequence: int
+    sequence: u8
     kwargs: dict[str, Any]
     bytes: str
 
