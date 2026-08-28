@@ -1,8 +1,10 @@
 """Tests for user-defined inheritance of classes."""
 
+from __future__ import annotations
+
 import struct
 from enum import IntEnum
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import pytest
 
@@ -11,6 +13,9 @@ from smp import image_management as smpimg
 from smp import message as smpmsg
 from smp import os_management as smpos
 from smp.exceptions import SMPMalformed, SMPMismatchedGroupId
+
+if TYPE_CHECKING:
+    from types_bits import u8
 
 USER_GROUP_ID_MIN: Final = 64
 
@@ -118,7 +123,7 @@ def test_invalid_command_id() -> None:
 
 
 @pytest.mark.parametrize("sequence", [0, 1, 0x2A, 0xFF])
-def test_to_frame_sequence_is_caller_owned(sequence: int) -> None:
+def test_to_frame_sequence_is_caller_owned(sequence: u8) -> None:
     """The caller's sequence reaches the wire verbatim; `smp` never assigns one."""
     frame = smpimg.ImageStatesReadRequest().to_frame(sequence)
     assert frame.header.sequence == sequence
@@ -132,8 +137,9 @@ def test_to_frame_requires_sequence() -> None:
 
 @pytest.mark.parametrize("sequence", [-1, 0x100])
 def test_to_frame_rejects_out_of_range_sequence(sequence: int) -> None:
+    """`u8` rejects these statically; an unchecked caller still fails at `struct`."""
     with pytest.raises(struct.error):
-        smpimg.ImageStatesReadRequest().to_frame(sequence=sequence)
+        smpimg.ImageStatesReadRequest().to_frame(sequence)  # type: ignore[arg-type]
 
 
 def test_loads_rejects_mismatched_group_id() -> None:
