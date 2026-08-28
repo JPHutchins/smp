@@ -117,6 +117,25 @@ def test_invalid_command_id() -> None:
         B().to_frame(sequence=0)
 
 
+@pytest.mark.parametrize("sequence", [0, 1, 0x2A, 0xFF])
+def test_to_frame_sequence_is_caller_owned(sequence: int) -> None:
+    """The caller's sequence reaches the wire verbatim; `smp` never assigns one."""
+    frame = smpimg.ImageStatesReadRequest().to_frame(sequence)
+    assert frame.header.sequence == sequence
+    assert smpimg.ImageStatesReadRequest.loads(bytes(frame)) == frame
+
+
+def test_to_frame_requires_sequence() -> None:
+    with pytest.raises(TypeError):
+        smpimg.ImageStatesReadRequest().to_frame()  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize("sequence", [-1, 0x100])
+def test_to_frame_rejects_out_of_range_sequence(sequence: int) -> None:
+    with pytest.raises(struct.error):
+        smpimg.ImageStatesReadRequest().to_frame(sequence=sequence)
+
+
 def test_loads_rejects_mismatched_group_id() -> None:
     wire = bytes(smpimg.ImageStatesReadRequest().to_frame(sequence=0))
     with pytest.raises(SMPMismatchedGroupId):
