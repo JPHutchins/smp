@@ -1,13 +1,21 @@
 """Tests for user-defined inheritance of classes."""
 
+from __future__ import annotations
+
 import struct
 from enum import IntEnum
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import pytest
 
 from smp import header as smphdr
+from smp import image_management as smpimg
 from smp import message as smpmsg
+from smp import os_management as smpos
+from smp.exceptions import SMPMalformed, SMPMismatchedGroupId
+
+if TYPE_CHECKING:
+    from types_bits import u8
 
 USER_GROUP_ID_MIN: Final = 64
 
@@ -15,7 +23,7 @@ USER_GROUP_ID_MIN: Final = 64
 def test_custom_ReadRequest() -> None:
     """Test ReadRequest inheritance."""
 
-    class A(smpmsg.ReadRequest):
+    class A(smpmsg.ReadRequest, frozen=True):
         _GROUP_ID = USER_GROUP_ID_MIN
         _COMMAND_ID = 0
 
@@ -23,7 +31,7 @@ def test_custom_ReadRequest() -> None:
     assert a._GROUP_ID == USER_GROUP_ID_MIN
     assert a._COMMAND_ID == 0
 
-    class B(smpmsg.ReadRequest):
+    class B(smpmsg.ReadRequest, frozen=True):
         _GROUP_ID = 65
         _COMMAND_ID = 0
 
@@ -35,7 +43,7 @@ def test_custom_ReadRequest() -> None:
         C = 64
         D = 65
 
-    class C(smpmsg.ReadRequest):
+    class C(smpmsg.ReadRequest, frozen=True):
         _GROUP_ID = MyGroupId.C
         _COMMAND_ID = 0
 
@@ -43,7 +51,7 @@ def test_custom_ReadRequest() -> None:
     assert c._GROUP_ID == MyGroupId.C
     assert c._COMMAND_ID == 0
 
-    class D(smpmsg.ReadRequest):
+    class D(smpmsg.ReadRequest, frozen=True):
         _GROUP_ID = MyGroupId.D
         _COMMAND_ID = 0
 
@@ -65,10 +73,10 @@ def test_custom_ReadRequest() -> None:
 )
 @pytest.mark.parametrize("group_id", [USER_GROUP_ID_MIN, 0xFFFF])
 @pytest.mark.parametrize("command_id", [0, 1, 0xFF])
-def test_custom_message(cls: type[smpmsg._MessageBase], group_id: int, command_id: int) -> None:
+def test_custom_message(cls: type[smpmsg.Data], group_id: int, command_id: int) -> None:
     """Test ReadRequest inheritance."""
 
-    class CustomInts(cls):  # type: ignore
+    class CustomInts(cls):  # type: ignore[valid-type, misc]
         _OP = getattr(cls, "_OP", smphdr.OP.READ)
         _GROUP_ID = group_id
         _COMMAND_ID = command_id
@@ -81,38 +89,67 @@ def test_custom_message(cls: type[smpmsg._MessageBase], group_id: int, command_i
 def test_invalid_group_id() -> None:
     """Test invalid group_id."""
 
-    with pytest.raises(struct.error):
-
-        class A(smpmsg.ReadRequest):
-            _GROUP_ID = 0x10000
-            _COMMAND_ID = 0
-
-        A()
+    class A(smpmsg.ReadRequest, frozen=True):
+        _GROUP_ID = 0x10000
+        _COMMAND_ID = 0
 
     with pytest.raises(struct.error):
+        A().to_frame(sequence=0)
 
-        class B(smpmsg.ReadRequest):
-            _GROUP_ID = -1
-            _COMMAND_ID = 0
+    class B(smpmsg.ReadRequest, frozen=True):
+        _GROUP_ID = -1
+        _COMMAND_ID = 0
 
-        B()
+    with pytest.raises(struct.error):
+        B().to_frame(sequence=0)
 
 
 def test_invalid_command_id() -> None:
     """Test invalid command_id."""
 
-    with pytest.raises(struct.error):
-
-        class A(smpmsg.ReadRequest):
-            _GROUP_ID = USER_GROUP_ID_MIN
-            _COMMAND_ID = 0x100
-
-        A()
+    class A(smpmsg.ReadRequest, frozen=True):
+        _GROUP_ID = USER_GROUP_ID_MIN
+        _COMMAND_ID = 0x100
 
     with pytest.raises(struct.error):
+        A().to_frame(sequence=0)
 
-        class B(smpmsg.ReadRequest):
-            _GROUP_ID = USER_GROUP_ID_MIN
-            _COMMAND_ID = -1
+    class B(smpmsg.ReadRequest, frozen=True):
+        _GROUP_ID = USER_GROUP_ID_MIN
+        _COMMAND_ID = -1
 
-        B()
+    with pytest.raises(struct.error):
+        B().to_frame(sequence=0)
+
+
+@pytest.mark.parametrize("sequence", [0, 1, 0x2A, 0xFF])
+def test_to_frame_sequence_is_caller_owned(sequence: u8) -> None:
+    """The caller's sequence reaches the wire verbatim; `smp` never assigns one."""
+    frame = smpimg.ImageStatesReadRequest().to_frame(sequence)
+    assert frame.header.sequence == sequence
+    assert smpimg.ImageStatesReadRequest.loads(bytes(frame)) == frame
+
+
+def test_to_frame_requires_sequence() -> None:
+    with pytest.raises(TypeError):
+        smpimg.ImageStatesReadRequest().to_frame()  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize("sequence", [-1, 0x100])
+def test_to_frame_rejects_out_of_range_sequence(sequence: int) -> None:
+    """`u8` rejects these statically; an unchecked caller still fails at `struct`."""
+    with pytest.raises(struct.error):
+        smpimg.ImageStatesReadRequest().to_frame(sequence)  # type: ignore[arg-type]
+
+
+def test_loads_rejects_mismatched_group_id() -> None:
+    wire = bytes(smpimg.ImageStatesReadRequest().to_frame(sequence=0))
+    with pytest.raises(SMPMismatchedGroupId):
+        smpos.EchoWriteResponse.loads(wire)
+
+
+def test_loads_rejects_length_mismatch() -> None:
+    wire = bytearray(bytes(smpimg.ImageStatesReadRequest().to_frame(sequence=0)))
+    wire[2:4] = b"\xff\xff"  # corrupt the header length field
+    with pytest.raises(SMPMalformed):
+        smpimg.ImageStatesReadRequest.loads(bytes(wire))

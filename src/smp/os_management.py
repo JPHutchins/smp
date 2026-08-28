@@ -3,24 +3,55 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+import msgspec
+import msgspec_cbor
 
 from smp import error, header, message
 
 
-class EchoWriteRequest(message.WriteRequest):
-    """Echo back the provided string."""
+@unique
+class OS_MGMT_RET_RC(IntEnum):
+    """OS Management return codes."""
+
+    OK = 0
+    """No error, this is implied if there is no ret value in the response."""
+
+    UNKNOWN = 1
+    """Unknown error occurred."""
+
+    INVALID_FORMAT = 2
+    """The provided format value is not valid."""
+
+    QUERY_YIELDS_NO_ANSWER = 3
+    """Query was not recognized."""
+
+    RTC_NOT_SET = 4
+    """RTC is not set."""
+
+    RTC_COMMAND_FAILED = 5
+    """RTC command failed."""
+
+
+class OSManagementErrorV1(error.ErrorV1, frozen=True):
+    """OS Management error response."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.ECHO
-
-    d: str
-    """String to echo."""
 
 
-class EchoWriteResponse(message.WriteResponse):
+class OSManagementErrorV2(error.ErrorV2[OS_MGMT_RET_RC], frozen=True):
+    """OS Management error response."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+
+
+class _OSGroupBase:
+    _ErrorV1 = OSManagementErrorV1
+    _ErrorV2 = OSManagementErrorV2
+
+
+class EchoWriteResponse(message.WriteResponse, frozen=True):
     """Success response to an echo request."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
@@ -28,6 +59,17 @@ class EchoWriteResponse(message.WriteResponse):
 
     r: str
     """Echoed string."""
+
+
+class EchoWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
+    """Echo back the provided string."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.ECHO
+    _Response = EchoWriteResponse
+
+    d: str
+    """String to echo."""
 
 
 @unique
@@ -45,7 +87,14 @@ class BootMode(IntEnum):
     """Bootloader boot mode, e.g. serial recovery for MCUboot."""
 
 
-class ResetWriteRequest(message.WriteRequest):
+class ResetWriteResponse(message.WriteResponse, frozen=True):
+    """Success response to a reset request."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.RESET
+
+
+class ResetWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
     """Performs reset of system.
 
     The device should issue response before resetting so that the SMP client
@@ -61,6 +110,7 @@ class ResetWriteRequest(message.WriteRequest):
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.RESET
+    _Response = ResetWriteResponse
 
     force: Literal[0, 1] | None = None
     """Force reset.
@@ -70,9 +120,7 @@ class ResetWriteRequest(message.WriteRequest):
     following map may be sent to force a reset
     """
 
-    boot_mode: BootMode | Annotated[int, Field(ge=0, le=255)] | None = Field(
-        default=None, union_mode="left_to_right"
-    )
+    boot_mode: BootMode | int | None = None
     """Boot mode to set via the retention boot mode module before resetting.
 
     A value of `BootMode.BOOTLOADER` (1) requests, for example, that an MCUboot
@@ -86,25 +134,25 @@ class ResetWriteRequest(message.WriteRequest):
     management group in Zephyr v4.2.0 (zephyrproject-rtos/zephyr#91510).
     """
 
+    def __post_init__(self) -> None:
+        if self.boot_mode is not None and not 0 <= self.boot_mode <= 255:
+            raise ValueError(f"boot_mode {self.boot_mode!r} is not a uint8 (0-255)")
 
-class ResetWriteResponse(message.WriteResponse):
-    """Success response to a reset request."""
+    @classmethod
+    def _convert_mapping(cls, data: dict[str, Any]) -> ResetWriteRequest:
+        cls._validate_mapping(data)
+        return cls(
+            force=msgspec.convert(data["force"], type=Literal[0, 1]) if "force" in data else None,
+            boot_mode=header.resolve_int_enum(
+                msgspec.convert(data["boot_mode"], type=int), BootMode
+            )
+            if "boot_mode" in data
+            else None,
+        )
 
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.RESET
 
-
-class TaskStatisticsReadRequest(message.ReadRequest):
-    """Request task statistics."""
-
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
-
-
-class TaskStatistics(BaseModel):
+class TaskStatistics(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """Task statistics."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     prio: int
     """Task priority."""
@@ -132,14 +180,14 @@ class TaskStatistics(BaseModel):
     """Set to 0 by Zephyr."""
 
 
-class TaskStatisticsZephyr(BaseModel):
+class TaskStatisticsZephyr(
+    msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True
+):
     """Task statistics for Zephyr when CONFIG_MCUMGR_GRP_OS_TASKSTAT_ONLY_SUPPORTED_STATS=y.
 
     In this configuration, Zephyr may omit fields that are not supported by the underlying RTOS.
     Only prio, tid, and state are guaranteed to be present.
     """
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     prio: int
     """Task priority."""
@@ -167,7 +215,15 @@ class TaskStatisticsZephyr(BaseModel):
     """Set to 0 by Zephyr."""
 
 
-class TaskStatisticsReadResponse(message.ReadResponse):
+def _discriminate_task(task: dict[str, Any]) -> TaskStatistics | TaskStatisticsZephyr:
+    # No wire tag; try the full struct first, fall back to the Zephyr subset.
+    try:
+        return msgspec.convert(task, type=TaskStatistics)
+    except msgspec.ValidationError:
+        return msgspec.convert(task, type=TaskStatisticsZephyr)
+
+
+class TaskStatisticsReadResponse(message.ReadResponse, frozen=True):
     """Task statistics response."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
@@ -176,18 +232,25 @@ class TaskStatisticsReadResponse(message.ReadResponse):
     tasks: dict[str, TaskStatistics | TaskStatisticsZephyr]
     """Task statistics map."""
 
+    @classmethod
+    def _convert_mapping(cls, data: dict[str, Any]) -> TaskStatisticsReadResponse:
+        cls._validate_mapping(data)
+        tasks = msgspec.convert(data["tasks"], type=dict[str, dict[str, Any]])
+        return cls(tasks={name: _discriminate_task(t) for name, t in tasks.items()})
 
-class MemoryPoolStatisticsReadRequest(message.ReadRequest):
-    """Request memory pool statistics."""
+
+class TaskStatisticsReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
+    """Request task statistics."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
+    _COMMAND_ID = header.CommandId.OSManagement.TASK_STATS
+    _Response = TaskStatisticsReadResponse
 
 
-class MemoryPoolStatistics(BaseModel):
+class MemoryPoolStatistics(
+    msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True
+):
     """Memory pool statistics."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     blksize: int
     """Size of the memory block in the pool."""
@@ -199,23 +262,32 @@ class MemoryPoolStatistics(BaseModel):
     """Lowest number of free blocks the pool reached during run-time."""
 
 
-class MemoryPoolStatisticsReadResponse(message.ReadResponse):
+class MemoryPoolStatisticsReadResponse(message.ReadResponse, frozen=True):
     """The memory pools are accessed by name."""
-
-    model_config = ConfigDict(extra="allow", frozen=True)
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
 
+    pools: dict[str, MemoryPoolStatistics]
+    """Memory pool statistics keyed by pool name."""
 
-class DateTimeReadRequest(message.ReadRequest):
-    """Request the current date and time."""
+    def __bytes__(self) -> bytes:
+        return msgspec_cbor.encode(self.pools, order="canonical")
+
+    @classmethod
+    def _convert_mapping(cls, data: dict[str, Any]) -> MemoryPoolStatisticsReadResponse:
+        return cls(pools=msgspec.convert(data, type=dict[str, MemoryPoolStatistics]))
+
+
+class MemoryPoolStatisticsReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
+    """Request memory pool statistics."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
+    _COMMAND_ID = header.CommandId.OSManagement.MEMORY_POOL_STATS
+    _Response = MemoryPoolStatisticsReadResponse
 
 
-class DateTimeReadResponse(message.ReadResponse):
+class DateTimeReadResponse(message.ReadResponse, frozen=True):
     """Response to a date and time request."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
@@ -224,30 +296,32 @@ class DateTimeReadResponse(message.ReadResponse):
     datetime: str
 
 
-class DateTimeWriteRequest(message.WriteRequest):
-    """Set the current date and time."""
+class DateTimeReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
+    """Request the current date and time."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
+    _Response = DateTimeReadResponse
 
-    datetime: str
 
-
-class DateTimeWriteResponse(message.WriteResponse):
+class DateTimeWriteResponse(message.WriteResponse, frozen=True):
     """Success response to a date and time request."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
 
 
-class MCUMgrParametersReadRequest(message.ReadRequest):
-    """Request MCU Manager parameters."""
+class DateTimeWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
+    """Set the current date and time."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
+    _COMMAND_ID = header.CommandId.OSManagement.DATETIME_STRING
+    _Response = DateTimeWriteResponse
+
+    datetime: str
 
 
-class MCUMgrParametersReadResponse(message.ReadResponse):
+class MCUMgrParametersReadResponse(message.ReadResponse, frozen=True):
     """Success response to a MCU Manager parameters request."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
@@ -259,11 +333,30 @@ class MCUMgrParametersReadResponse(message.ReadResponse):
     """Number of SMP buffers."""
 
 
-class OSApplicationInfoReadRequest(message.ReadRequest):
+class MCUMgrParametersReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
+    """Request MCU Manager parameters."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.MCUMGR_PARAMETERS
+    _Response = MCUMgrParametersReadResponse
+
+
+class OSApplicationInfoReadResponse(message.ReadResponse, frozen=True):
+    """Success response to an application information request."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
+
+    output: str
+    """Text response including requested parameters."""
+
+
+class OSApplicationInfoReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
     """Request information about the application running on the device."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
+    _Response = OSApplicationInfoReadResponse
 
     format: str | None = None
     """Format specifier of returned response.
@@ -287,34 +380,6 @@ class OSApplicationInfoReadRequest(message.ReadRequest):
     """
 
 
-class OSApplicationInfoReadResponse(message.ReadResponse):
-    """Success response to an application information request."""
-
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.OS_APPLICATION_INFO
-
-    output: str
-    """Text response including requested parameters."""
-
-
-class BootloaderInformationReadRequest(message.ReadRequest):
-    """Request bootloader information."""
-
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
-    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
-
-    query: str | None = None
-    """Is string representing query for parameters.
-
-    With no restrictions how the query looks like as processing of query is left
-    for bootloader backend. If there is no query, then response will return string
-    identifying the bootloader.
-
-    MCUboot supports the query string,"mode".  The response to mode is of type
-    `MCUbootMode`.
-    """
-
-
 @unique
 class MCUbootMode(IntEnum):
     UNKNOWN = -1
@@ -327,16 +392,16 @@ class MCUbootMode(IntEnum):
     RAM_LOADER = 6
 
 
-class MCUbootModeQueryResponse(BaseModel):
+class MCUbootModeQueryResponse(
+    msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True
+):
     """Response to a MCUboot mode query."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
     mode: MCUbootMode
-    no_downgrade: bool | None = Field(alias="no-downgrade", default=None)
+    no_downgrade: bool | None = msgspec.field(name="no-downgrade", default=None)
 
 
-class BootloaderInformationReadResponse(message.ReadResponse):
+class BootloaderInformationReadResponse(message.ReadResponse, frozen=True):
     """Success response to a bootloader information request."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
@@ -344,7 +409,7 @@ class BootloaderInformationReadResponse(message.ReadResponse):
 
     bootloader: str
     """String identifying the bootloader.  For MCUboot it will be "MCUboot"."""
-    response: MCUbootModeQueryResponse | Any | None = None
+    response: MCUbootModeQueryResponse | None = None
     """Response to “query”.
 
     This is optional and may be left out in case when query yields no response,
@@ -353,36 +418,20 @@ class BootloaderInformationReadResponse(message.ReadResponse):
     be a map, that is dependent on bootloader backend and query."""
 
 
-@unique
-class OS_MGMT_RET_RC(IntEnum):
-    """OS Management return codes."""
-
-    OK = 0
-    """No error, this is implied if there is no ret value in the response."""
-
-    UNKNOWN = 1
-    """Unknown error occurred."""
-
-    INVALID_FORMAT = 2
-    """The provided format value is not valid."""
-
-    QUERY_YIELDS_NO_ANSWER = 3
-    """Query was not recognized."""
-
-    RTC_NOT_SET = 4
-    """RTC is not set."""
-
-    RTC_COMMAND_FAILED = 5
-    """RTC command failed."""
-
-
-class OSManagementErrorV1(error.ErrorV1):
-    """OS Management error response."""
+class BootloaderInformationReadRequest(message.ReadRequest, _OSGroupBase, frozen=True):
+    """Request bootloader information."""
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
+    _Response = BootloaderInformationReadResponse
 
+    query: str | None = None
+    """Is string representing query for parameters.
 
-class OSManagementErrorV2(error.ErrorV2[OS_MGMT_RET_RC]):
-    """OS Management error response."""
+    With no restrictions how the query looks like as processing of query is left
+    for bootloader backend. If there is no query, then response will return string
+    identifying the bootloader.
 
-    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    MCUboot supports the query string,"mode".  The response to mode is of type
+    `MCUbootMode`.
+    """

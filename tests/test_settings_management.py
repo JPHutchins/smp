@@ -2,171 +2,141 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeVar
-
-import cbor2
-
 from smp import header as smphdr
-from smp import message as smpmsg
 from smp import settings_management as smpset
-from tests.helpers import make_assert_header
+from tests.helpers import assert_frame
 
-T = TypeVar("T", bound=smpmsg._MessageBase)
-
-
-def _do_test(
-    msg: type[T],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.SettingsManagement,
-    data: dict[str, Any],
-) -> T:
-    cbor = cbor2.dumps(data, canonical=True)
-    assert_header = make_assert_header(
-        smphdr.GroupId.SETTINGS_MANAGEMENT, op, command_id, len(cbor)
-    )
-
-    def _assert_common(r: smpmsg._MessageBase) -> None:
-        assert_header(r)
-        for k, v in data.items():
-            assert v == getattr(r, k)
-        assert cbor == r.BYTES[8:]
-
-    r = msg(**data)
-
-    _assert_common(r)  # serialize
-    _assert_common(msg.loads(r.BYTES))  # deserialize
-
-    return r
+setcmd = smphdr.CommandId.SettingsManagement
 
 
 def test_ReadSettingRequest() -> None:
-    r = _do_test(
-        smpset.ReadSettingRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {"name": "example"},
+    frame = assert_frame(
+        smpset.ReadSettingRequest(name="example"),
+        op=smphdr.OP.READ,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
-    assert r.name == "example"
-    assert r.max_size is None
+    assert frame.data.name == "example"
+    assert frame.data.max_size is None
 
-    r = _do_test(
-        smpset.ReadSettingRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {"name": "example", "max_size": 256},
+    frame = assert_frame(
+        smpset.ReadSettingRequest(name="example", max_size=256),
+        op=smphdr.OP.READ,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
-    assert r.name == "example"
-    assert r.max_size == 256
+    assert frame.data.name == "example"
+    assert frame.data.max_size == 256
 
 
 def test_ReadSettingResponse() -> None:
-    r = _do_test(
-        smpset.ReadSettingResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {"val": b"example"},
+    frame = assert_frame(
+        smpset.ReadSettingResponse(val=b"example"),
+        op=smphdr.OP.READ_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
-    assert r.val == b"example"
-    assert r.max_size is None
+    assert frame.data.val == b"example"
+    assert frame.data.max_size is None
 
-    r = _do_test(
-        smpset.ReadSettingResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {"val": b"example", "max_size": 256},
+    frame = assert_frame(
+        smpset.ReadSettingResponse(val=b"example", max_size=256),
+        op=smphdr.OP.READ_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
-    assert r.val == b"example"
-    assert r.max_size == 256
+    assert frame.data.val == b"example"
+    assert frame.data.max_size == 256
 
 
 def test_WriteSettingRequest() -> None:
-    r = _do_test(
-        smpset.WriteSettingRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {"name": "example", "val": b"example"},
+    frame = assert_frame(
+        smpset.WriteSettingRequest(name="example", val=b"example"),
+        op=smphdr.OP.WRITE,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
-    assert r.name == "example"
-    assert r.val == b"example"
+    assert frame.data.name == "example"
+    assert frame.data.val == b"example"
 
 
 def test_WriteSettingResponse() -> None:
-    _do_test(
-        smpset.WriteSettingResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.SettingsManagement.READ_WRITE_SETTING,
-        {},
+    assert_frame(
+        smpset.WriteSettingResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.READ_WRITE_SETTING,
     )
 
 
 def test_DeleteSettingRequest() -> None:
-    r = _do_test(
-        smpset.DeleteSettingRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.SettingsManagement.DELETE_SETTING,
-        {"name": "example"},
+    frame = assert_frame(
+        smpset.DeleteSettingRequest(name="example"),
+        op=smphdr.OP.WRITE,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.DELETE_SETTING,
     )
-    assert r.name == "example"
+    assert frame.data.name == "example"
 
 
 def test_DeleteSettingResponse() -> None:
-    _do_test(
-        smpset.DeleteSettingResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.SettingsManagement.DELETE_SETTING,
-        {},
+    assert_frame(
+        smpset.DeleteSettingResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.DELETE_SETTING,
     )
 
 
 def test_CommitSettingsRequest() -> None:
-    _do_test(
-        smpset.CommitSettingsRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS,
-        {},
+    assert_frame(
+        smpset.CommitSettingsRequest(),
+        op=smphdr.OP.WRITE,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.COMMIT_SETTINGS,
     )
 
 
 def test_CommitSettingsResponse() -> None:
-    _do_test(
-        smpset.CommitSettingsResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.SettingsManagement.COMMIT_SETTINGS,
-        {},
+    assert_frame(
+        smpset.CommitSettingsResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.COMMIT_SETTINGS,
     )
 
 
 def test_LoadSettingsRequest() -> None:
-    _do_test(
-        smpset.LoadSettingsRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS,
-        {},
+    assert_frame(
+        smpset.LoadSettingsRequest(),
+        op=smphdr.OP.READ,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.LOAD_SAVE_SETTINGS,
     )
 
 
 def test_LoadSettingsResponse() -> None:
-    _do_test(
-        smpset.LoadSettingsResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS,
-        {},
+    assert_frame(
+        smpset.LoadSettingsResponse(),
+        op=smphdr.OP.READ_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.LOAD_SAVE_SETTINGS,
     )
 
 
 def test_SaveSettingsRequest() -> None:
-    _do_test(
-        smpset.SaveSettingsRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS,
-        {},
+    assert_frame(
+        smpset.SaveSettingsRequest(),
+        op=smphdr.OP.WRITE,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.LOAD_SAVE_SETTINGS,
     )
 
 
 def test_SaveSettingsResponse() -> None:
-    _do_test(
-        smpset.SaveSettingsResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.SettingsManagement.LOAD_SAVE_SETTINGS,
-        {},
+    assert_frame(
+        smpset.SaveSettingsResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=smphdr.GroupId.SETTINGS_MANAGEMENT,
+        command_id=setcmd.LOAD_SAVE_SETTINGS,
     )
