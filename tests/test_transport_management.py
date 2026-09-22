@@ -2,168 +2,152 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, TypeVar
+from typing import Any, ClassVar, Literal
 
-import cbor2
+import msgspec
+import msgspec_cbor
 import pytest
-from pydantic import ValidationError
 
 from smp import header as smphdr
 from smp import message as smpmsg
 from smp import transport_management as smptrans
-from tests.helpers import make_assert_header
+from smp.exceptions import SMPMalformed
+from tests.helpers import assert_frame
 
-if TYPE_CHECKING:
-    from pydantic import BaseModel
-
-T = TypeVar("T", bound=smpmsg._MessageBase)
-
-
-def _do_test(
-    msg: type[T],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.TransportManagement,
-    data: dict[str, Any],
-    nested_model: type[BaseModel] | None = None,
-) -> T:
-    cbor = cbor2.dumps(data, canonical=True)
-    assert_header = make_assert_header(
-        smphdr.GroupId.TRANSPORT_MANAGEMENT, op, command_id, len(cbor)
-    )
-
-    def _assert_common(r: smpmsg._MessageBase) -> None:
-        assert_header(r)
-        for k, v in data.items():
-            if type(v) is tuple and nested_model is not None:
-                for v2 in v:
-                    assert v2 == nested_model(**v2).model_dump(exclude_none=True)
-            else:
-                assert v == getattr(r, k)
-        assert cbor == r.BYTES[8:]
-
-    r = msg(**data)
-
-    _assert_common(r)  # serialize
-    _assert_common(msg.loads(r.BYTES))  # deserialize
-
-    return r
+tcmd = smphdr.CommandId.TransportManagement
+GROUP = smphdr.GroupId.TRANSPORT_MANAGEMENT
 
 
-def _frame(
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.TransportManagement,
-    payload: dict[str, Any],
-) -> bytes:
-    d = cbor2.dumps(payload, canonical=True)
+def _frame(op: smphdr.OP, command_id: smphdr.AnyCommandId, payload: dict[str, Any]) -> bytes:
+    data = msgspec_cbor.encode(payload, order="canonical")
     return (
-        smphdr.Header(
-            op=op,
-            version=smphdr.Version.V2,
-            flags=smphdr.Flag(0),
-            length=len(d),
-            group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
-            sequence=0,
-            command_id=command_id,
-        ).BYTES
-        + d
+        bytes(
+            smphdr.Header(
+                op=op,
+                version=smphdr.Version.V2,
+                flags=smphdr.Flag(0),
+                length=len(data),
+                group_id=GROUP,
+                sequence=0,
+                command_id=command_id,
+            )
+        )
+        + data
     )
 
 
 def test_ConnectRequest() -> None:
-    r = _do_test(
-        smptrans.ConnectRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.CONNECT,
-        {"transport": smptrans.TransportType.SHELL},
+    frame = assert_frame(
+        smptrans.ConnectRequest(transport=smptrans.TransportType.SHELL),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
     )
-    assert type(r.transport) is smptrans.TransportType
+    assert frame.data.transport is smptrans.TransportType.SHELL
 
-    _do_test(
-        smptrans.ConnectRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.CONNECT,
-        {"transport": smptrans.TransportType.RAW_SERIAL, "mode": 0},
+    assert_frame(
+        smptrans.ConnectRequest(transport=smptrans.TransportType.RAW_SERIAL, mode=0),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
     )
+
+
+def test_ConnectRequest_narrows_an_unknown_transport_to_int() -> None:
+    frame = smptrans.ConnectRequest.loads(_frame(smphdr.OP.WRITE, tcmd.CONNECT, {"transport": 9}))
+
+    assert frame.data.transport == 9
+    assert type(frame.data.transport) is int
+
+
+@pytest.mark.parametrize("transport", [smptrans.TransportType.BLUETOOTH, 2])
+def test_ConnectRequest_rejects_bluetooth_on_construction(transport: int) -> None:
+    """Bluetooth takes parameters, so it is outside this variant's domain."""
+
+    with pytest.raises(ValueError):
+        smptrans.ConnectRequest(transport=transport)
+
+
+def test_ConnectRequest_rejects_bluetooth_on_the_wire() -> None:
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.ConnectRequest.loads(_frame(smphdr.OP.WRITE, tcmd.CONNECT, {"transport": 2}))
 
 
 def test_BluetoothConnectRequest() -> None:
-    r = _do_test(
-        smptrans.BluetoothConnectRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.CONNECT,
-        {
-            "transport": smptrans.TransportType.BLUETOOTH,
-            "address": "C0:FF:EE:C0:FF:EE",
-            "address_type": smptrans.BluetoothAddressType.RANDOM,
-            "le_coded": True,
-        },
+    frame = assert_frame(
+        smptrans.BluetoothConnectRequest(
+            transport=smptrans.TransportType.BLUETOOTH,
+            address="C0:FF:EE:C0:FF:EE",
+            address_type=smptrans.BluetoothAddressType.RANDOM,
+            le_coded=True,
+        ),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
     )
-    assert r.address_type is smptrans.BluetoothAddressType.RANDOM
+    assert frame.data.address_type is smptrans.BluetoothAddressType.RANDOM
 
 
 def test_BluetoothConnectRequest_requires_transport() -> None:
     """The discriminant is data, so a payload lacking it is malformed."""
 
-    frame = _frame(
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.CONNECT,
-        {"address": "C0:FF:EE:C0:FF:EE"},
-    )
-
-    with pytest.raises(ValidationError):
-        smptrans.BluetoothConnectRequest.loads(frame)
-
-    with pytest.raises(ValidationError):
-        smptrans.BluetoothConnectRequest(address="C0:FF:EE:C0:FF:EE")  # type: ignore[call-arg]
-
-
-@pytest.mark.parametrize("transport", [smptrans.TransportType.BLUETOOTH, 2])
-def test_ConnectRequest_rejects_bluetooth(transport: int) -> None:
-    """Bluetooth takes parameters, so it is outside this variant's domain."""
-
-    with pytest.raises(ValidationError):
-        smptrans.ConnectRequest(transport=transport)  # type: ignore[arg-type]
-
-
-@pytest.mark.parametrize(
-    "address", ["", "C0:FF:EE:C0:FF", "C0:FF:EE:C0:FF:EE:C0", "C0FFEEC0FFEE", "ZZ:FF:EE:C0:FF:EE"]
-)
-def test_BluetoothConnectRequest_rejects_malformed_address(address: str) -> None:
-    with pytest.raises(ValidationError):
-        smptrans.BluetoothConnectRequest(
-            transport=smptrans.TransportType.BLUETOOTH, address=address
+    with pytest.raises(msgspec.ValidationError):
+        smptrans.BluetoothConnectRequest.loads(
+            _frame(smphdr.OP.WRITE, tcmd.CONNECT, {"address": "C0:FF:EE:C0:FF:EE"})
         )
 
 
 def test_BluetoothConnectRequest_rejects_another_transport() -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError):
         smptrans.BluetoothConnectRequest(
             transport=smptrans.TransportType.SHELL,  # type: ignore[arg-type]
             address="C0:FF:EE:C0:FF:EE",
         )
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(msgspec.DecodeError):
         smptrans.BluetoothConnectRequest.loads(
-            smptrans.ConnectRequest(transport=smptrans.TransportType.SHELL).BYTES
+            _frame(
+                smphdr.OP.WRITE,
+                tcmd.CONNECT,
+                {"transport": 3, "address": "C0:FF:EE:C0:FF:EE"},
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    "address", ["", "C0:FF:EE:C0:FF", "C0:FF:EE:C0:FF:EE:C0", "C0FFEEC0FFEE", "ZZ:FF:EE:C0:FF:EE"]
+)
+def test_BluetoothConnectRequest_rejects_a_malformed_address(address: str) -> None:
+    with pytest.raises(ValueError):
+        smptrans.BluetoothConnectRequest(
+            transport=smptrans.TransportType.BLUETOOTH, address=address
+        )
+
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.BluetoothConnectRequest.loads(
+            _frame(smphdr.OP.WRITE, tcmd.CONNECT, {"transport": 2, "address": address})
         )
 
 
 def test_an_unmodeled_transport_gets_its_own_request_type() -> None:
     """A transport that takes parameters is a sibling variant, never a subclass."""
 
-    class ModbusConnectRequest(smpmsg.WriteRequest):
+    class ModbusConnectRequest(smpmsg.WriteRequest, frozen=True):
         _GROUP_ID = smptrans.GROUP_ID
-        _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
+        _COMMAND_ID = tcmd.CONNECT
 
         transport: Literal[70]
         unit: smptrans.UInt32
         parity: str
 
-    r = ModbusConnectRequest(transport=70, unit=3, parity="even")
+    frame = assert_frame(
+        ModbusConnectRequest(transport=70, unit=3, parity="even"),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
+    )
 
-    assert cbor2.loads(r.BYTES[8:]) == {"transport": 70, "unit": 3, "parity": "even"}
-    assert r == ModbusConnectRequest.loads(r.BYTES)
-    assert not isinstance(r, smptrans.ConnectRequest)
+    assert not isinstance(frame.data, smptrans.ConnectRequest)
 
 
 def test_connect_variants_are_exhaustive() -> None:
@@ -187,51 +171,59 @@ def test_connect_variants_are_exhaustive() -> None:
 
 
 def test_ConnectResponse() -> None:
-    _do_test(
-        smptrans.ConnectResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.TransportManagement.CONNECT,
-        {},
+    assert_frame(
+        smptrans.ConnectResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
+        length=1,
     )
 
 
 def test_DisconnectRequest() -> None:
-    _do_test(
-        smptrans.DisconnectRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.DISCONNECT,
-        {},
+    assert_frame(
+        smptrans.DisconnectRequest(),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.DISCONNECT,
+        length=1,
     )
 
 
 def test_DisconnectTransportRequest() -> None:
-    r = _do_test(
-        smptrans.DisconnectTransportRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.DISCONNECT,
-        {"transport": smptrans.TransportType.BLUETOOTH},
+    frame = assert_frame(
+        smptrans.DisconnectTransportRequest(transport=smptrans.TransportType.BLUETOOTH),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.DISCONNECT,
     )
-    assert type(r.transport) is smptrans.TransportType
+    assert frame.data.transport is smptrans.TransportType.BLUETOOTH
 
 
 def test_DisconnectAllRequest() -> None:
-    _do_test(
-        smptrans.DisconnectAllRequest,
-        smphdr.OP.WRITE,
-        smphdr.CommandId.TransportManagement.DISCONNECT,
-        {"all": True},
+    assert_frame(
+        smptrans.DisconnectAllRequest(all=True),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.DISCONNECT,
     )
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError):
         smptrans.DisconnectAllRequest(all=False)  # type: ignore[arg-type]
+
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.DisconnectAllRequest.loads(
+            _frame(smphdr.OP.WRITE, tcmd.DISCONNECT, {"all": False})
+        )
 
 
 def test_DisconnectResponse() -> None:
-    _do_test(
-        smptrans.DisconnectResponse,
-        smphdr.OP.WRITE_RSP,
-        smphdr.CommandId.TransportManagement.DISCONNECT,
-        {},
+    assert_frame(
+        smptrans.DisconnectResponse(),
+        op=smphdr.OP.WRITE_RSP,
+        group_id=GROUP,
+        command_id=tcmd.DISCONNECT,
+        length=1,
     )
 
 
@@ -251,40 +243,41 @@ def test_disconnect_variants_are_exhaustive() -> None:
 
 
 def test_StatusRequest() -> None:
-    _do_test(
-        smptrans.StatusRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.TransportManagement.STATUS,
-        {},
+    assert_frame(
+        smptrans.StatusRequest(),
+        op=smphdr.OP.READ,
+        group_id=GROUP,
+        command_id=tcmd.STATUS,
+        length=1,
     )
 
 
 def test_UnbridgedStatusResponse() -> None:
-    _do_test(
-        smptrans.UnbridgedStatusResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.STATUS,
-        {"supported": 1, "active": 0},
+    assert_frame(
+        smptrans.UnbridgedStatusResponse(supported=1, active=0),
+        op=smphdr.OP.READ_RSP,
+        group_id=GROUP,
+        command_id=tcmd.STATUS,
     )
 
 
 def test_BridgedStatusResponse() -> None:
-    _do_test(
-        smptrans.BridgedStatusResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.STATUS,
-        {"supported": 1, "active": 1, "bridged": True},
+    assert_frame(
+        smptrans.BridgedStatusResponse(supported=1, active=1, bridged=True),
+        op=smphdr.OP.READ_RSP,
+        group_id=GROUP,
+        command_id=tcmd.STATUS,
     )
 
 
 def test_BridgedToTransportStatusResponse() -> None:
-    r = _do_test(
-        smptrans.BridgedToTransportStatusResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.STATUS,
-        {"supported": 4, "active": 1, "bridged": True, "transport": 2},
+    frame = assert_frame(
+        smptrans.BridgedToTransportStatusResponse(supported=4, active=1, bridged=True, transport=2),
+        op=smphdr.OP.READ_RSP,
+        group_id=GROUP,
+        command_id=tcmd.STATUS,
     )
-    assert r.transport is smptrans.TransportType.BLUETOOTH
+    assert frame.data.transport is smptrans.TransportType.BLUETOOTH
 
 
 def test_status_variants_are_exhaustive() -> None:
@@ -324,33 +317,35 @@ def test_status_variants_are_exhaustive() -> None:
 def test_loads_status_response_picks_the_variant(
     payload: dict[str, Any], variant: type[smpmsg.Response]
 ) -> None:
-    frame = _frame(smphdr.OP.READ_RSP, smphdr.CommandId.TransportManagement.STATUS, payload)
+    frame = smptrans.loads_status_response(_frame(smphdr.OP.READ_RSP, tcmd.STATUS, payload))
 
-    assert type(smptrans.loads_status_response(frame)) is variant
+    assert type(frame.data) is variant
 
 
 def test_loads_status_response_reads_a_relocated_group() -> None:
     """A device may serve this group from another group ID."""
 
-    class CustomUnbridged(smptrans.UnbridgedStatusResponse):
-        _GROUP_ID = 0xABCD
+    class CustomUnbridged(smptrans.UnbridgedStatusResponse, frozen=True):
+        _GROUP_ID: ClassVar[smphdr.GroupIdField] = 0xABCD
 
-    class CustomBridged(smptrans.BridgedStatusResponse):
-        _GROUP_ID = 0xABCD
+    class CustomBridged(smptrans.BridgedStatusResponse, frozen=True):
+        _GROUP_ID: ClassVar[smphdr.GroupIdField] = 0xABCD
 
-    class CustomBridgedToTransport(smptrans.BridgedToTransportStatusResponse):
-        _GROUP_ID = 0xABCD
+    class CustomBridgedToTransport(smptrans.BridgedToTransportStatusResponse, frozen=True):
+        _GROUP_ID: ClassVar[smphdr.GroupIdField] = 0xABCD
 
-    r = CustomBridgedToTransport(supported=1, active=1, bridged=True, transport=2)
+    frame = CustomBridgedToTransport(supported=1, active=1, bridged=True, transport=2).to_frame(
+        sequence=0
+    )
 
     assert (
         smptrans.loads_status_response(
-            r.BYTES,
+            bytes(frame),
             unbridged=CustomUnbridged,
             bridged=CustomBridged,
             bridged_to_transport=CustomBridgedToTransport,
         )
-        == r
+        == frame
     )
 
 
@@ -365,220 +360,231 @@ def test_loads_status_response_reads_a_relocated_group() -> None:
 def test_no_status_variant_accepts_an_impossible_payload(payload: dict[str, Any]) -> None:
     """`bridged` is only ever true, and `transport` only appears alongside it."""
 
-    frame = _frame(smphdr.OP.READ_RSP, smphdr.CommandId.TransportManagement.STATUS, payload)
+    frame = _frame(smphdr.OP.READ_RSP, tcmd.STATUS, payload)
 
     for variant in (
         smptrans.UnbridgedStatusResponse,
         smptrans.BridgedStatusResponse,
         smptrans.BridgedToTransportStatusResponse,
     ):
-        with pytest.raises(ValidationError):
+        with pytest.raises(msgspec.DecodeError):
             variant.loads(frame)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(msgspec.DecodeError):
         smptrans.loads_status_response(frame)
 
 
 def test_ListOfTransportsRequest() -> None:
-    _do_test(
-        smptrans.ListOfTransportsRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.TransportManagement.LIST,
-        {},
+    assert_frame(
+        smptrans.ListOfTransportsRequest(),
+        op=smphdr.OP.READ,
+        group_id=GROUP,
+        command_id=tcmd.LIST,
+        length=1,
     )
 
 
 def test_ListOfTransportsResponse() -> None:
-    r = _do_test(
-        smptrans.ListOfTransportsResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.LIST,
-        {
-            "transports": (
-                {"id": 0, "name": "uart"},
-                {"id": 2},
-                {"id": 9},
-                {"id": 64, "name": "modbus"},
-            )
-        },
-        nested_model=smptrans.Transport,
+    frame = smptrans.ListOfTransportsResponse.loads(
+        _frame(
+            smphdr.OP.READ_RSP,
+            tcmd.LIST,
+            {
+                "transports": [
+                    {"id": 0, "name": "uart"},
+                    {"id": 2},
+                    {"id": 9},
+                    {"id": 64, "name": "modbus"},
+                ]
+            },
+        )
     )
+    transports = frame.data.transports
 
-    assert type(r.transports[0].id) is smptrans.TransportType
-    assert r.transports[0].id is smptrans.TransportType.SERIAL
-    assert r.transports[1].name is None
-    assert type(r.transports[2].id) is int
-    assert r.transports[3].id is smptrans.TransportType.USER_DEFINED
+    assert transports[0].id is smptrans.TransportType.SERIAL
+    assert transports[0].name == "uart"
+    assert transports[1].name is None
+    assert type(transports[2].id) is int
+    assert transports[3].id is smptrans.TransportType.USER_DEFINED
 
 
 def test_TransportModesRequest() -> None:
-    _do_test(
-        smptrans.TransportModesRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.TransportManagement.GET_MODES,
-        {"transport": 2},
+    assert_frame(
+        smptrans.TransportModesRequest(transport=2),
+        op=smphdr.OP.READ,
+        group_id=GROUP,
+        command_id=tcmd.GET_MODES,
     )
 
 
 def test_TransportModesResponse() -> None:
-    r = _do_test(
-        smptrans.TransportModesResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.GET_MODES,
-        {
-            "modes": (
-                {"id": 0, "description": "UART", "incoming": True, "outgoing": True},
-                {"id": 1, "description": "Shell", "incoming": True},
-            )
-        },
-        nested_model=smptrans.Mode,
+    frame = smptrans.TransportModesResponse.loads(
+        _frame(
+            smphdr.OP.READ_RSP,
+            tcmd.GET_MODES,
+            {
+                "modes": [
+                    {"id": 0, "description": "UART", "incoming": True, "outgoing": True},
+                    {"id": 1, "description": "Shell", "incoming": True},
+                ]
+            },
+        )
     )
 
-    assert r.modes[1].outgoing is None
+    assert frame.data.modes[0].outgoing is True
+    assert frame.data.modes[1].outgoing is None
+
+
+def test_Mode_rejects_a_false_flag() -> None:
+    """A flag the protocol only ever emits as true is not a `bool`."""
+
+    with pytest.raises(ValueError):
+        smptrans.Mode(id=0, description="UART", incoming=False)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError):
+        smptrans.Mode(id=0, description="UART", outgoing=False)  # type: ignore[arg-type]
+
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.TransportModesResponse.loads(
+            _frame(
+                smphdr.OP.READ_RSP,
+                tcmd.GET_MODES,
+                {"modes": [{"id": 0, "description": "UART", "incoming": False}]},
+            )
+        )
 
 
 def test_Mode_rejects_type_in_place_of_id() -> None:
     """A mode's ID is `id`; `type` is not accepted in its place."""
 
-    with pytest.raises(ValidationError):
-        smptrans.Mode(type=0, description="Bluetooth Low Energy")  # type: ignore[call-arg]
+    with pytest.raises(msgspec.ValidationError):
+        smptrans.TransportModesResponse.loads(
+            _frame(
+                smphdr.OP.READ_RSP,
+                tcmd.GET_MODES,
+                {"modes": [{"type": 0, "description": "Bluetooth Low Energy"}]},
+            )
+        )
 
 
 def test_TransportConfigDetailsRequest() -> None:
-    _do_test(
-        smptrans.TransportConfigDetailsRequest,
-        smphdr.OP.READ,
-        smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS,
-        {"transport": 2, "mode": 0},
+    assert_frame(
+        smptrans.TransportConfigDetailsRequest(transport=2, mode=0),
+        op=smphdr.OP.READ,
+        group_id=GROUP,
+        command_id=tcmd.GET_CONFIG_DETAILS,
     )
 
 
 def test_TransportConfigDetailsResponse() -> None:
-    r = _do_test(
-        smptrans.TransportConfigDetailsResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS,
-        {
-            "configs": (
-                {"name": "address_type", "type": 0, "required": True},
-                {"name": "address", "type": 3, "required": True},
-                {"name": "le_coded", "type": 2},
-            )
-        },
-        nested_model=smptrans.ConfigDetail,
+    frame = smptrans.TransportConfigDetailsResponse.loads(
+        _frame(
+            smphdr.OP.READ_RSP,
+            tcmd.GET_CONFIG_DETAILS,
+            {
+                "configs": [
+                    {"name": "address_type", "type": 0, "required": True},
+                    {"name": "address", "type": 3, "required": True},
+                    {"name": "le_coded", "type": 2},
+                ]
+            },
+        )
     )
+    configs = frame.data.configs
 
-    assert r.configs[0].type is smptrans.ConfigType.UINT
-    assert r.configs[1].type is smptrans.ConfigType.STRING
-    assert r.configs[2].required is None
+    assert configs[0].type is smptrans.ConfigType.UINT
+    assert configs[1].type is smptrans.ConfigType.STRING
+    assert configs[2].required is None
 
 
 def test_TransportConfigDetailsResponse_empty() -> None:
     """A transport that takes no configuration."""
 
-    r = _do_test(
-        smptrans.TransportConfigDetailsResponse,
-        smphdr.OP.READ_RSP,
-        smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS,
-        {"configs": ()},
+    frame = assert_frame(
+        smptrans.TransportConfigDetailsResponse(configs=()),
+        op=smphdr.OP.READ_RSP,
+        group_id=GROUP,
+        command_id=tcmd.GET_CONFIG_DETAILS,
     )
-    assert r.configs == ()
+    assert frame.data.configs == ()
+
+
+def test_ConfigDetail_rejects_a_false_required() -> None:
+    with pytest.raises(ValueError):
+        smptrans.ConfigDetail(
+            name="port",
+            type=smptrans.ConfigType.STRING,
+            required=False,  # type: ignore[arg-type]
+        )
+
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.TransportConfigDetailsResponse.loads(
+            _frame(
+                smphdr.OP.READ_RSP,
+                tcmd.GET_CONFIG_DETAILS,
+                {"configs": [{"name": "port", "type": 3, "required": False}]},
+            )
+        )
 
 
 @pytest.mark.parametrize(
     ("msg", "op", "command_id"),
     [
-        (
-            smptrans.ConnectRequest,
-            smphdr.OP.WRITE,
-            smphdr.CommandId.TransportManagement.CONNECT,
-        ),
-        (
-            smptrans.DisconnectTransportRequest,
-            smphdr.OP.WRITE,
-            smphdr.CommandId.TransportManagement.DISCONNECT,
-        ),
-        (
-            smptrans.TransportModesRequest,
-            smphdr.OP.READ,
-            smphdr.CommandId.TransportManagement.GET_MODES,
-        ),
+        (smptrans.ConnectRequest, smphdr.OP.WRITE, tcmd.CONNECT),
+        (smptrans.DisconnectTransportRequest, smphdr.OP.WRITE, tcmd.DISCONNECT),
+        (smptrans.TransportModesRequest, smphdr.OP.READ, tcmd.GET_MODES),
     ],
 )
-def test_extra_fields_are_forbidden(
-    msg: type[smpmsg.Request],
-    op: smphdr.OP,
-    command_id: smphdr.CommandId.TransportManagement,
+def test_an_unknown_field_is_rejected(
+    msg: type[smpmsg.Data], op: smphdr.OP, command_id: smphdr.AnyCommandId
 ) -> None:
-    with pytest.raises(ValidationError):
+    with pytest.raises(msgspec.ValidationError):
         msg.loads(_frame(op, command_id, {"transport": 3, "unexpected": True}))
+
+
+@pytest.mark.parametrize(
+    ("msg", "op", "command_id"),
+    [
+        (smptrans.ConnectRequest, smphdr.OP.WRITE, tcmd.CONNECT),
+        (smptrans.DisconnectTransportRequest, smphdr.OP.WRITE, tcmd.DISCONNECT),
+        (smptrans.TransportModesRequest, smphdr.OP.READ, tcmd.GET_MODES),
+        (smptrans.DisconnectAllRequest, smphdr.OP.WRITE, tcmd.DISCONNECT),
+    ],
+)
+def test_a_missing_required_field_is_rejected(
+    msg: type[smpmsg.Data], op: smphdr.OP, command_id: smphdr.AnyCommandId
+) -> None:
+    with pytest.raises(msgspec.ValidationError):
+        msg.loads(_frame(op, command_id, {}))
 
 
 def test_custom_group_id() -> None:
     """A device may serve this group from another group ID."""
 
-    class CustomStatusRequest(smptrans.StatusRequest):
-        _GROUP_ID = 0xABCD
+    class CustomStatusRequest(smptrans.StatusRequest, frozen=True):
+        _GROUP_ID: ClassVar[smphdr.GroupIdField] = 0xABCD
 
-    r = CustomStatusRequest()
+    frame = CustomStatusRequest().to_frame(sequence=0)
 
-    assert r.header.group_id == 0xABCD
-    assert r == CustomStatusRequest.loads(r.BYTES)
-
-
-@pytest.mark.parametrize("rc", [e.value for e in smptrans.TRANSPORT_MGMT_ERR])
-def test_TransportManagementErrorV2(rc: int) -> None:
-    d = cbor2.dumps({"err": {"group": smphdr.GroupId.TRANSPORT_MANAGEMENT, "rc": rc}})
-    h = smphdr.Header(
-        op=smphdr.OP.WRITE_RSP,
-        version=smphdr.Version.V2,
-        flags=smphdr.Flag(0),
-        length=len(d),
-        group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
-        sequence=0,
-        command_id=smphdr.CommandId.TransportManagement.CONNECT,
-    )
-
-    e = smptrans.TransportManagementErrorV2.loads(h.BYTES + d)
-
-    assert smptrans.TRANSPORT_MGMT_ERR is type(e.err.rc)
-    assert rc == e.err.rc
-    assert e.err.group == smphdr.GroupId.TRANSPORT_MANAGEMENT
-
-
-def test_TransportManagementErrorV1() -> None:
-    d = cbor2.dumps({"rc": 3, "rsn": "no such transport"})
-    h = smphdr.Header(
-        op=smphdr.OP.WRITE_RSP,
-        version=smphdr.Version.V1,
-        flags=smphdr.Flag(0),
-        length=len(d),
-        group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
-        sequence=0,
-        command_id=smphdr.CommandId.TransportManagement.DISCONNECT,
-    )
-
-    e = smptrans.TransportManagementErrorV1.loads(h.BYTES + d)
-
-    assert e.rc == 3
-    assert e.rsn == "no such transport"
+    assert frame.header.group_id == 0xABCD
+    assert CustomStatusRequest.loads(bytes(frame)) == frame
 
 
 @pytest.mark.parametrize("command_id", list(smphdr.CommandId.TransportManagement))
 def test_header_accepts_every_command_id(
     command_id: smphdr.CommandId.TransportManagement,
 ) -> None:
-    h = smphdr.Header(
+    header = smphdr.Header(
         op=smphdr.OP.READ,
         version=smphdr.Version.V2,
         flags=smphdr.Flag(0),
         length=0,
-        group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
+        group_id=GROUP,
         sequence=0,
         command_id=command_id,
     )
 
-    assert h == smphdr.Header.loads(h.BYTES)
+    assert header == smphdr.Header.loads(bytes(header))
 
 
 @pytest.mark.parametrize("command_id", [3, 4, 5, 9, 255])
@@ -591,26 +597,72 @@ def test_header_rejects_reserved_and_unassigned_command_ids(command_id: int) -> 
             version=smphdr.Version.V2,
             flags=smphdr.Flag(0),
             length=0,
-            group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
+            group_id=GROUP,
             sequence=0,
             command_id=command_id,
         )
 
 
-def test_Mode_rejects_a_false_flag() -> None:
-    """A flag the protocol only ever emits as true is not a `bool`."""
+@pytest.mark.parametrize("rc", [e.value for e in smptrans.TRANSPORT_MGMT_ERR])
+def test_TransportManagementErrorV2(rc: int) -> None:
+    frame = smptrans.TransportManagementErrorV2.loads(
+        _frame(smphdr.OP.WRITE_RSP, tcmd.CONNECT, {"err": {"group": GROUP, "rc": rc}})
+    )
 
-    with pytest.raises(ValidationError):
-        smptrans.Mode(id=0, description="UART", incoming=False)  # type: ignore[arg-type]
-
-    with pytest.raises(ValidationError):
-        smptrans.Mode(id=0, description="UART", outgoing=False)  # type: ignore[arg-type]
+    assert type(frame.data.err.rc) is smptrans.TRANSPORT_MGMT_ERR
+    assert frame.data.err.rc == rc
+    assert frame.data.err.group == GROUP
 
 
-def test_ConfigDetail_rejects_a_false_required() -> None:
-    with pytest.raises(ValidationError):
-        smptrans.ConfigDetail(
-            name="port",
-            type=smptrans.ConfigType.STRING,
-            required=False,  # type: ignore[arg-type]
+def test_TransportManagementErrorV1() -> None:
+    frame = smptrans.TransportManagementErrorV1.loads(
+        _frame(smphdr.OP.WRITE_RSP, tcmd.DISCONNECT, {"rc": 3, "rsn": "no such transport"})
+    )
+
+    assert frame.data.rc == 3
+    assert frame.data.rsn == "no such transport"
+
+
+def test_a_transport_out_of_uint32_range_is_rejected() -> None:
+    with pytest.raises(ValueError):
+        smptrans.ConnectRequest(transport=0x100000000)
+
+    with pytest.raises(msgspec.DecodeError):
+        smptrans.ConnectRequest.loads(
+            _frame(smphdr.OP.WRITE, tcmd.CONNECT, {"transport": 0x100000000})
         )
+
+
+def test_BluetoothConnectRequest_carries_a_mode() -> None:
+    frame = assert_frame(
+        smptrans.BluetoothConnectRequest(
+            transport=smptrans.TransportType.BLUETOOTH,
+            address="C0:FF:EE:C0:FF:EE",
+            mode=0,
+        ),
+        op=smphdr.OP.WRITE,
+        group_id=GROUP,
+        command_id=tcmd.CONNECT,
+    )
+
+    assert frame.data.mode == 0
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [smptrans.BridgedStatusResponse, smptrans.BridgedToTransportStatusResponse],
+)
+def test_a_bridged_status_variant_rejects_a_false_flag(variant: type[smpmsg.Response]) -> None:
+    kwargs: dict[str, Any] = {"supported": 1, "active": 1, "bridged": False}
+    if variant is smptrans.BridgedToTransportStatusResponse:
+        kwargs["transport"] = 2
+
+    with pytest.raises(ValueError):
+        variant(**kwargs)
+
+
+def test_loads_status_response_rejects_a_length_mismatch() -> None:
+    frame = _frame(smphdr.OP.READ_RSP, tcmd.STATUS, {"supported": 1, "active": 0})
+
+    with pytest.raises(SMPMalformed):
+        smptrans.loads_status_response(frame + b"\x00")
