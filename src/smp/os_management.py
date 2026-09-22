@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Any, Literal
+from typing import Annotated, Any, Literal, TypeAlias
 
 import msgspec
 import msgspec_cbor
 
 from smp import error, header, message
+
+_UInt8: TypeAlias = Annotated[int, msgspec.Meta(ge=0, le=255)]
 
 
 @unique
@@ -144,7 +146,7 @@ class ResetWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
         return cls(
             force=msgspec.convert(data["force"], type=Literal[0, 1]) if "force" in data else None,
             boot_mode=header.resolve_int_enum(
-                msgspec.convert(data["boot_mode"], type=int), BootMode
+                msgspec.convert(data["boot_mode"], type=_UInt8), BootMode
             )
             if "boot_mode" in data
             else None,

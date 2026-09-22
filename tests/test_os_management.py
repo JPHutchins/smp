@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import msgspec
+import msgspec_cbor
 import pytest
 
 from smp import header as smphdr
@@ -100,6 +101,30 @@ def test_ResetWriteRequest_boot_mode_rejects_out_of_range(boot_mode: int) -> Non
     """boot_mode is a uint8_t on the wire; values outside [0, 255] are invalid."""
     with pytest.raises(ValueError):
         smpos.ResetWriteRequest(boot_mode=boot_mode)
+
+
+@pytest.mark.parametrize("boot_mode", [-1, 256])
+def test_ResetWriteRequest_boot_mode_out_of_range_on_the_wire(boot_mode: int) -> None:
+    """A malformed payload raises `DecodeError`, never a bare `ValueError`."""
+
+    payload = msgspec_cbor.encode({"boot_mode": boot_mode}, order="canonical")
+    frame = (
+        bytes(
+            smphdr.Header(
+                op=smphdr.OP.WRITE,
+                version=smphdr.Version.V2,
+                flags=smphdr.Flag(0),
+                length=len(payload),
+                group_id=OS,
+                sequence=0,
+                command_id=oscmd.RESET,
+            )
+        )
+        + payload
+    )
+
+    with pytest.raises(msgspec.DecodeError):
+        smpos.ResetWriteRequest.loads(frame)
 
 
 def test_TaskStatisticsReadRequest() -> None:
