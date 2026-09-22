@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Any
 
 import msgspec
 
@@ -77,14 +76,8 @@ class ListOfGroupsResponse(smpmsg.ReadResponse, frozen=True):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.LIST_OF_GROUPS
 
-    groups: tuple[smphdr.GroupIdField, ...]
+    groups: tuple[smphdr.GroupId, ...]
     """Contains a list of the supported SMP group IDs on the device."""
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> ListOfGroupsResponse:
-        cls._validate_mapping(data)
-        raw = msgspec.convert(data["groups"], type=tuple[int, ...])
-        return cls(groups=tuple(smphdr.resolve_group_id(g) for g in raw))
 
 
 class ListOfGroupsRequest(smpmsg.ReadRequest, _EnumGroupBase, frozen=True):
@@ -101,20 +94,12 @@ class GroupIdResponse(smpmsg.ReadResponse, frozen=True):
     _GROUP_ID = smphdr.GroupId.ENUM_MANAGEMENT
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_ID
 
-    group: smphdr.GroupIdField
+    group: smphdr.GroupId
     """The Group ID at the requested index."""
     end: bool | None = None
     """Will be set to true if the listed group is the final supported group on
     the device, otherwise will be omitted.
     """
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> GroupIdResponse:
-        cls._validate_mapping(data)
-        return cls(
-            group=smphdr.resolve_group_id(msgspec.convert(data["group"], type=int)),
-            end=msgspec.convert(data["end"], type=bool) if "end" in data else None,
-        )
 
 
 class GroupIdRequest(smpmsg.ReadRequest, _EnumGroupBase, frozen=True):
@@ -137,20 +122,12 @@ class GroupIdRequest(smpmsg.ReadRequest, _EnumGroupBase, frozen=True):
 class GroupDetails(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """Group Details"""
 
-    group: smphdr.GroupIdField
+    group: smphdr.GroupId
     """The group ID of the SMP command group."""
     name: str | None = None
     """The name of the SMP command group."""
     handlers: int | None = None
     """The number of handlers that the SMP command group supports."""
-
-
-class _GroupDetailsWire(
-    msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True
-):
-    group: int
-    name: str | None = None
-    handlers: int | None = None
 
 
 class GroupDetailsResponse(smpmsg.ReadResponse, frozen=True):
@@ -161,21 +138,6 @@ class GroupDetailsResponse(smpmsg.ReadResponse, frozen=True):
 
     groups: tuple[GroupDetails, ...]
     """Contains a list of the requested SMP group details."""
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> GroupDetailsResponse:
-        cls._validate_mapping(data)
-        wires = msgspec.convert(data["groups"], type=tuple[_GroupDetailsWire, ...])
-        return cls(
-            groups=tuple(
-                GroupDetails(
-                    group=smphdr.resolve_group_id(w.group),
-                    name=w.name,
-                    handlers=w.handlers,
-                )
-                for w in wires
-            )
-        )
 
 
 class GroupDetailsRequest(smpmsg.ReadRequest, _EnumGroupBase, frozen=True):
@@ -196,16 +158,8 @@ class GroupDetailsRequest(smpmsg.ReadRequest, _EnumGroupBase, frozen=True):
     _COMMAND_ID = smphdr.CommandId.EnumManagement.GROUP_DETAILS
     _Response = GroupDetailsResponse
 
-    groups: tuple[smphdr.GroupIdField, ...] | None = None
+    groups: tuple[smphdr.GroupId, ...] | None = None
     """Contains a list of the SMP group IDs to fetch details on.
 
     If omitted, details on all supported groups will be returned.
     """
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> GroupDetailsRequest:
-        cls._validate_mapping(data)
-        if "groups" not in data:
-            return cls()
-        raw = msgspec.convert(data["groups"], type=tuple[int, ...])
-        return cls(groups=tuple(smphdr.resolve_group_id(g) for g in raw))

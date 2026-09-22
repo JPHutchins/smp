@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Annotated, Any, Literal, TypeAlias
+from typing import Any, Literal
 
 import msgspec
 import msgspec_cbor
 
 from smp import error, header, message
-
-_UInt8: TypeAlias = Annotated[int, msgspec.Meta(ge=0, le=255)]
 
 
 @unique
@@ -88,6 +86,16 @@ class BootMode(IntEnum):
     BOOTLOADER = 1
     """Bootloader boot mode, e.g. serial recovery for MCUboot."""
 
+    @classmethod
+    def _missing_(cls, value: object) -> BootMode | None:
+        """The server casts the value to a `uint8_t`, so any of them is a mode."""
+        if type(value) is int and 0 <= value <= 255:
+            unknown = int.__new__(cls, value)
+            unknown._name_ = f"UNKNOWN_{value}"
+            unknown._value_ = value
+            return unknown
+        return None
+
 
 class ResetWriteResponse(message.WriteResponse, frozen=True):
     """Success response to a reset request."""
@@ -122,7 +130,7 @@ class ResetWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
     following map may be sent to force a reset
     """
 
-    boot_mode: BootMode | int | None = None
+    boot_mode: BootMode | None = None
     """Boot mode to set via the retention boot mode module before resetting.
 
     A value of `BootMode.BOOTLOADER` (1) requests, for example, that an MCUboot
@@ -135,22 +143,6 @@ class ResetWriteRequest(message.WriteRequest, _OSGroupBase, frozen=True):
     which depends on `CONFIG_RETENTION_BOOT_MODE`. Added to the SMP OS
     management group in Zephyr v4.2.0 (zephyrproject-rtos/zephyr#91510).
     """
-
-    def __post_init__(self) -> None:
-        if self.boot_mode is not None and not 0 <= self.boot_mode <= 255:
-            raise ValueError(f"boot_mode {self.boot_mode!r} is not a uint8 (0-255)")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> ResetWriteRequest:
-        cls._validate_mapping(data)
-        return cls(
-            force=msgspec.convert(data["force"], type=Literal[0, 1]) if "force" in data else None,
-            boot_mode=header.resolve_int_enum(
-                msgspec.convert(data["boot_mode"], type=_UInt8), BootMode
-            )
-            if "boot_mode" in data
-            else None,
-        )
 
 
 class TaskStatistics(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):

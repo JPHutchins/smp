@@ -5,9 +5,7 @@ from __future__ import annotations
 import struct
 from dataclasses import dataclass
 from enum import IntEnum, IntFlag, unique
-from typing import ClassVar, TypeAlias, TypeVar
-
-E = TypeVar("E", bound=IntEnum)
+from typing import ClassVar, Final, TypeAlias
 
 
 class CommandId:
@@ -84,6 +82,14 @@ class CommandId:
 AnyCommandId: TypeAlias = IntEnum | int
 
 
+class UserGroupId(IntEnum):
+    """Users may define their own Group IDs starting at 64.
+
+    Registering one here names it wherever a `GroupId` is decoded."""
+
+    INTERCREATE = 64
+
+
 @unique
 class GroupId(IntEnum):
     OS_MANAGEMENT = 0
@@ -100,28 +106,20 @@ class GroupId(IntEnum):
     TRANSPORT_MANAGEMENT = 11
     ZEPHYR_MANAGEMENT = 63
 
+    @classmethod
+    def _missing_(cls, value: object) -> GroupId | None:
+        """A device may serve a group this package does not name."""
+        if type(value) is int and 0 <= value <= 0xFFFF:
+            unknown = int.__new__(cls, value)
+            unknown._name_ = _USER_GROUP_NAMES.get(value) or f"UNKNOWN_{value}"
+            unknown._value_ = value
+            return unknown
+        return None
 
-class UserGroupId(IntEnum):
-    """Users may define their own Group IDs starting at 64.
 
-    It is optional to register them here."""
-
-    INTERCREATE = 64
-
+_USER_GROUP_NAMES: Final[dict[int, str]] = {m.value: m.name for m in UserGroupId}
 
 GroupIdField: TypeAlias = GroupId | UserGroupId | int
-
-
-def resolve_int_enum(value: int, enum: type[E]) -> E | int:
-    try:
-        return enum(value)
-    except ValueError:
-        return value
-
-
-def resolve_group_id(value: int) -> GroupId | UserGroupId | int:
-    resolved = resolve_int_enum(value, GroupId)
-    return resolved if isinstance(resolved, GroupId) else resolve_int_enum(value, UserGroupId)
 
 
 @unique

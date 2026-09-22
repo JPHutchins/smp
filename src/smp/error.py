@@ -77,13 +77,8 @@ class ErrorV1(message.Response, frozen=True):
 class Err(msgspec.Struct, Generic[T], frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """SMP error response version 2 `err` map."""
 
-    group: header.GroupIdField
+    group: header.GroupId
     rc: T
-
-
-class _ErrWire(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
-    group: int
-    rc: int
 
 
 class ErrorV2(message.Response, Generic[T], frozen=True):
@@ -103,10 +98,5 @@ class ErrorV2(message.Response, Generic[T], frozen=True):
     @classmethod
     def _convert_mapping(cls, data: dict[str, Any]) -> ErrorV2[T]:
         cls._validate_mapping(data)
-        wire = msgspec.convert(data["err"], type=_ErrWire)
-        return cls(
-            err=Err(
-                group=header.resolve_group_id(wire.group),
-                rc=msgspec.convert(wire.rc, type=cls._rc_type()),
-            )
-        )
+        err_type: Any = Err[cls._rc_type()]  # type: ignore[misc]  # resolved at runtime
+        return cls(err=msgspec.convert(data["err"], type=err_type))

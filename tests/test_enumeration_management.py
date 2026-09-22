@@ -57,7 +57,14 @@ def test_ListOfGroupsRequest() -> None:
 
 def test_ListOfGroupsResponse() -> None:
     frame = assert_frame(
-        smpenum.ListOfGroupsResponse(groups=(2, smphdr.GroupId.RUNTIME_TESTS, 15, 64)),
+        smpenum.ListOfGroupsResponse(
+            groups=(
+                smphdr.GroupId(2),
+                smphdr.GroupId.RUNTIME_TESTS,
+                smphdr.GroupId(15),
+                smphdr.GroupId(64),
+            )
+        ),
         op=smphdr.OP.READ_RSP,
         group_id=smphdr.GroupId.ENUM_MANAGEMENT,
         command_id=enumcmd.LIST_OF_GROUPS,
@@ -69,9 +76,9 @@ def test_ListOfGroupsResponse() -> None:
     assert groups[0] == smphdr.GroupId.STATISTICS_MANAGEMENT
     assert type(groups[1]) is smphdr.GroupId
     assert groups[1] == smphdr.GroupId.RUNTIME_TESTS
-    assert type(groups[2]) is int
+    assert groups[2].name == "UNKNOWN_15"
     assert groups[2] == 15
-    assert type(groups[3]) is smphdr.UserGroupId
+    assert groups[3].name == "INTERCREATE"
     assert groups[3] == smphdr.UserGroupId.INTERCREATE
 
 
@@ -87,7 +94,7 @@ def test_GroupIdRequest(index: int | None) -> None:
 
 def test_GroupIdResponse() -> None:
     frame = assert_frame(
-        smpenum.GroupIdResponse(group=2),
+        smpenum.GroupIdResponse(group=smphdr.GroupId(2)),
         op=smphdr.OP.READ_RSP,
         group_id=smphdr.GroupId.ENUM_MANAGEMENT,
         command_id=enumcmd.GROUP_ID,
@@ -100,7 +107,11 @@ def test_GroupIdResponse() -> None:
 def test_GroupDetailsRequest() -> None:
     assert_frame(
         smpenum.GroupDetailsRequest(
-            groups=(smphdr.GroupId.STATISTICS_MANAGEMENT, smphdr.GroupId.RUNTIME_TESTS, 15)
+            groups=(
+                smphdr.GroupId.STATISTICS_MANAGEMENT,
+                smphdr.GroupId.RUNTIME_TESTS,
+                smphdr.GroupId(15),
+            )
         ),
         op=smphdr.OP.READ,
         group_id=smphdr.GroupId.ENUM_MANAGEMENT,
@@ -119,10 +130,10 @@ def test_GroupDetailsResponse() -> None:
     frame = assert_frame(
         smpenum.GroupDetailsResponse(
             groups=(
-                smpenum.GroupDetails(group=2, name="group2", handlers=2),
-                smpenum.GroupDetails(group=5, name="group5", handlers=5),
-                smpenum.GroupDetails(group=15, name="group15", handlers=15),
-                smpenum.GroupDetails(group=64, name="group64", handlers=64),
+                smpenum.GroupDetails(group=smphdr.GroupId(2), name="group2", handlers=2),
+                smpenum.GroupDetails(group=smphdr.GroupId(5), name="group5", handlers=5),
+                smpenum.GroupDetails(group=smphdr.GroupId(15), name="group15", handlers=15),
+                smpenum.GroupDetails(group=smphdr.GroupId(64), name="group64", handlers=64),
             )
         ),
         op=smphdr.OP.READ_RSP,
@@ -131,15 +142,15 @@ def test_GroupDetailsResponse() -> None:
     )
     groups = frame.data.groups
     assert groups == (
-        smpenum.GroupDetails(group=2, name="group2", handlers=2),
-        smpenum.GroupDetails(group=5, name="group5", handlers=5),
-        smpenum.GroupDetails(group=15, name="group15", handlers=15),
-        smpenum.GroupDetails(group=64, name="group64", handlers=64),
+        smpenum.GroupDetails(group=smphdr.GroupId(2), name="group2", handlers=2),
+        smpenum.GroupDetails(group=smphdr.GroupId(5), name="group5", handlers=5),
+        smpenum.GroupDetails(group=smphdr.GroupId(15), name="group15", handlers=15),
+        smpenum.GroupDetails(group=smphdr.GroupId(64), name="group64", handlers=64),
     )
     assert type(groups[0].group) is smphdr.GroupId
     assert type(groups[1].group) is smphdr.GroupId
-    assert type(groups[2].group) is int
-    assert type(groups[3].group) is smphdr.UserGroupId
+    assert groups[2].group.name == "UNKNOWN_15"
+    assert groups[3].group.name == "INTERCREATE"
 
 
 def test_ListOfGroupsResponse_rejects_missing_groups() -> None:

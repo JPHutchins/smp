@@ -47,7 +47,7 @@ def test_ResetWriteResponse() -> None:
 
 def test_ResetWriteRequest_boot_mode_normal() -> None:
     frame = assert_frame(
-        smpos.ResetWriteRequest(boot_mode=0),
+        smpos.ResetWriteRequest(boot_mode=smpos.BootMode.NORMAL),
         op=smphdr.OP.WRITE,
         group_id=OS,
         command_id=oscmd.RESET,
@@ -57,7 +57,7 @@ def test_ResetWriteRequest_boot_mode_normal() -> None:
 
 def test_ResetWriteRequest_boot_mode_bootloader() -> None:
     frame = assert_frame(
-        smpos.ResetWriteRequest(boot_mode=1),
+        smpos.ResetWriteRequest(boot_mode=smpos.BootMode.BOOTLOADER),
         op=smphdr.OP.WRITE,
         group_id=OS,
         command_id=oscmd.RESET,
@@ -65,21 +65,22 @@ def test_ResetWriteRequest_boot_mode_bootloader() -> None:
     assert frame.data.boot_mode is smpos.BootMode.BOOTLOADER
 
 
-def test_ResetWriteRequest_boot_mode_passes_through_unknown_int() -> None:
-    """A wire-valid but unrecognized boot mode stays a plain int."""
+def test_ResetWriteRequest_names_an_unknown_boot_mode() -> None:
+    """The enum is open: a wire-valid but unrecognized mode is still a member."""
     frame = assert_frame(
-        smpos.ResetWriteRequest(boot_mode=5),
+        smpos.ResetWriteRequest(boot_mode=smpos.BootMode(5)),
         op=smphdr.OP.WRITE,
         group_id=OS,
         command_id=oscmd.RESET,
     )
     assert frame.data.boot_mode == 5
-    assert type(frame.data.boot_mode) is int
+    assert isinstance(frame.data.boot_mode, smpos.BootMode)
+    assert frame.data.boot_mode.name == "UNKNOWN_5"
 
 
 def test_ResetWriteRequest_force_and_boot_mode() -> None:
     frame = assert_frame(
-        smpos.ResetWriteRequest(force=1, boot_mode=1),
+        smpos.ResetWriteRequest(force=1, boot_mode=smpos.BootMode.BOOTLOADER),
         op=smphdr.OP.WRITE,
         group_id=OS,
         command_id=oscmd.RESET,
@@ -91,7 +92,7 @@ def test_ResetWriteRequest_force_and_boot_mode() -> None:
 def test_ResetWriteRequest_boot_mode_accepts_enum_member() -> None:
     """Constructing with a BootMode member serializes identically to its int value."""
     from_enum = smpos.ResetWriteRequest(boot_mode=smpos.BootMode.BOOTLOADER)
-    from_int = smpos.ResetWriteRequest(boot_mode=1)
+    from_int = smpos.ResetWriteRequest(boot_mode=smpos.BootMode.BOOTLOADER)
     assert bytes(from_enum.to_frame(sequence=0))[8:] == bytes(from_int.to_frame(sequence=0))[8:]
     assert from_enum.boot_mode is smpos.BootMode.BOOTLOADER
 
@@ -100,7 +101,7 @@ def test_ResetWriteRequest_boot_mode_accepts_enum_member() -> None:
 def test_ResetWriteRequest_boot_mode_rejects_out_of_range(boot_mode: int) -> None:
     """boot_mode is a uint8_t on the wire; values outside [0, 255] are invalid."""
     with pytest.raises(ValueError):
-        smpos.ResetWriteRequest(boot_mode=boot_mode)
+        smpos.BootMode(boot_mode)
 
 
 @pytest.mark.parametrize("boot_mode", [-1, 256])
