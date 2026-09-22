@@ -1,0 +1,1 @@
+{"bytes": "0900001d000b1102a366616374697665016762726964676564f569737570706f7274656401", "kwargs": {"active": 1, "bridged": true, "supported": 1}, "message": "smp.transport_management.BridgedStatusResponse", "sequence": 17, "version": 1}
