@@ -64,6 +64,15 @@ class CommandId:
         GROUP_DETAILS = 3
 
     @unique
+    class TransportManagement(IntEnum):
+        CONNECT = 0
+        DISCONNECT = 1
+        STATUS = 2
+        LIST = 6
+        GET_MODES = 7
+        GET_CONFIG_DETAILS = 8
+
+    @unique
     class ZephyrManagement(IntEnum):
         ERASE_STORAGE = 0
 
@@ -88,6 +97,7 @@ class GroupId(IntEnum):
     FILE_MANAGEMENT = 8
     SHELL_MANAGEMENT = 9
     ENUM_MANAGEMENT = 10
+    TRANSPORT_MANAGEMENT = 11
     ZEPHYR_MANAGEMENT = 63
 
 
@@ -153,6 +163,7 @@ class Header:
         GroupId.IMAGE_MANAGEMENT: CommandId.ImageManagement,
         GroupId.SHELL_MANAGEMENT: CommandId.ShellManagement,
         GroupId.FILE_MANAGEMENT: CommandId.FileManagement,
+        GroupId.TRANSPORT_MANAGEMENT: CommandId.TransportManagement,
     }
     _STRUCT: ClassVar[struct.Struct] = struct.Struct("!BBHHBB")
     SIZE: ClassVar[int] = _STRUCT.size

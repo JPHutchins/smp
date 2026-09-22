@@ -1,0 +1,1 @@
+{"bytes": "09000038000b1206a16a7472616e73706f72747384a262696400646e616d656475617274a162696402a162696409a26269641840646e616d65666d6f64627573", "kwargs": {"transports": [{"id": 0, "name": "uart"}, {"id": 2}, {"id": 9}, {"id": 64, "name": "modbus"}]}, "message": "smp.transport_management.ListOfTransportsResponse", "sequence": 18, "version": 1}

@@ -1,0 +1,2 @@
+{"bytes": "0a000001000b0701a0", "kwargs": {}, "message": "smp.transport_management.DisconnectRequest", "sequence": 7, "version": 1}
+{"bytes": "0a000001000b0d01a0", "kwargs": {}, "message": "smp.transport_management.DisconnectRequest", "sequence": 13, "version": 1}

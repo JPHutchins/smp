@@ -1,0 +1,3 @@
+{"bytes": "0a00000c000b0000a1697472616e73706f727403", "kwargs": {"transport": 3}, "message": "smp.transport_management.ConnectRequest", "sequence": 0, "version": 1}
+{"bytes": "0a000012000b0100a2646d6f646500697472616e73706f727401", "kwargs": {"mode": 0, "transport": 1}, "message": "smp.transport_management.ConnectRequest", "sequence": 1, "version": 1}
+{"bytes": "0a00000c000b0400a1697472616e73706f727403", "kwargs": {"transport": 3}, "message": "smp.transport_management.ConnectRequest", "sequence": 4, "version": 1}

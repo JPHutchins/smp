@@ -1,0 +1,2 @@
+{"bytes": "09000028000b1202a466616374697665016762726964676564f569737570706f7274656404697472616e73706f727402", "kwargs": {"active": 1, "bridged": true, "supported": 4, "transport": 2}, "message": "smp.transport_management.BridgedToTransportStatusResponse", "sequence": 18, "version": 1}
+{"bytes": "09000028000b1302a466616374697665016762726964676564f569737570706f7274656401697472616e73706f727402", "kwargs": {"active": 1, "bridged": true, "supported": 1, "transport": 2}, "message": "smp.transport_management.BridgedToTransportStatusResponse", "sequence": 19, "version": 1}
