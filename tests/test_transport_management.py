@@ -53,19 +53,26 @@ def test_ConnectRequest() -> None:
     )
 
 
-def test_ConnectRequest_narrows_an_unknown_transport_to_int() -> None:
+def test_ConnectRequest_names_an_unknown_transport() -> None:
+    """The enum is open: an ID this package does not name is still a member."""
+
     frame = smptrans.ConnectRequest.loads(_frame(smphdr.OP.WRITE, tcmd.CONNECT, {"transport": 9}))
 
     assert frame.data.transport == 9
-    assert type(frame.data.transport) is int
+    assert isinstance(frame.data.transport, smptrans.TransportType)
+    assert frame.data.transport.name == "UNKNOWN_9"
 
 
 @pytest.mark.parametrize("transport", [smptrans.TransportType.BLUETOOTH, 2])
 def test_ConnectRequest_rejects_bluetooth_on_construction(transport: int) -> None:
-    """Bluetooth takes parameters, so it is outside this variant's domain."""
+    """Bluetooth takes parameters, so it is outside this variant's domain.
+
+    The bare `2` is a type error as well; it is here to prove the runtime guard
+    catches what a caller ignoring the type checker could still pass.
+    """
 
     with pytest.raises(ValueError):
-        smptrans.ConnectRequest(transport=transport)
+        smptrans.ConnectRequest(transport=transport)  # type: ignore[arg-type]
 
 
 def test_ConnectRequest_rejects_bluetooth_on_the_wire() -> None:
@@ -202,14 +209,11 @@ def test_DisconnectTransportRequest() -> None:
 
 def test_DisconnectAllRequest() -> None:
     assert_frame(
-        smptrans.DisconnectAllRequest(all=True),
+        smptrans.DisconnectAllRequest(all=smpmsg.PRESENT),
         op=smphdr.OP.WRITE,
         group_id=GROUP,
         command_id=tcmd.DISCONNECT,
     )
-
-    with pytest.raises(ValueError):
-        smptrans.DisconnectAllRequest(all=False)  # type: ignore[arg-type]
 
     with pytest.raises(msgspec.DecodeError):
         smptrans.DisconnectAllRequest.loads(
@@ -237,8 +241,11 @@ def test_disconnect_variants_are_exhaustive() -> None:
             case smptrans.DisconnectRequest():
                 return "current"
 
-    assert describe(smptrans.DisconnectAllRequest(all=True)) == "all"
-    assert describe(smptrans.DisconnectTransportRequest(transport=2)) == "transport 2"
+    assert describe(smptrans.DisconnectAllRequest(all=smpmsg.PRESENT)) == "all"
+    assert (
+        describe(smptrans.DisconnectTransportRequest(transport=smptrans.TransportType.BLUETOOTH))
+        == "transport 2"
+    )
     assert describe(smptrans.DisconnectRequest()) == "current"
 
 
@@ -263,7 +270,7 @@ def test_UnbridgedStatusResponse() -> None:
 
 def test_BridgedStatusResponse() -> None:
     assert_frame(
-        smptrans.BridgedStatusResponse(supported=1, active=1, bridged=True),
+        smptrans.BridgedStatusResponse(supported=1, active=1, bridged=smpmsg.PRESENT),
         op=smphdr.OP.READ_RSP,
         group_id=GROUP,
         command_id=tcmd.STATUS,
@@ -272,7 +279,12 @@ def test_BridgedStatusResponse() -> None:
 
 def test_BridgedToTransportStatusResponse() -> None:
     frame = assert_frame(
-        smptrans.BridgedToTransportStatusResponse(supported=4, active=1, bridged=True, transport=2),
+        smptrans.BridgedToTransportStatusResponse(
+            supported=4,
+            active=1,
+            bridged=smpmsg.PRESENT,
+            transport=smptrans.TransportType.BLUETOOTH,
+        ),
         op=smphdr.OP.READ_RSP,
         group_id=GROUP,
         command_id=tcmd.STATUS,
@@ -290,8 +302,10 @@ def test_status_variants_are_exhaustive() -> None:
             case smptrans.UnbridgedStatusResponse():
                 return "unbridged"
 
-    to = smptrans.BridgedToTransportStatusResponse(supported=1, active=1, bridged=True, transport=2)
-    bridged = smptrans.BridgedStatusResponse(supported=1, active=1, bridged=True)
+    to = smptrans.BridgedToTransportStatusResponse(
+        supported=1, active=1, bridged=smpmsg.PRESENT, transport=smptrans.TransportType.BLUETOOTH
+    )
+    bridged = smptrans.BridgedStatusResponse(supported=1, active=1, bridged=smpmsg.PRESENT)
     unbridged = smptrans.UnbridgedStatusResponse(supported=1, active=0)
 
     assert describe(to) == "bridged to 2"
@@ -334,9 +348,9 @@ def test_loads_status_response_reads_a_relocated_group() -> None:
     class CustomBridgedToTransport(smptrans.BridgedToTransportStatusResponse, frozen=True):
         _GROUP_ID: ClassVar[smphdr.GroupIdField] = 0xABCD
 
-    frame = CustomBridgedToTransport(supported=1, active=1, bridged=True, transport=2).to_frame(
-        sequence=0
-    )
+    frame = CustomBridgedToTransport(
+        supported=1, active=1, bridged=smpmsg.PRESENT, transport=smptrans.TransportType.BLUETOOTH
+    ).to_frame(sequence=0)
 
     assert (
         smptrans.loads_status_response(
@@ -404,13 +418,13 @@ def test_ListOfTransportsResponse() -> None:
     assert transports[0].id is smptrans.TransportType.SERIAL
     assert transports[0].name == "uart"
     assert transports[1].name is None
-    assert type(transports[2].id) is int
+    assert transports[2].id.name == "UNKNOWN_9"
     assert transports[3].id is smptrans.TransportType.USER_DEFINED
 
 
 def test_TransportModesRequest() -> None:
     assert_frame(
-        smptrans.TransportModesRequest(transport=2),
+        smptrans.TransportModesRequest(transport=smptrans.TransportType.BLUETOOTH),
         op=smphdr.OP.READ,
         group_id=GROUP,
         command_id=tcmd.GET_MODES,
@@ -431,18 +445,12 @@ def test_TransportModesResponse() -> None:
         )
     )
 
-    assert frame.data.modes[0].outgoing is True
+    assert frame.data.modes[0].outgoing == smpmsg.PRESENT
     assert frame.data.modes[1].outgoing is None
 
 
 def test_Mode_rejects_a_false_flag() -> None:
     """A flag the protocol only ever emits as true is not a `bool`."""
-
-    with pytest.raises(ValueError):
-        smptrans.Mode(id=0, description="UART", incoming=False)  # type: ignore[arg-type]
-
-    with pytest.raises(ValueError):
-        smptrans.Mode(id=0, description="UART", outgoing=False)  # type: ignore[arg-type]
 
     with pytest.raises(msgspec.DecodeError):
         smptrans.TransportModesResponse.loads(
@@ -469,7 +477,7 @@ def test_Mode_rejects_type_in_place_of_id() -> None:
 
 def test_TransportConfigDetailsRequest() -> None:
     assert_frame(
-        smptrans.TransportConfigDetailsRequest(transport=2, mode=0),
+        smptrans.TransportConfigDetailsRequest(transport=smptrans.TransportType.BLUETOOTH, mode=0),
         op=smphdr.OP.READ,
         group_id=GROUP,
         command_id=tcmd.GET_CONFIG_DETAILS,
@@ -510,13 +518,6 @@ def test_TransportConfigDetailsResponse_empty() -> None:
 
 
 def test_ConfigDetail_rejects_a_false_required() -> None:
-    with pytest.raises(ValueError):
-        smptrans.ConfigDetail(
-            name="port",
-            type=smptrans.ConfigType.STRING,
-            required=False,  # type: ignore[arg-type]
-        )
-
     with pytest.raises(msgspec.DecodeError):
         smptrans.TransportConfigDetailsResponse.loads(
             _frame(
@@ -625,7 +626,7 @@ def test_TransportManagementErrorV1() -> None:
 
 def test_a_transport_out_of_uint32_range_is_rejected() -> None:
     with pytest.raises(ValueError):
-        smptrans.ConnectRequest(transport=0x100000000)
+        smptrans.TransportType(0x100000000)
 
     with pytest.raises(msgspec.DecodeError):
         smptrans.ConnectRequest.loads(
@@ -653,12 +654,12 @@ def test_BluetoothConnectRequest_carries_a_mode() -> None:
     [smptrans.BridgedStatusResponse, smptrans.BridgedToTransportStatusResponse],
 )
 def test_a_bridged_status_variant_rejects_a_false_flag(variant: type[smpmsg.Response]) -> None:
-    kwargs: dict[str, Any] = {"supported": 1, "active": 1, "bridged": False}
-    if variant is smptrans.BridgedToTransportStatusResponse:
-        kwargs["transport"] = 2
+    """`bridged` is a `Present`, so `false` has no inhabitant to construct."""
 
-    with pytest.raises(ValueError):
-        variant(**kwargs)
+    payload: dict[str, Any] = {"supported": 1, "active": 1, "bridged": False, "transport": 2}
+
+    with pytest.raises(msgspec.DecodeError):
+        variant.loads(_frame(smphdr.OP.READ_RSP, tcmd.STATUS, payload))
 
 
 def test_loads_status_response_rejects_a_length_mismatch() -> None:

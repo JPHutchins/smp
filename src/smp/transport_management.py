@@ -38,28 +38,15 @@ class TransportType(IntEnum):
     SPI = 7
     USER_DEFINED = 64
 
-
-TransportTypeField: TypeAlias = TransportType | int
-
-TransportWithoutConnectParameters: TypeAlias = (
-    Literal[
-        TransportType.SERIAL,
-        TransportType.RAW_SERIAL,
-        TransportType.SHELL,
-        TransportType.UDP_IPV4,
-        TransportType.UDP_IPV6,
-        TransportType.LORAWAN,
-        TransportType.SPI,
-        TransportType.USER_DEFINED,
-    ]
-    | int
-)
-"""Every transport except those whose connect parameters have their own request
-type.
-
-The `int` arm admits any transport ID, Bluetooth's included, so the exclusion is
-enforced in `ConnectRequest.__post_init__` rather than by the type.
-"""
+    @classmethod
+    def _missing_(cls, value: object) -> TransportType | None:
+        """A device may serve a transport this package does not name."""
+        if type(value) is int and 0 <= value <= 0xFFFFFFFF:
+            unknown = int.__new__(cls, value)
+            unknown._name_ = f"UNKNOWN_{value}"
+            unknown._value_ = value
+            return unknown
+        return None
 
 
 @unique
@@ -85,11 +72,6 @@ _BLUETOOTH_ADDRESS_PATTERN = r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
 _BLUETOOTH_ADDRESS = re.compile(_BLUETOOTH_ADDRESS_PATTERN)
 
 BluetoothAddress: TypeAlias = Annotated[str, msgspec.Meta(pattern=_BLUETOOTH_ADDRESS_PATTERN)]
-
-
-def _uint32(value: int, name: str) -> None:
-    if not 0 <= value <= 0xFFFFFFFF:
-        raise ValueError(f"{name} {value!r} is not a uint32 (0-0xFFFFFFFF)")
 
 
 @unique
@@ -196,8 +178,11 @@ class ConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
     _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
     _Response = ConnectResponse
 
-    transport: TransportWithoutConnectParameters
-    """The transport to bridge the transport that receives this request to."""
+    transport: TransportType
+    """The transport to bridge the transport that receives this request to.
+
+    Bluetooth is excluded; it takes parameters, so it has its own request type.
+    """
     mode: UInt32 | None = None
     """The configuration mode of the transport to use.
 
@@ -205,22 +190,10 @@ class ConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
     """
 
     def __post_init__(self) -> None:
-        _uint32(self.transport, "transport")
         if self.transport == TransportType.BLUETOOTH:
-            raise ValueError("Bluetooth takes connect parameters; use BluetoothConnectRequest")
-        if self.mode is not None:
-            _uint32(self.mode, "mode")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> ConnectRequest:
-        cls._validate_mapping(data)
-        transport = msgspec.convert(data["transport"], type=UInt32)
-        if transport == TransportType.BLUETOOTH:
-            raise msgspec.ValidationError("Bluetooth takes connect parameters")
-        return cls(
-            transport=smphdr.resolve_int_enum(transport, TransportType),
-            mode=msgspec.convert(data["mode"], type=UInt32) if "mode" in data else None,
-        )
+            raise msgspec.ValidationError(
+                "Bluetooth takes connect parameters; use BluetoothConnectRequest"
+            )
 
 
 class BluetoothConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
@@ -245,18 +218,15 @@ class BluetoothConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=T
 
     def __post_init__(self) -> None:
         if self.transport != TransportType.BLUETOOTH:
-            raise ValueError(f"transport {self.transport!r} is not TransportType.BLUETOOTH")
+            raise msgspec.ValidationError(f"transport {self.transport!r} is not Bluetooth")
         if _BLUETOOTH_ADDRESS.match(self.address) is None:
-            raise ValueError(f"address {self.address!r} is not a Bluetooth address")
-        if self.mode is not None:
-            _uint32(self.mode, "mode")
+            raise msgspec.ValidationError(f"address {self.address!r} is not a Bluetooth address")
 
     @classmethod
     def _convert_mapping(cls, data: dict[str, Any]) -> BluetoothConnectRequest:
         cls._validate_mapping(data)
-        transport = msgspec.convert(data["transport"], type=UInt32)
-        if transport != TransportType.BLUETOOTH:
-            raise msgspec.ValidationError(f"transport {transport} is not Bluetooth")
+        if msgspec.convert(data["transport"], type=UInt32) != TransportType.BLUETOOTH:
+            raise msgspec.ValidationError("transport is not Bluetooth")
         return cls(
             transport=TransportType.BLUETOOTH,
             address=msgspec.convert(data["address"], type=BluetoothAddress),
@@ -294,20 +264,8 @@ class DisconnectTransportRequest(smpmsg.WriteRequest, _TransportGroupBase, froze
     _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
     _Response = DisconnectResponse
 
-    transport: TransportTypeField
+    transport: TransportType
     """The transport to disconnect the bridge from."""
-
-    def __post_init__(self) -> None:
-        _uint32(self.transport, "transport")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> DisconnectTransportRequest:
-        cls._validate_mapping(data)
-        return cls(
-            transport=smphdr.resolve_int_enum(
-                msgspec.convert(data["transport"], type=UInt32), TransportType
-            )
-        )
 
 
 class DisconnectAllRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
@@ -317,18 +275,7 @@ class DisconnectAllRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True
     _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
     _Response = DisconnectResponse
 
-    all: Literal[True]
-
-    def __post_init__(self) -> None:
-        if self.all is not True:
-            raise ValueError(f"all {self.all!r} is not True")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> DisconnectAllRequest:
-        cls._validate_mapping(data)
-        if msgspec.convert(data["all"], type=bool) is not True:
-            raise msgspec.ValidationError("all is not true")
-        return cls(all=True)
+    all: smpmsg.Present
 
 
 AnyDisconnectRequest: TypeAlias = (
@@ -359,22 +306,7 @@ class BridgedStatusResponse(smpmsg.ReadResponse, frozen=True):
     """How many bridges can be active at a given time."""
     active: UInt32
     """How many bridges are currently active."""
-    bridged: Literal[True]
-
-    def __post_init__(self) -> None:
-        if self.bridged is not True:
-            raise ValueError(f"bridged {self.bridged!r} is not True")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> BridgedStatusResponse:
-        cls._validate_mapping(data)
-        if msgspec.convert(data["bridged"], type=bool) is not True:
-            raise msgspec.ValidationError("bridged is not true")
-        return cls(
-            supported=msgspec.convert(data["supported"], type=UInt32),
-            active=msgspec.convert(data["active"], type=UInt32),
-            bridged=True,
-        )
+    bridged: smpmsg.Present
 
 
 class BridgedToTransportStatusResponse(smpmsg.ReadResponse, frozen=True):
@@ -387,28 +319,9 @@ class BridgedToTransportStatusResponse(smpmsg.ReadResponse, frozen=True):
     """How many bridges can be active at a given time."""
     active: UInt32
     """How many bridges are currently active."""
-    bridged: Literal[True]
-    transport: TransportTypeField
+    bridged: smpmsg.Present
+    transport: TransportType
     """The transport that the transport that received the request is bridged to."""
-
-    def __post_init__(self) -> None:
-        if self.bridged is not True:
-            raise ValueError(f"bridged {self.bridged!r} is not True")
-        _uint32(self.transport, "transport")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> BridgedToTransportStatusResponse:
-        cls._validate_mapping(data)
-        if msgspec.convert(data["bridged"], type=bool) is not True:
-            raise msgspec.ValidationError("bridged is not true")
-        return cls(
-            supported=msgspec.convert(data["supported"], type=UInt32),
-            active=msgspec.convert(data["active"], type=UInt32),
-            bridged=True,
-            transport=smphdr.resolve_int_enum(
-                msgspec.convert(data["transport"], type=UInt32), TransportType
-            ),
-        )
 
 
 AnyStatusResponse: TypeAlias = (
@@ -460,18 +373,10 @@ def loads_status_response(
 class Transport(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """A transport that supports bridging."""
 
-    id: TransportTypeField
+    id: TransportType
     """The transport's ID."""
     name: str | None = None
     """The transport's name, if available."""
-
-    def __post_init__(self) -> None:
-        _uint32(self.id, "id")
-
-
-class _TransportWire(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
-    id: UInt32
-    name: str | None = None
 
 
 class ListOfTransportsResponse(smpmsg.ReadResponse, frozen=True):
@@ -482,17 +387,6 @@ class ListOfTransportsResponse(smpmsg.ReadResponse, frozen=True):
 
     transports: tuple[Transport, ...]
     """The transports that support bridging."""
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> ListOfTransportsResponse:
-        cls._validate_mapping(data)
-        wires = msgspec.convert(data["transports"], type=tuple[_TransportWire, ...])
-        return cls(
-            transports=tuple(
-                Transport(id=smphdr.resolve_int_enum(w.id, TransportType), name=w.name)
-                for w in wires
-            )
-        )
 
 
 class ListOfTransportsRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
@@ -510,24 +404,10 @@ class Mode(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_field
     """The mode's ID, to be passed as the `mode` of a connect request."""
     description: str
     """A description of the mode."""
-    incoming: Literal[True] | None = None
+    incoming: smpmsg.Present | None = None
     """The mode supports incoming bridge connections."""
-    outgoing: Literal[True] | None = None
+    outgoing: smpmsg.Present | None = None
     """The mode supports outgoing bridge connections."""
-
-    def __post_init__(self) -> None:
-        _uint32(self.id, "id")
-        if self.incoming is not True and self.incoming is not None:
-            raise ValueError(f"incoming {self.incoming!r} is not True or None")
-        if self.outgoing is not True and self.outgoing is not None:
-            raise ValueError(f"outgoing {self.outgoing!r} is not True or None")
-
-
-class _ModeWire(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
-    id: UInt32
-    description: str
-    incoming: bool | None = None
-    outgoing: bool | None = None
 
 
 class TransportModesResponse(smpmsg.ReadResponse, frozen=True):
@@ -539,27 +419,6 @@ class TransportModesResponse(smpmsg.ReadResponse, frozen=True):
     modes: tuple[Mode, ...]
     """The modes that the requested transport supports."""
 
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> TransportModesResponse:
-        cls._validate_mapping(data)
-        wires = msgspec.convert(data["modes"], type=tuple[_ModeWire, ...])
-        for wire in wires:
-            if (wire.incoming is not None and wire.incoming is not True) or (
-                wire.outgoing is not None and wire.outgoing is not True
-            ):
-                raise msgspec.ValidationError("a mode flag is present and not true")
-        return cls(
-            modes=tuple(
-                Mode(
-                    id=wire.id,
-                    description=wire.description,
-                    incoming=True if wire.incoming else None,
-                    outgoing=True if wire.outgoing else None,
-                )
-                for wire in wires
-            )
-        )
-
 
 class TransportModesRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
     """Request information on the modes of a transport."""
@@ -568,20 +427,8 @@ class TransportModesRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True
     _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_MODES
     _Response = TransportModesResponse
 
-    transport: TransportTypeField
+    transport: TransportType
     """The transport to get the modes of."""
-
-    def __post_init__(self) -> None:
-        _uint32(self.transport, "transport")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> TransportModesRequest:
-        cls._validate_mapping(data)
-        return cls(
-            transport=smphdr.resolve_int_enum(
-                msgspec.convert(data["transport"], type=UInt32), TransportType
-            )
-        )
 
 
 class ConfigDetail(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
@@ -593,20 +440,8 @@ class ConfigDetail(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unkno
     """
     type: ConfigType
     """The type of the configuration item."""
-    required: Literal[True] | None = None
+    required: smpmsg.Present | None = None
     """Present and true if the configuration item is required."""
-
-    def __post_init__(self) -> None:
-        if self.required is not True and self.required is not None:
-            raise ValueError(f"required {self.required!r} is not True or None")
-
-
-class _ConfigDetailWire(
-    msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True
-):
-    name: str
-    type: ConfigType
-    required: bool | None = None
 
 
 class TransportConfigDetailsResponse(smpmsg.ReadResponse, frozen=True):
@@ -621,22 +456,6 @@ class TransportConfigDetailsResponse(smpmsg.ReadResponse, frozen=True):
     Empty for a transport that takes no configuration.
     """
 
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> TransportConfigDetailsResponse:
-        cls._validate_mapping(data)
-        wires = msgspec.convert(data["configs"], type=tuple[_ConfigDetailWire, ...])
-        for wire in wires:
-            if wire.required is not None and wire.required is not True:
-                raise msgspec.ValidationError("required is present and not true")
-        return cls(
-            configs=tuple(
-                ConfigDetail(
-                    name=wire.name, type=wire.type, required=True if wire.required else None
-                )
-                for wire in wires
-            )
-        )
-
 
 class TransportConfigDetailsRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
     """Request the configuration that a transport's mode accepts."""
@@ -645,21 +464,7 @@ class TransportConfigDetailsRequest(smpmsg.ReadRequest, _TransportGroupBase, fro
     _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS
     _Response = TransportConfigDetailsResponse
 
-    transport: TransportTypeField
+    transport: TransportType
     """The transport to get configuration information for."""
     mode: UInt32
     """The mode of the transport to get configuration information for."""
-
-    def __post_init__(self) -> None:
-        _uint32(self.transport, "transport")
-        _uint32(self.mode, "mode")
-
-    @classmethod
-    def _convert_mapping(cls, data: dict[str, Any]) -> TransportConfigDetailsRequest:
-        cls._validate_mapping(data)
-        return cls(
-            transport=smphdr.resolve_int_enum(
-                msgspec.convert(data["transport"], type=UInt32), TransportType
-            ),
-            mode=msgspec.convert(data["mode"], type=UInt32),
-        )

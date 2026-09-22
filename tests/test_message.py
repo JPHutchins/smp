@@ -153,3 +153,20 @@ def test_loads_rejects_length_mismatch() -> None:
     wire[2:4] = b"\xff\xff"  # corrupt the header length field
     with pytest.raises(SMPMalformed):
         smpimg.ImageStatesReadRequest.loads(bytes(wire))
+
+
+def test_Present_is_a_singleton_value() -> None:
+    """`Present` stands for a flag the protocol emits only as `true`."""
+
+    assert repr(smpmsg.PRESENT) == "PRESENT"
+    assert smpmsg.Present() == smpmsg.PRESENT
+    assert smpmsg.PRESENT != True  # noqa: E712
+    assert len({smpmsg.PRESENT, smpmsg.Present()}) == 1
+
+
+def test_the_hooks_refuse_a_type_they_do_not_know() -> None:
+    with pytest.raises(NotImplementedError):
+        smpmsg._enc_hook(object())
+
+    with pytest.raises(NotImplementedError):
+        smpmsg._dec_hook(complex, 1)

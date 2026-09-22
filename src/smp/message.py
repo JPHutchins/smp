@@ -6,7 +6,7 @@ An SMP message is a `Frame`: an SMP `Header` and its CBOR payload `Data`.
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Generic, TypeVar
 
 import msgspec
 import msgspec_cbor
@@ -18,6 +18,42 @@ if TYPE_CHECKING:
     from types_bits import u8
 
 T = TypeVar("T", bound="Data")
+
+
+class Present:
+    """A flag that the protocol emits only as `true`, or omits entirely.
+
+    `False` is unrepresentable: a field typed `Present | None` holds `PRESENT`
+    or nothing.
+    """
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        return "PRESENT"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Present)
+
+    def __hash__(self) -> int:
+        return hash(Present)
+
+
+PRESENT: Final = Present()
+
+
+def _enc_hook(obj: Any) -> Any:
+    if isinstance(obj, Present):
+        return True
+    raise NotImplementedError(f"Cannot encode {type(obj).__name__}")
+
+
+def _dec_hook(expected: type, obj: Any) -> Any:
+    if expected is Present:
+        if obj is not True:
+            raise msgspec.ValidationError(f"Expected `true`, got `{obj!r}`")
+        return PRESENT
+    raise NotImplementedError(f"Cannot decode {expected!r}")
 
 
 class Data(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
@@ -36,7 +72,7 @@ class Data(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_field
     ]
 
     def __bytes__(self) -> bytes:
-        return msgspec_cbor.encode(self, order="canonical")
+        return msgspec_cbor.encode(self, order="canonical", enc_hook=_enc_hook)
 
     def to_frame(
         self: T,
@@ -74,14 +110,14 @@ class Data(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_field
 
     @classmethod
     def _convert_mapping(cls: type[T], data: dict[str, Any]) -> T:
-        return msgspec.convert(data, type=cls)
+        return msgspec.convert(data, type=cls, dec_hook=_dec_hook)
 
     @classmethod
     def _decode_payload(cls: type[T], payload: bytes) -> T:
         # Direct decode unless a subclass overrides _convert_mapping to discriminate
         # an int-like union or a bare dynamic map that msgspec cannot decode directly.
         if cls._convert_mapping.__func__ is Data._convert_mapping.__func__:  # type: ignore[attr-defined]
-            return msgspec_cbor.decode(payload, type=cls)
+            return msgspec_cbor.decode(payload, type=cls, dec_hook=_dec_hook)
         return cls._convert_mapping(msgspec_cbor.decode(payload, type=dict))
 
     @classmethod
