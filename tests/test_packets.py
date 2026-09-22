@@ -3,9 +3,9 @@
 import struct
 from base64 import b64decode
 
+import msgspec
 import pytest
 from crcmod.predefined import mkPredefinedCrcFun  # type: ignore
-from pydantic import ValidationError
 
 from smp import header, image_management
 from smp.exceptions import SMPBadContinueDelimiter, SMPBadCRC, SMPBadStartDelimiter
@@ -33,7 +33,7 @@ def _assert_header(frame: bytes) -> None:
 
 def _assert_payload(frame: bytes, data: bytes) -> None:
     # deserialize the original request itself
-    r = image_management.ImageUploadWriteRequest.loads(frame)
+    r = image_management.ImageUploadWriteRequest.loads(frame).data
     assert off == r.off
     assert image == r.image
     assert length == r.len
@@ -56,7 +56,7 @@ def test_encode(line_length: int, line_length_ratio: float) -> None:
     )
 
     reconstruct = bytearray([])
-    for i, p in enumerate(encode(r.BYTES, line_length=line_length)):
+    for i, p in enumerate(encode(bytes(r.to_frame(sequence=0)), line_length=line_length)):
         # assert that packet delimiters are correct
         if i == 0:
             assert bytes([6, 9]) == p[:2]
@@ -96,7 +96,7 @@ def test_decode(line_length: int, line_length_ratio: float) -> None:
         off=off, data=data, image=image, len=length, sha=sha, upgrade=upgrade
     )
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req.to_frame(sequence=0)), line_length=line_length):
         packets.append(p)
 
     decoder = decode()
@@ -119,7 +119,7 @@ def test_decode_raises_SMPBadStartDelimiter() -> None:
         off=off, data=b"hello!", image=image, len=length, sha=sha, upgrade=upgrade
     )
     packets = []
-    for p in encode(req.BYTES):
+    for p in encode(bytes(req.to_frame(sequence=0))):
         packets.append(p)
 
     # malform the start delimiter
@@ -149,7 +149,7 @@ def test_decode_raises_SMPBadContinueDelimiter() -> None:
         upgrade=upgrade,
     )
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req.to_frame(sequence=0)), line_length=line_length):
         packets.append(p)
 
     assert len(packets) > 1
@@ -184,7 +184,7 @@ def test_decode_raises_SMPBadCRC(j: int, i: int) -> None:
     )
 
     packets = []
-    for p in encode(req.BYTES, line_length=line_length):
+    for p in encode(bytes(req.to_frame(sequence=0)), line_length=line_length):
         packets.append(p)
 
     assert len(packets) == 4
@@ -200,7 +200,7 @@ def test_decode_raises_SMPBadCRC(j: int, i: int) -> None:
         decoder = decode()
         next(decoder)
 
-        with pytest.raises((SMPBadCRC, ValidationError)):
+        with pytest.raises((SMPBadCRC, msgspec.DecodeError)):
             frame = b""
             for packet in packets:
                 try:

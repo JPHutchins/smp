@@ -11,7 +11,9 @@ requires-python = ">=3.10"
 dependencies = [
 "cbor2>=6,<7",
 "crcmod>=1.7,<2",
-"pydantic>=2.6,<3",
+"msgspec>=0.21.1",
+"msgspec-cbor>=0.2,<0.3",
+"types-bits>=0.2,<0.3",
 ]
 dynamic = ["version"]
 classifiers = [
@@ -50,6 +52,7 @@ dev = [
     "pytest-cov>=7,<8",
     "camas[mcp]==0.1.25",
     "pyright>=1.1,<2",
+    "typing-extensions>=4,<5",
 ]
 doc = [
 "mkdocstrings[python]>=0.26.1,<1",
@@ -72,14 +75,19 @@ extend-select = [
 ]
 
 [tool.ruff.lint.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-base-classes = ["msgspec.Struct"]
 
 [tool.ruff.format]
 quote-style = "preserve"
 
 [tool.mypy]
 disallow_untyped_defs = true
+warn_unused_ignores = true
 exclude = ['\.venv']
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "standard"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

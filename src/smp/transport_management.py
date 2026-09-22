@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
+import re
 from enum import IntEnum, unique
-from typing import Annotated, Literal, TypeAlias
+from typing import Annotated, Any, Literal, TypeAlias
 
-import cbor2
-from pydantic import BaseModel, ConfigDict, Field
+import msgspec
+import msgspec_cbor
 
 import smp.error as smperr
 import smp.header as smphdr
 import smp.message as smpmsg
+from smp.exceptions import SMPMalformed
 
 GROUP_ID: smphdr.GroupIdField = smphdr.GroupId.TRANSPORT_MANAGEMENT
 """The group ID that this module's messages are addressed to.
@@ -19,7 +21,7 @@ A device may serve this group from another group ID; subclass the messages that
 such a device is sent and override `_GROUP_ID`.
 """
 
-UInt32: TypeAlias = Annotated[int, Field(ge=0, le=0xFFFFFFFF)]
+UInt32: TypeAlias = Annotated[int, msgspec.Meta(ge=0, le=0xFFFFFFFF)]
 
 
 @unique
@@ -36,26 +38,15 @@ class TransportType(IntEnum):
     SPI = 7
     USER_DEFINED = 64
 
-
-TransportTypeField: TypeAlias = Annotated[TransportType | UInt32, Field(union_mode="left_to_right")]
-
-TransportWithoutConnectParameters: TypeAlias = Annotated[
-    Literal[
-        TransportType.SERIAL,
-        TransportType.RAW_SERIAL,
-        TransportType.SHELL,
-        TransportType.UDP_IPV4,
-        TransportType.UDP_IPV6,
-        TransportType.LORAWAN,
-        TransportType.SPI,
-        TransportType.USER_DEFINED,
-    ]
-    | Annotated[int, Field(ge=0, lt=TransportType.BLUETOOTH)]
-    | Annotated[int, Field(gt=TransportType.BLUETOOTH, le=0xFFFFFFFF)],
-    Field(union_mode="left_to_right"),
-]
-"""Every transport except those whose connect parameters have their own request
-type."""
+    @classmethod
+    def _missing_(cls, value: object) -> TransportType | None:
+        """A device may serve a transport this package does not name."""
+        if type(value) is int and 0 <= value <= 0xFFFFFFFF:
+            unknown = int.__new__(cls, value)
+            unknown._name_ = f"UNKNOWN_{value}"
+            unknown._value_ = value
+            return unknown
+        return None
 
 
 @unique
@@ -77,269 +68,10 @@ class BluetoothAddressType(IntEnum):
     RANDOM = 1
 
 
-class ConnectRequest(smpmsg.WriteRequest):
-    """Bridge to a transport that takes no parameters beyond `transport` and `mode`.
+_BLUETOOTH_ADDRESS_PATTERN = r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
+_BLUETOOTH_ADDRESS = re.compile(_BLUETOOTH_ADDRESS_PATTERN)
 
-    A transport that takes parameters gets its own request type, the way
-    `BluetoothConnectRequest` does.
-    """
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
-
-    transport: TransportWithoutConnectParameters
-    """The transport to bridge the transport that receives this request to."""
-    mode: UInt32 | None = None
-    """The configuration mode of the transport to use.
-
-    May be omitted to use the default value of 0.
-    """
-
-
-class BluetoothConnectRequest(smpmsg.WriteRequest):
-    """Bridge to the Bluetooth transport."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
-
-    transport: Literal[TransportType.BLUETOOTH]
-    address: Annotated[str, Field(pattern=r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")]
-    """The address of the peripheral to connect to."""
-    address_type: BluetoothAddressType | None = None
-    """The type of `address`."""
-    le_coded: bool | None = None
-    """Request the LE Coded PHY instead of the 1M PHY."""
-    mode: UInt32 | None = None
-    """The configuration mode of the transport to use.
-
-    May be omitted to use the default value of 0.
-    """
-
-
-AnyConnectRequest: TypeAlias = BluetoothConnectRequest | ConnectRequest
-"""The connect (bridge) request variants."""
-
-
-class ConnectResponse(smpmsg.WriteResponse):
-    """Success response to a connect (bridge) request."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
-
-
-class DisconnectRequest(smpmsg.WriteRequest):
-    """Disconnect the bridge of the transport that receives this request."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
-
-
-class DisconnectTransportRequest(smpmsg.WriteRequest):
-    """Disconnect the bridge of the given transport."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
-
-    transport: TransportTypeField
-    """The transport to disconnect the bridge from."""
-
-
-class DisconnectAllRequest(smpmsg.WriteRequest):
-    """Disconnect all active bridges."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
-
-    all: Literal[True]
-
-
-AnyDisconnectRequest: TypeAlias = (
-    DisconnectAllRequest | DisconnectTransportRequest | DisconnectRequest
-)
-"""The disconnect request variants."""
-
-
-class DisconnectResponse(smpmsg.WriteResponse):
-    """Success response to any of the disconnect requests."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
-
-
-class StatusRequest(smpmsg.ReadRequest):
-    """Request information on active bridges and on what the device supports."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
-
-
-class UnbridgedStatusResponse(smpmsg.ReadResponse):
-    """The status of a transport that is not bridged."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
-
-    supported: UInt32
-    """How many bridges can be active at a given time."""
-    active: UInt32
-    """How many bridges are currently active."""
-
-
-class BridgedStatusResponse(smpmsg.ReadResponse):
-    """The status of a bridged transport whose peer the device did not name."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
-
-    supported: UInt32
-    """How many bridges can be active at a given time."""
-    active: UInt32
-    """How many bridges are currently active."""
-    bridged: Literal[True]
-
-
-class BridgedToTransportStatusResponse(smpmsg.ReadResponse):
-    """The status of a bridged transport, naming the transport it is bridged to."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
-
-    supported: UInt32
-    """How many bridges can be active at a given time."""
-    active: UInt32
-    """How many bridges are currently active."""
-    bridged: Literal[True]
-    transport: TransportTypeField
-    """The transport that the transport that received the request is bridged to."""
-
-
-AnyStatusResponse: TypeAlias = (
-    BridgedToTransportStatusResponse | BridgedStatusResponse | UnbridgedStatusResponse
-)
-"""The status response variants."""
-
-
-def loads_status_response(
-    data: bytes,
-    unbridged: type[UnbridgedStatusResponse] = UnbridgedStatusResponse,
-    bridged: type[BridgedStatusResponse] = BridgedStatusResponse,
-    bridged_to_transport: type[BridgedToTransportStatusResponse] = BridgedToTransportStatusResponse,
-) -> AnyStatusResponse:
-    """Deserialize a status response as the variant that its payload names.
-
-    A device that serves this group from another group ID is read by passing
-    the variants that carry its `_GROUP_ID`.
-    """
-    payload = cbor2.loads(data[smphdr.Header.SIZE :])
-
-    if "transport" in payload:
-        return bridged_to_transport.loads(data)
-    if "bridged" in payload:
-        return bridged.loads(data)
-    return unbridged.loads(data)
-
-
-class Transport(BaseModel):
-    """A transport that supports bridging."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    id: TransportTypeField
-    """The transport's ID."""
-    name: str | None = None
-    """The transport's name, if available."""
-
-
-class ListOfTransportsRequest(smpmsg.ReadRequest):
-    """Request information on the transports that the device supports."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.LIST
-
-
-class ListOfTransportsResponse(smpmsg.ReadResponse):
-    """SMP transport list response."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.LIST
-
-    transports: tuple[Transport, ...]
-    """The transports that support bridging."""
-
-
-class Mode(BaseModel):
-    """A configuration mode of a transport."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    id: UInt32
-    """The mode's ID, to be passed as the `mode` of a connect request."""
-    description: str
-    """A description of the mode."""
-    incoming: Literal[True] | None = None
-    """The mode supports incoming bridge connections."""
-    outgoing: Literal[True] | None = None
-    """The mode supports outgoing bridge connections."""
-
-
-class TransportModesRequest(smpmsg.ReadRequest):
-    """Request information on the modes of a transport."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_MODES
-
-    transport: TransportTypeField
-    """The transport to get the modes of."""
-
-
-class TransportModesResponse(smpmsg.ReadResponse):
-    """SMP transport modes response."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_MODES
-
-    modes: tuple[Mode, ...]
-    """The modes that the requested transport supports."""
-
-
-class ConfigDetail(BaseModel):
-    """A configuration item of a transport's mode."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    name: str
-    """The name of the configuration item, to be used as the key of the
-    transport specific entry of a connect request.
-    """
-    type: ConfigType
-    """The type of the configuration item."""
-    required: Literal[True] | None = None
-    """Present and true if the configuration item is required."""
-
-
-class TransportConfigDetailsRequest(smpmsg.ReadRequest):
-    """Request the configuration that a transport's mode accepts."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS
-
-    transport: TransportTypeField
-    """The transport to get configuration information for."""
-    mode: UInt32
-    """The mode of the transport to get configuration information for."""
-
-
-class TransportConfigDetailsResponse(smpmsg.ReadResponse):
-    """SMP transport configuration details response."""
-
-    _GROUP_ID = GROUP_ID
-    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS
-
-    configs: tuple[ConfigDetail, ...]
-    """The configuration items that the requested transport's mode accepts.
-
-    Empty for a transport that takes no configuration.
-    """
+BluetoothAddress: TypeAlias = Annotated[str, msgspec.Meta(pattern=_BLUETOOTH_ADDRESS_PATTERN)]
 
 
 @unique
@@ -411,13 +143,328 @@ class TRANSPORT_MGMT_ERR(IntEnum):
     """A bridge connection attempt has failed."""
 
 
-class TransportManagementErrorV1(smperr.ErrorV1):
+class TransportManagementErrorV1(smperr.ErrorV1, frozen=True):
     """Error response to a transport management command."""
 
     _GROUP_ID = GROUP_ID
 
 
-class TransportManagementErrorV2(smperr.ErrorV2[TRANSPORT_MGMT_ERR]):
+class TransportManagementErrorV2(smperr.ErrorV2[TRANSPORT_MGMT_ERR], frozen=True):
     """Error response to a transport management command."""
 
     _GROUP_ID = GROUP_ID
+
+
+class _TransportGroupBase:
+    _ErrorV1 = TransportManagementErrorV1
+    _ErrorV2 = TransportManagementErrorV2
+
+
+class ConnectResponse(smpmsg.WriteResponse, frozen=True):
+    """Success response to a connect (bridge) request."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
+
+
+class ConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
+    """Bridge to a transport that takes no parameters beyond `transport` and `mode`.
+
+    A transport that takes parameters gets its own request type, the way
+    `BluetoothConnectRequest` does.
+    """
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
+    _Response = ConnectResponse
+
+    transport: TransportType
+    """The transport to bridge the transport that receives this request to.
+
+    Bluetooth is excluded; it takes parameters, so it has its own request type.
+    """
+    mode: UInt32 | None = None
+    """The configuration mode of the transport to use.
+
+    May be omitted to use the default value of 0.
+    """
+
+    def __post_init__(self) -> None:
+        if self.transport == TransportType.BLUETOOTH:
+            raise msgspec.ValidationError(
+                "Bluetooth takes connect parameters; use BluetoothConnectRequest"
+            )
+
+
+class BluetoothConnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
+    """Bridge to the Bluetooth transport."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.CONNECT
+    _Response = ConnectResponse
+
+    transport: Literal[TransportType.BLUETOOTH]
+    address: BluetoothAddress
+    """The address of the peripheral to connect to."""
+    address_type: BluetoothAddressType | None = None
+    """The type of `address`."""
+    le_coded: bool | None = None
+    """Request the LE Coded PHY instead of the 1M PHY."""
+    mode: UInt32 | None = None
+    """The configuration mode of the transport to use.
+
+    May be omitted to use the default value of 0.
+    """
+
+    def __post_init__(self) -> None:
+        if self.transport != TransportType.BLUETOOTH:
+            raise msgspec.ValidationError(f"transport {self.transport!r} is not Bluetooth")
+        if _BLUETOOTH_ADDRESS.match(self.address) is None:
+            raise msgspec.ValidationError(f"address {self.address!r} is not a Bluetooth address")
+
+    @classmethod
+    def _convert_mapping(cls, data: dict[str, Any]) -> BluetoothConnectRequest:
+        cls._validate_mapping(data)
+        if msgspec.convert(data["transport"], type=UInt32) != TransportType.BLUETOOTH:
+            raise msgspec.ValidationError("transport is not Bluetooth")
+        return cls(
+            transport=TransportType.BLUETOOTH,
+            address=msgspec.convert(data["address"], type=BluetoothAddress),
+            address_type=msgspec.convert(data["address_type"], type=BluetoothAddressType)
+            if "address_type" in data
+            else None,
+            le_coded=msgspec.convert(data["le_coded"], type=bool) if "le_coded" in data else None,
+            mode=msgspec.convert(data["mode"], type=UInt32) if "mode" in data else None,
+        )
+
+
+AnyConnectRequest: TypeAlias = BluetoothConnectRequest | ConnectRequest
+"""The connect (bridge) request variants."""
+
+
+class DisconnectResponse(smpmsg.WriteResponse, frozen=True):
+    """Success response to any of the disconnect requests."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
+
+
+class DisconnectRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
+    """Disconnect the bridge of the transport that receives this request."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
+    _Response = DisconnectResponse
+
+
+class DisconnectTransportRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
+    """Disconnect the bridge of the given transport."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
+    _Response = DisconnectResponse
+
+    transport: TransportType
+    """The transport to disconnect the bridge from."""
+
+
+class DisconnectAllRequest(smpmsg.WriteRequest, _TransportGroupBase, frozen=True):
+    """Disconnect all active bridges."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.DISCONNECT
+    _Response = DisconnectResponse
+
+    all: smpmsg.Present
+
+
+AnyDisconnectRequest: TypeAlias = (
+    DisconnectAllRequest | DisconnectTransportRequest | DisconnectRequest
+)
+"""The disconnect request variants."""
+
+
+class UnbridgedStatusResponse(smpmsg.ReadResponse, frozen=True):
+    """The status of a transport that is not bridged."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
+
+    supported: UInt32
+    """How many bridges can be active at a given time."""
+    active: UInt32
+    """How many bridges are currently active."""
+
+
+class BridgedStatusResponse(smpmsg.ReadResponse, frozen=True):
+    """The status of a bridged transport whose peer the device did not name."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
+
+    supported: UInt32
+    """How many bridges can be active at a given time."""
+    active: UInt32
+    """How many bridges are currently active."""
+    bridged: smpmsg.Present
+
+
+class BridgedToTransportStatusResponse(smpmsg.ReadResponse, frozen=True):
+    """The status of a bridged transport, naming the transport it is bridged to."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
+
+    supported: UInt32
+    """How many bridges can be active at a given time."""
+    active: UInt32
+    """How many bridges are currently active."""
+    bridged: smpmsg.Present
+    transport: TransportType
+    """The transport that the transport that received the request is bridged to."""
+
+
+AnyStatusResponse: TypeAlias = (
+    BridgedToTransportStatusResponse | BridgedStatusResponse | UnbridgedStatusResponse
+)
+"""The status response variants."""
+
+AnyStatusFrame: TypeAlias = (
+    smpmsg.Frame[BridgedToTransportStatusResponse]
+    | smpmsg.Frame[BridgedStatusResponse]
+    | smpmsg.Frame[UnbridgedStatusResponse]
+)
+"""A `Frame` carrying one of the status response variants."""
+
+
+class StatusRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
+    """Request information on active bridges and on what the device supports."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.STATUS
+    _Response = UnbridgedStatusResponse
+
+
+def loads_status_response(
+    frame: bytes,
+    unbridged: type[UnbridgedStatusResponse] = UnbridgedStatusResponse,
+    bridged: type[BridgedStatusResponse] = BridgedStatusResponse,
+    bridged_to_transport: type[BridgedToTransportStatusResponse] = BridgedToTransportStatusResponse,
+) -> AnyStatusFrame:
+    """Deserialize a status response as the variant that its payload names.
+
+    A device that serves this group from another group ID is read by passing
+    the variants that carry its `_GROUP_ID`.
+    """
+    header = smphdr.Header.loads(frame[: smphdr.Header.SIZE])
+    payload = frame[smphdr.Header.SIZE :]
+    if header.length != len(payload):
+        raise SMPMalformed(f"header.length {header.length} != payload length {len(payload)}")
+
+    mapping: dict[str, Any] = msgspec_cbor.decode(payload, type=dict)
+
+    if "transport" in mapping:
+        return bridged_to_transport.load(header, mapping)
+    if "bridged" in mapping:
+        return bridged.load(header, mapping)
+    return unbridged.load(header, mapping)
+
+
+class Transport(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
+    """A transport that supports bridging."""
+
+    id: TransportType
+    """The transport's ID."""
+    name: str | None = None
+    """The transport's name, if available."""
+
+
+class ListOfTransportsResponse(smpmsg.ReadResponse, frozen=True):
+    """SMP transport list response."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.LIST
+
+    transports: tuple[Transport, ...]
+    """The transports that support bridging."""
+
+
+class ListOfTransportsRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
+    """Request information on the transports that the device supports."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.LIST
+    _Response = ListOfTransportsResponse
+
+
+class Mode(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
+    """A configuration mode of a transport."""
+
+    id: UInt32
+    """The mode's ID, to be passed as the `mode` of a connect request."""
+    description: str
+    """A description of the mode."""
+    incoming: smpmsg.Present | None = None
+    """The mode supports incoming bridge connections."""
+    outgoing: smpmsg.Present | None = None
+    """The mode supports outgoing bridge connections."""
+
+
+class TransportModesResponse(smpmsg.ReadResponse, frozen=True):
+    """SMP transport modes response."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_MODES
+
+    modes: tuple[Mode, ...]
+    """The modes that the requested transport supports."""
+
+
+class TransportModesRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
+    """Request information on the modes of a transport."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_MODES
+    _Response = TransportModesResponse
+
+    transport: TransportType
+    """The transport to get the modes of."""
+
+
+class ConfigDetail(msgspec.Struct, frozen=True, omit_defaults=True, forbid_unknown_fields=True):
+    """A configuration item of a transport's mode."""
+
+    name: str
+    """The name of the configuration item, to be used as the key of the
+    transport specific entry of a connect request.
+    """
+    type: ConfigType
+    """The type of the configuration item."""
+    required: smpmsg.Present | None = None
+    """Present and true if the configuration item is required."""
+
+
+class TransportConfigDetailsResponse(smpmsg.ReadResponse, frozen=True):
+    """SMP transport configuration details response."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS
+
+    configs: tuple[ConfigDetail, ...]
+    """The configuration items that the requested transport's mode accepts.
+
+    Empty for a transport that takes no configuration.
+    """
+
+
+class TransportConfigDetailsRequest(smpmsg.ReadRequest, _TransportGroupBase, frozen=True):
+    """Request the configuration that a transport's mode accepts."""
+
+    _GROUP_ID = GROUP_ID
+    _COMMAND_ID = smphdr.CommandId.TransportManagement.GET_CONFIG_DETAILS
+    _Response = TransportConfigDetailsResponse
+
+    transport: TransportType
+    """The transport to get configuration information for."""
+    mode: UInt32
+    """The mode of the transport to get configuration information for."""

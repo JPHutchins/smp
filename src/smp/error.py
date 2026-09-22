@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar, get_args, get_origin
 
-from pydantic import BaseModel, ConfigDict
+import msgspec
 
-from smp import message
-from smp.header import GroupIdField
+from smp import header, message
 
 T = TypeVar("T", bound=IntEnum)
 
@@ -63,7 +62,7 @@ class MGMT_ERR(IntEnum):
     """User errors defined from 256 onwards"""
 
 
-class ErrorV1(message.Response):
+class ErrorV1(message.Response, frozen=True):
     """SMP error response version 1."""
 
     RESPONSE_TYPE = message.ResponseType.ERROR_V1
@@ -75,18 +74,29 @@ class ErrorV1(message.Response):
     """Error reason."""
 
 
-class Err(BaseModel, Generic[T]):
+class Err(msgspec.Struct, Generic[T], frozen=True, omit_defaults=True, forbid_unknown_fields=True):
     """SMP error response version 2 `err` map."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True, arbitrary_types_allowed=True)
-
-    group: GroupIdField
+    group: header.GroupId
     rc: T
 
 
-class ErrorV2(message.Response, Generic[T]):
+class ErrorV2(message.Response, Generic[T], frozen=True):
     """SMP error response version 2."""
 
     RESPONSE_TYPE = message.ResponseType.ERROR_V2
 
     err: Err[T]
+
+    @classmethod
+    def _rc_type(cls) -> Any:
+        for base in getattr(cls, "__orig_bases__", ()):
+            if get_origin(base) is ErrorV2:
+                return get_args(base)[0]
+        raise TypeError(f"{cls.__name__} does not parametrize {ErrorV2.__name__}")
+
+    @classmethod
+    def _convert_mapping(cls, data: dict[str, Any]) -> ErrorV2[T]:
+        cls._validate_mapping(data)
+        err_type: Any = Err[cls._rc_type()]  # type: ignore[misc]  # resolved at runtime
+        return cls(err=msgspec.convert(data["err"], type=err_type))

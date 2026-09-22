@@ -9,28 +9,20 @@ import pytest
 
 from smp import header as smpheader
 from smp import image_management as smpimg
-from tests.helpers import make_assert_header
+from tests.helpers import assert_frame
+
+imgcmd = smpheader.CommandId.ImageManagement
+IMG = smpheader.GroupId.IMAGE_MANAGEMENT
 
 
 def test_ImageStatesReadRequest() -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.READ,
-        smpheader.CommandId.ImageManagement.STATE,
-        1,  # empty map
+    assert_frame(
+        smpimg.ImageStatesReadRequest(),
+        op=smpheader.OP.READ,
+        group_id=IMG,
+        command_id=imgcmd.STATE,
+        length=1,
     )
-    r = smpimg.ImageStatesReadRequest()
-
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageStatesReadRequest.loads(r.BYTES)
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageStatesReadRequest.load(r.header, {})
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
 
 @pytest.mark.slow
@@ -56,222 +48,113 @@ def test_ImageStatesReadResponse(
     permanent: bool | None,
     splitStatus: int | None,
 ) -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.READ_RSP,
-        smpheader.CommandId.ImageManagement.STATE,
-        None,
+    image_state = smpimg.ImageState(
+        slot=slot,
+        version=version,
+        image=image,
+        hash=hash,
+        bootable=bootable,
+        pending=pending,
+        confirmed=confirmed,
+        active=active,
+        permanent=permanent,
     )
-    r1 = smpimg.ImageStatesReadResponse(
-        sequence=0,
-        images=[
-            smpimg.ImageState(
-                slot=slot,
-                version=version,
-                image=image,
-                hash=hash,
-                bootable=bootable,
-                pending=pending,
-                confirmed=confirmed,
-                active=active,
-                permanent=permanent,
-            ),
-            smpimg.ImageState(
-                slot=slot,
-                version=version,
-                image=image,
-                hash=hash,
-                bootable=bootable,
-                pending=pending,
-                confirmed=confirmed,
-                active=active,
-                permanent=permanent,
-            ),
-        ],
-        splitStatus=splitStatus,
+    frame = assert_frame(
+        smpimg.ImageStatesReadResponse(images=[image_state, image_state], splitStatus=splitStatus),
+        op=smpheader.OP.READ_RSP,
+        group_id=IMG,
+        command_id=imgcmd.STATE,
     )
 
-    assert_header(r1)
+    payload = cast("dict", cbor2.loads(bytes(frame)[smpheader.Header.SIZE :]))
+    for i, decoded_state in enumerate(frame.data.images):
+        assert decoded_state.slot == slot
+        assert decoded_state.version == version
+        assert decoded_state.image == image
+        assert decoded_state.hash == hash
+        assert decoded_state.bootable == bootable
+        assert decoded_state.pending == pending
+        assert decoded_state.confirmed == confirmed
+        assert decoded_state.active == active
+        assert decoded_state.permanent == permanent
 
-    def assert_response(r: smpimg.ImageStatesReadResponse) -> None:
-        d = cast("dict", cbor2.loads(r.BYTES[8:]))
-        for i, image_state in enumerate(r.images):
-            assert slot == image_state.slot
-            assert version == image_state.version
-            assert image == image_state.image
-            assert hash == image_state.hash
-            assert bootable == image_state.bootable
-            assert pending == image_state.pending
-            assert confirmed == image_state.confirmed
-            assert active == image_state.active
-            assert permanent == image_state.permanent
+        for field in type(decoded_state).__struct_fields__:
+            if getattr(decoded_state, field) is None:
+                assert field not in payload["images"][i]
 
-            for f in type(image_state).model_fields:
-                if getattr(image_state, f) is None:
-                    assert f not in d["images"][i]
-
-        assert splitStatus == r.splitStatus
-
-    assert_response(r1)
-
-    r2 = smpimg.ImageStatesReadResponse.loads(r1.BYTES)
-    assert_header(r2)
-    assert_response(r2)
-
-    r3 = smpimg.ImageStatesReadResponse.load(
-        r1.header, r1.model_dump(exclude={'header', 'sequence'})
-    )
-    assert_header(r3)
-    assert_response(r3)
+    assert frame.data.splitStatus == splitStatus
 
 
 def test_ImageEraseRequest() -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE,
-        smpheader.CommandId.ImageManagement.ERASE,
-        1,  # empty map
+    assert_frame(
+        smpimg.ImageEraseRequest(),
+        op=smpheader.OP.WRITE,
+        group_id=IMG,
+        command_id=imgcmd.ERASE,
+        length=1,
     )
-    r = smpimg.ImageEraseRequest()
 
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageEraseRequest.loads(r.BYTES)
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageEraseRequest.load(r.header, {})
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE,
-        smpheader.CommandId.ImageManagement.ERASE,
-        None,
+    frame = assert_frame(
+        smpimg.ImageEraseRequest(slot=0),
+        op=smpheader.OP.WRITE,
+        group_id=IMG,
+        command_id=imgcmd.ERASE,
     )
-    r = smpimg.ImageEraseRequest(slot=0)
-
-    assert_header(r)
-    assert r.slot == 0
-
-    r = smpimg.ImageEraseRequest.loads(r.BYTES)
-    assert_header(r)
-    assert r.slot == 0
+    assert frame.data.slot == 0
 
 
 def test_ImageEraseResponse() -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE_RSP,
-        smpheader.CommandId.ImageManagement.ERASE,
-        1,  # empty map
+    assert_frame(
+        smpimg.ImageEraseResponse(),
+        op=smpheader.OP.WRITE_RSP,
+        group_id=IMG,
+        command_id=imgcmd.ERASE,
+        length=1,
     )
-    r = smpimg.ImageEraseResponse()
-
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageEraseResponse.loads(r.BYTES)
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
-
-    r = smpimg.ImageEraseResponse.load(r.header, {})
-    assert_header(r)
-    assert len(r.BYTES) == smpheader.Header.SIZE + 1
 
 
 def test_ImageUploadWriteRequest() -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE,
-        smpheader.CommandId.ImageManagement.UPLOAD,
-        None,
+    frame = assert_frame(
+        smpimg.ImageUploadWriteRequest(
+            off=0,
+            data=b"hello",
+            image=1,
+            len=5,
+            sha=b"world",
+            upgrade=True,
+        ),
+        op=smpheader.OP.WRITE,
+        group_id=IMG,
+        command_id=imgcmd.UPLOAD,
     )
-    r = smpimg.ImageUploadWriteRequest(
-        off=0,
-        data=b"hello",
-        image=1,
-        len=5,
-        sha=b"world",
-        upgrade=True,
+    assert frame.data.off == 0
+    assert frame.data.data == b"hello"
+    assert frame.data.image == 1
+    assert frame.data.len == 5
+    assert frame.data.sha == b"world"
+    assert frame.data.upgrade is True
+
+    frame = assert_frame(
+        smpimg.ImageUploadWriteRequest(off=10, data=b"hello"),
+        op=smpheader.OP.WRITE,
+        group_id=IMG,
+        command_id=imgcmd.UPLOAD,
     )
-
-    assert_header(r)
-
-    r = smpimg.ImageUploadWriteRequest.loads(r.BYTES)
-    assert_header(r)
-
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE,
-        smpheader.CommandId.ImageManagement.UPLOAD,
-        None,
-    )
-    r = smpimg.ImageUploadWriteRequest(
-        off=0,
-        data=b"hello",
-        image=1,
-        len=5,
-        sha=b"world",
-        upgrade=True,
-    )
-
-    assert_header(r)
-    assert r.off == 0
-    assert r.data == b"hello"
-    assert r.image == 1
-    assert r.len == 5
-    assert r.sha == b"world"
-    assert r.upgrade is True
-
-    r = smpimg.ImageUploadWriteRequest.loads(r.BYTES)
-    assert_header(r)
-    assert r.off == 0
-    assert r.data == b"hello"
-    assert r.image == 1
-    assert r.len == 5
-    assert r.sha == b"world"
-    assert r.upgrade is True
-
-    # when off != 0 do not send image, len, sha, or upgrade
-    r = smpimg.ImageUploadWriteRequest(off=10, data=b"hello")
-    assert_header(r)
-    assert r.off == 10
-    assert r.data == b"hello"
+    assert frame.data.off == 10
+    assert frame.data.data == b"hello"
 
 
 @pytest.mark.parametrize("off", [None, 0, 1, 0xFFFF, 0xFFFFFFFF])
 @pytest.mark.parametrize("match", [None, True, False])
 def test_ImageUploadWriteResponse(off: int | None, match: bool | None) -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE_RSP,
-        smpheader.CommandId.ImageManagement.UPLOAD,
-        None,
+    frame = assert_frame(
+        smpimg.ImageUploadWriteResponse(off=off, match=match),
+        op=smpheader.OP.WRITE_RSP,
+        group_id=IMG,
+        command_id=imgcmd.UPLOAD,
     )
-    r = smpimg.ImageUploadWriteResponse(off=off, match=match)
-
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
-
-    r = smpimg.ImageUploadWriteResponse.loads(r.BYTES)
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
-
-    cbor_dict = (
-        {}
-        | ({"off": off} if off is not None else {})
-        | ({"match": match} if match is not None else {})
-    )
-
-    r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
+    assert frame.data.off == off
+    assert frame.data.match == match
 
 
 @pytest.mark.parametrize("off", [None, 0, 1, 0xFFFF, 0xFFFFFFFF])
@@ -280,34 +163,12 @@ def test_ImageUploadWriteResponse(off: int | None, match: bool | None) -> None:
 def test_legacy_ImageUploadWriteResponse(
     off: int | None, match: bool | None, rc: int | None
 ) -> None:
-    assert_header = make_assert_header(
-        smpheader.GroupId.IMAGE_MANAGEMENT,
-        smpheader.OP.WRITE_RSP,
-        smpheader.CommandId.ImageManagement.UPLOAD,
-        None,
+    frame = assert_frame(
+        smpimg.ImageUploadWriteResponse(off=off, match=match, rc=rc),
+        op=smpheader.OP.WRITE_RSP,
+        group_id=IMG,
+        command_id=imgcmd.UPLOAD,
     )
-    r = smpimg.ImageUploadWriteResponse(off=off, match=match, rc=rc)
-
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
-    assert r.rc == rc
-
-    r = smpimg.ImageUploadWriteResponse.loads(r.BYTES)
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
-    assert r.rc == rc
-
-    cbor_dict = (
-        {}
-        | ({"off": off} if off is not None else {})
-        | ({"match": match} if match is not None else {})
-        | ({"rc": rc} if rc is not None else {})
-    )
-
-    r = smpimg.ImageUploadWriteResponse.load(r.header, cbor_dict)
-    assert_header(r)
-    assert r.off == off
-    assert r.match == match
-    assert r.rc == rc
+    assert frame.data.off == off
+    assert frame.data.match == match
+    assert frame.data.rc == rc

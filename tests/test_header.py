@@ -98,3 +98,16 @@ def test_header_deserialization(
 
     # test the reserialization
     assert _h.BYTES == h.BYTES
+
+
+@pytest.mark.parametrize("value", [-1, 0x10000])
+def test_GroupId_rejects_a_value_that_is_not_a_uint16(value: int) -> None:
+    """The enum is open across the uint16 range, and closed outside it."""
+
+    with pytest.raises(ValueError):
+        GroupId(value)
+
+
+def test_GroupId_names_a_registered_user_group() -> None:
+    assert GroupId(64).name == "INTERCREATE"
+    assert GroupId(999).name == "UNKNOWN_999"
