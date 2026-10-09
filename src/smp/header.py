@@ -31,6 +31,7 @@ class CommandId:
         CORELIST = 3
         CORELOAD = 4
         ERASE = 5
+        SLOT_INFO = 6
 
     @unique
     class StatisticsManagement(IntEnum):

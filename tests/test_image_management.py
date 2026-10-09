@@ -311,3 +311,69 @@ def test_legacy_ImageUploadWriteResponse(
     assert r.off == off
     assert r.match == match
     assert r.rc == rc
+
+
+def test_ImageSlotInfoReadRequest() -> None:
+    assert_header = make_assert_header(
+        smpheader.GroupId.IMAGE_MANAGEMENT,
+        smpheader.OP.READ,
+        smpheader.CommandId.ImageManagement.SLOT_INFO,
+        1,  # empty map
+    )
+    r = smpimg.ImageSlotInfoReadRequest()
+
+    assert_header(r)
+    assert_header(smpimg.ImageSlotInfoReadRequest.loads(r.BYTES))
+
+
+def test_ImageSlotInfoReadResponse() -> None:
+    # Two 3 MiB slots with CONFIG_MCUMGR_GRP_IMG_TOO_LARGE_SYSBUILD
+    data = {
+        "images": [
+            {
+                "image": 0,
+                "slots": [{"slot": 0, "size": 3145728}, {"slot": 1, "size": 3145728}],
+                "max_image_size": 3112960,
+            }
+        ]
+    }
+    cbor = cbor2.dumps(data)
+    frame = (
+        bytes(
+            smpheader.Header(
+                op=smpheader.OP.READ_RSP,
+                version=smpheader.Version.V2,
+                flags=smpheader.Flag(0),
+                length=len(cbor),
+                group_id=smpheader.GroupId.IMAGE_MANAGEMENT,
+                sequence=0,
+                command_id=smpheader.CommandId.ImageManagement.SLOT_INFO,
+            )
+        )
+        + cbor
+    )
+
+    r = smpimg.ImageSlotInfoReadResponse.loads(frame)
+
+    (image,) = r.images
+    assert image.image == 0
+    assert image.max_image_size == 3112960
+    assert [(s.slot, s.size, s.upload_image_id) for s in image.slots] == [
+        (0, 3145728, None),
+        (1, 3145728, None),
+    ]
+
+
+def test_ImageSlotInfoReadResponse_direct_upload() -> None:
+    r = smpimg.ImageSlotInfoReadResponse(
+        images=(
+            smpimg.ImageSlotInfo(
+                image=1,
+                slots=(smpimg.ImageSlot(slot=0, size=4096, upload_image_id=2),),
+            ),
+        )
+    )
+
+    loaded = smpimg.ImageSlotInfoReadResponse.loads(r.BYTES)
+    assert loaded.images[0].slots[0].upload_image_id == 2
+    assert loaded.images[0].max_image_size is None
