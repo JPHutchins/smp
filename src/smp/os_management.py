@@ -310,8 +310,8 @@ class BootloaderInformationReadRequest(message.ReadRequest):
     for bootloader backend. If there is no query, then response will return string
     identifying the bootloader.
 
-    MCUboot supports the query string,"mode".  The response to mode is of type
-    `MCUbootMode`.
+    For MCUboot's "mode" query, use `MCUbootModeReadRequest`, which is answered
+    with a different response.
     """
 
 
@@ -325,6 +325,9 @@ class MCUbootMode(IntEnum):
     DIRECT_XIP_WITHOUT_REVERT = 4
     DIRECT_XIP_WITH_REVERT = 5
     RAM_LOADER = 6
+    FIRMWARE_LOADER = 7
+    SINGLE_SLOT_RAM_LOADER = 8
+    SWAP_USING_OFFSET = 9
 
 
 class MCUbootModeQueryResponse(BaseModel):
@@ -351,6 +354,36 @@ class BootloaderInformationReadResponse(message.ReadResponse):
     SMP version 2 error code of `OS_MGMT_ERR_QUERY_YIELDS_NO_ANSWER` is
     expected. Response may have more than one parameter reported back or it may
     be a map, that is dependent on bootloader backend and query."""
+
+
+class MCUbootModeReadRequest(message.ReadRequest):
+    """Request MCUboot's mode of operation.
+
+    This is the bootloader information command with the "mode" query. The device
+    answers it with `MCUbootModeReadResponse` rather than
+    `BootloaderInformationReadResponse`.
+    """
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
+
+    query: Literal["mode"]
+
+
+class MCUbootModeReadResponse(message.ReadResponse):
+    """Success response to an MCUboot mode request."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
+
+    mode: MCUbootMode | int = Field(union_mode="left_to_right")
+    """MCUboot's mode of operation; an `int` when the mode is newer than `MCUbootMode`."""
+    no_downgrade: bool | None = Field(
+        default=None, validation_alias="no-downgrade", serialization_alias="no-downgrade"
+    )
+    """Sent, as `True`, when MCUboot prevents downgrades."""
 
 
 @unique

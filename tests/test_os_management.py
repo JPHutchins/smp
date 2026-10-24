@@ -265,6 +265,78 @@ def test_BootloaderInformationReadResponse() -> None:
     assert r.response["no-downgrade"] is True
 
 
+def _bootloader_info_frame(data: dict[str, Any]) -> bytes:
+    cbor = cbor2.dumps(data, canonical=True)
+    return (
+        bytes(
+            smphdr.Header(
+                op=smphdr.OP.READ_RSP,
+                version=smphdr.Version.V2,
+                flags=smphdr.Flag(0),
+                length=len(cbor),
+                group_id=smphdr.GroupId.OS_MANAGEMENT,
+                sequence=0,
+                command_id=oscmd.BOOTLOADER_INFO,
+            )
+        )
+        + cbor
+    )
+
+
+def test_MCUbootModeReadRequest() -> None:
+    _do_test(smpos.MCUbootModeReadRequest, smphdr.OP.READ, oscmd.BOOTLOADER_INFO, {"query": "mode"})
+
+    with pytest.raises(ValidationError):
+        smpos.MCUbootModeReadRequest(query="MCUbootMode")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "mode, expected",
+    [
+        (3, smpos.MCUbootMode.SWAP_WITHOUT_SCRATCH),
+        (7, smpos.MCUbootMode.FIRMWARE_LOADER),
+        (8, smpos.MCUbootMode.SINGLE_SLOT_RAM_LOADER),
+        (9, smpos.MCUbootMode.SWAP_USING_OFFSET),
+    ],
+)
+def test_MCUbootModeReadResponse(mode: int, expected: smpos.MCUbootMode) -> None:
+    r = _do_test(
+        smpos.MCUbootModeReadResponse, smphdr.OP.READ_RSP, oscmd.BOOTLOADER_INFO, {"mode": mode}
+    )
+
+    assert type(r.mode) is smpos.MCUbootMode
+    assert r.mode == expected
+    assert r.no_downgrade is None
+
+
+def test_MCUbootModeReadResponse_no_downgrade() -> None:
+    """Zephyr adds "no-downgrade" with CONFIG_MCUBOOT_BOOTLOADER_NO_DOWNGRADE."""
+    r = smpos.MCUbootModeReadResponse.loads(
+        _bootloader_info_frame({"mode": 9, "no-downgrade": True})
+    )
+
+    assert r.mode == smpos.MCUbootMode.SWAP_USING_OFFSET
+    assert r.no_downgrade is True
+
+    w = smpos.MCUbootModeReadResponse(mode=smpos.MCUbootMode.SWAP_USING_OFFSET, no_downgrade=True)
+
+    assert cbor2.loads(w.BYTES[8:]) == {"mode": 9, "no-downgrade": True}
+
+
+def test_MCUbootModeReadResponse_unknown_mode_is_kept() -> None:
+    r = smpos.MCUbootModeReadResponse.loads(_bootloader_info_frame({"mode": 42}))
+
+    assert r.mode == 42
+
+
+def test_bootloader_information_replies_are_distinct() -> None:
+    """Each request gets its own reply, and neither response accepts the other's."""
+    with pytest.raises(ValidationError):
+        smpos.BootloaderInformationReadResponse.loads(_bootloader_info_frame({"mode": 9}))
+    with pytest.raises(ValidationError):
+        smpos.MCUbootModeReadResponse.loads(_bootloader_info_frame({"bootloader": "MCUboot"}))
+
+
 def test_TaskStatisticsReadResponse_all_fields() -> None:
     """Test TaskStatistics with all fields present."""
     data: dict[str, Any] = {
