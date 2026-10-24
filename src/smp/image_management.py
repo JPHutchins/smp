@@ -260,6 +260,55 @@ class ImageEraseResponse(message.WriteResponse):
     _COMMAND_ID = header.CommandId.ImageManagement.ERASE
 
 
+class ImageSlotInfoReadRequest(message.ReadRequest):
+    """Request the images and slots that the application can see.
+
+    Zephyr: `CONFIG_MCUMGR_GRP_IMG_SLOT_INFO`.
+    """
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.SLOT_INFO
+
+
+class ImageSlot(BaseModel):
+    """One slot of an image."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    slot: int
+    """The slot within the image, 0 or 1; not the physical slot number."""
+    size: int
+    """The size of the slot in bytes."""
+    upload_image_id: int | None = None
+    """The image ID that uploads directly to this slot.
+
+    Only sent with Zephyr's `CONFIG_MCUMGR_GRP_IMG_DIRECT_UPLOAD`."""
+
+
+class ImageSlotInfo(BaseModel):
+    """The slots of one image."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    image: int
+    """The image number."""
+    slots: tuple[ImageSlot, ...]
+    max_image_size: int | None = None
+    """The largest application that can be uploaded to this image.
+
+    Only sent with Zephyr's `CONFIG_MCUMGR_GRP_IMG_TOO_LARGE_SYSBUILD` or
+    `CONFIG_MCUMGR_GRP_IMG_TOO_LARGE_BOOTLOADER_INFO`."""
+
+
+class ImageSlotInfoReadResponse(message.ReadResponse):
+    """Success response to a slot info request."""
+
+    _GROUP_ID = header.GroupId.IMAGE_MANAGEMENT
+    _COMMAND_ID = header.CommandId.ImageManagement.SLOT_INFO
+
+    images: tuple[ImageSlotInfo, ...]
+
+
 @unique
 class IMG_MGMT_ERR(IntEnum):
     """Image management error codes."""
