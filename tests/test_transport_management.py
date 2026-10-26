@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from smp import header as smphdr
 from smp import message as smpmsg
 from smp import transport_management as smptrans
-from tests.helpers import make_assert_header
+from tests.helpers import make_assert_header, make_frame
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -54,19 +54,7 @@ def _frame(
     command_id: smphdr.CommandId.TransportManagement,
     payload: dict[str, Any],
 ) -> bytes:
-    d = cbor2.dumps(payload, canonical=True)
-    return (
-        smphdr.Header(
-            op=op,
-            version=smphdr.Version.V2,
-            flags=smphdr.Flag(0),
-            length=len(d),
-            group_id=smphdr.GroupId.TRANSPORT_MANAGEMENT,
-            sequence=0,
-            command_id=command_id,
-        ).BYTES
-        + d
-    )
+    return make_frame(smphdr.GroupId.TRANSPORT_MANAGEMENT, op, command_id, payload)
 
 
 def test_ConnectRequest() -> None:

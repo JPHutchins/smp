@@ -82,6 +82,7 @@ class _MessageBase(ABC, BaseModel):
                 exclude_unset=True,
                 exclude={'header', 'version', 'sequence', 'smp_data'},
                 exclude_none=True,
+                by_alias=True,
             ),
             canonical=True,
         )

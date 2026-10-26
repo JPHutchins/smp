@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from enum import IntEnum, unique
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal, TypeAlias
 
+import cbor2
 from pydantic import BaseModel, ConfigDict, Field
 
 from smp import error, header, message
@@ -303,16 +304,24 @@ class BootloaderInformationReadRequest(message.ReadRequest):
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
-    query: str | None = None
-    """Is string representing query for parameters.
 
-    With no restrictions how the query looks like as processing of query is left
-    for bootloader backend. If there is no query, then response will return string
-    identifying the bootloader.
+class BootloaderInformationReadResponse(message.ReadResponse):
+    """Success response to a bootloader information request."""
 
-    MCUboot supports the query string,"mode".  The response to mode is of type
-    `MCUbootMode`.
-    """
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
+
+    bootloader: str
+    """String identifying the bootloader.  For MCUboot it will be "MCUboot"."""
+
+
+class MCUbootModeReadRequest(message.ReadRequest):
+    """Request MCUboot's mode of operation."""
+
+    _GROUP_ID = header.GroupId.OS_MANAGEMENT
+    _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
+
+    query: Literal["mode"]
 
 
 @unique
@@ -325,32 +334,41 @@ class MCUbootMode(IntEnum):
     DIRECT_XIP_WITHOUT_REVERT = 4
     DIRECT_XIP_WITH_REVERT = 5
     RAM_LOADER = 6
+    FIRMWARE_LOADER = 7
+    SINGLE_SLOT_RAM_LOADER = 8
+    SWAP_USING_OFFSET = 9
 
 
-class MCUbootModeQueryResponse(BaseModel):
-    """Response to a MCUboot mode query."""
+class MCUbootModeReadResponse(message.ReadResponse):
+    """Success response to an MCUboot mode request."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    mode: MCUbootMode
-    no_downgrade: bool | None = Field(alias="no-downgrade", default=None)
-
-
-class BootloaderInformationReadResponse(message.ReadResponse):
-    """Success response to a bootloader information request."""
+    model_config = ConfigDict(populate_by_name=True)
 
     _GROUP_ID = header.GroupId.OS_MANAGEMENT
     _COMMAND_ID = header.CommandId.OSManagement.BOOTLOADER_INFO
 
-    bootloader: str
-    """String identifying the bootloader.  For MCUboot it will be "MCUboot"."""
-    response: MCUbootModeQueryResponse | Any | None = None
-    """Response to “query”.
+    mode: MCUbootMode | Annotated[int, Field(ge=-(2**31), le=2**31 - 1)] = Field(
+        union_mode="left_to_right"
+    )
+    no_downgrade: Literal[True] | None = Field(
+        default=None, validation_alias="no-downgrade", serialization_alias="no-downgrade"
+    )
+    """MCUboot will not update to an image whose version is lower than the running one."""
 
-    This is optional and may be left out in case when query yields no response,
-    SMP version 2 error code of `OS_MGMT_ERR_QUERY_YIELDS_NO_ANSWER` is
-    expected. Response may have more than one parameter reported back or it may
-    be a map, that is dependent on bootloader backend and query."""
+
+AnyBootloaderInformationReadResponse: TypeAlias = (
+    BootloaderInformationReadResponse | MCUbootModeReadResponse
+)
+"""The bootloader information response variants, one per request."""
+
+
+def loads_bootloader_information_response(data: bytes) -> AnyBootloaderInformationReadResponse:
+    """Deserialize a bootloader information response as the variant that its payload names."""
+    return (
+        MCUbootModeReadResponse.loads(data)
+        if "mode" in cbor2.loads(data[header.Header.SIZE :])
+        else BootloaderInformationReadResponse.loads(data)
+    )
 
 
 @unique
