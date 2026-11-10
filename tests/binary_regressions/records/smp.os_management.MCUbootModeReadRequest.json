@@ -1,0 +1,1 @@
+{"message": "smp.os_management.MCUbootModeReadRequest", "version": 1, "sequence": 159, "kwargs": {"query": "mode"}, "bytes": "0800000c00009f08a1657175657279646d6f6465"}

@@ -11,7 +11,7 @@ from pydantic import BaseModel, ValidationError
 from smp import header as smphdr
 from smp import message as smpmsg
 from smp import os_management as smpos
-from tests.helpers import make_assert_header
+from tests.helpers import make_assert_header, make_frame
 
 oscmd = smphdr.CommandId.OSManagement
 
@@ -241,28 +241,140 @@ def test_OSApplicationInfoReadResponse() -> None:
     )
 
 
+def _bootloader_info_frame(payload: dict[str, Any]) -> bytes:
+    return make_frame(
+        smphdr.GroupId.OS_MANAGEMENT, smphdr.OP.READ_RSP, oscmd.BOOTLOADER_INFO, payload
+    )
+
+
 def test_BootloaderInformationReadRequest() -> None:
     _do_test(smpos.BootloaderInformationReadRequest, smphdr.OP.READ, oscmd.BOOTLOADER_INFO, {})
-    _do_test(
-        smpos.BootloaderInformationReadRequest,
-        smphdr.OP.READ,
-        oscmd.BOOTLOADER_INFO,
-        {"query": "MCUbootMode"},
-    )
+
+    with pytest.raises(ValidationError):
+        smpos.BootloaderInformationReadRequest(query="mode")  # type: ignore[call-arg]
 
 
 def test_BootloaderInformationReadResponse() -> None:
-    r = _do_test(
+    _do_test(
         smpos.BootloaderInformationReadResponse,
         smphdr.OP.READ_RSP,
         oscmd.BOOTLOADER_INFO,
-        {"bootloader": "MCUboot", "response": {"mode": 3, "no-downgrade": True}},
+        {"bootloader": "MCUboot"},
     )
 
-    assert r.bootloader == "MCUboot"
-    assert type(r.response) is dict
-    assert r.response["mode"] == smpos.MCUbootMode.SWAP_WITHOUT_SCRATCH
-    assert r.response["no-downgrade"] is True
+
+def test_MCUbootModeReadRequest() -> None:
+    _do_test(smpos.MCUbootModeReadRequest, smphdr.OP.READ, oscmd.BOOTLOADER_INFO, {"query": "mode"})
+
+    with pytest.raises(ValidationError):
+        smpos.MCUbootModeReadRequest(query="MCUbootMode")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("mode", list(smpos.MCUbootMode))
+def test_MCUbootModeReadResponse(mode: smpos.MCUbootMode) -> None:
+    r = _do_test(
+        smpos.MCUbootModeReadResponse,
+        smphdr.OP.READ_RSP,
+        oscmd.BOOTLOADER_INFO,
+        {"mode": int(mode)},
+    )
+
+    assert r.mode is mode
+    assert smpos.MCUbootModeReadResponse.loads(r.BYTES).mode is mode
+    assert r.no_downgrade is None
+
+
+def test_MCUbootModeReadResponse_keeps_an_unknown_mode() -> None:
+    r = smpos.MCUbootModeReadResponse.loads(_bootloader_info_frame({"mode": 42}))
+
+    assert type(r.mode) is int
+    assert r.mode == 42
+
+
+@pytest.mark.parametrize("mode", [-(2**31) - 1, 2**31])
+def test_MCUbootModeReadResponse_rejects_a_mode_wider_than_int32(mode: int) -> None:
+    with pytest.raises(ValidationError):
+        smpos.MCUbootModeReadResponse.loads(_bootloader_info_frame({"mode": mode}))
+
+
+def test_MCUbootModeReadResponse_no_downgrade() -> None:
+    frame = _bootloader_info_frame({"mode": 9, "no-downgrade": True})
+
+    r = smpos.MCUbootModeReadResponse.loads(frame)
+
+    assert r.mode is smpos.MCUbootMode.SWAP_USING_OFFSET
+    assert r.no_downgrade is True
+    assert (
+        frame
+        == smpos.MCUbootModeReadResponse(
+            sequence=0, mode=smpos.MCUbootMode.SWAP_USING_OFFSET, no_downgrade=True
+        ).BYTES
+    )
+
+
+def test_MCUbootModeReadResponse_rejects_a_false_no_downgrade() -> None:
+    """The flag is sent only when true."""
+    with pytest.raises(ValidationError):
+        smpos.MCUbootModeReadResponse.loads(
+            _bootloader_info_frame({"mode": 9, "no-downgrade": False})
+        )
+
+
+def test_bootloader_information_variants_are_exhaustive() -> None:
+    def describe(r: smpos.AnyBootloaderInformationReadResponse) -> str:
+        match r:
+            case smpos.BootloaderInformationReadResponse():
+                return r.bootloader
+            case smpos.MCUbootModeReadResponse():
+                return f"mode {int(r.mode)}"
+
+    bootloader = smpos.BootloaderInformationReadResponse(bootloader="MCUboot")
+    mode = smpos.MCUbootModeReadResponse(mode=smpos.MCUbootMode.SWAP_USING_OFFSET)
+
+    assert describe(bootloader) == "MCUboot"
+    assert describe(mode) == "mode 9"
+
+    assert not isinstance(bootloader, smpos.MCUbootModeReadResponse)
+    assert not isinstance(mode, smpos.BootloaderInformationReadResponse)
+
+
+@pytest.mark.parametrize(
+    ("payload", "variant"),
+    [
+        ({"bootloader": "MCUboot"}, smpos.BootloaderInformationReadResponse),
+        ({"mode": 9}, smpos.MCUbootModeReadResponse),
+        ({"mode": 9, "no-downgrade": True}, smpos.MCUbootModeReadResponse),
+    ],
+)
+def test_loads_bootloader_information_response_picks_the_variant(
+    payload: dict[str, Any], variant: type[smpmsg.Response]
+) -> None:
+    assert (
+        type(smpos.loads_bootloader_information_response(_bootloader_info_frame(payload)))
+        is variant
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {},
+        {"bootloader": "MCUboot", "mode": 9},
+        {"bootloader": "MCUboot", "response": {"mode": 9}},
+    ],
+)
+def test_no_bootloader_information_variant_accepts_an_impossible_payload(
+    payload: dict[str, Any],
+) -> None:
+    """The device names the bootloader or reports its mode, never both, and never nested."""
+    frame = _bootloader_info_frame(payload)
+
+    for variant in (smpos.BootloaderInformationReadResponse, smpos.MCUbootModeReadResponse):
+        with pytest.raises(ValidationError):
+            variant.loads(frame)
+
+    with pytest.raises(ValidationError):
+        smpos.loads_bootloader_information_response(frame)
 
 
 def test_TaskStatisticsReadResponse_all_fields() -> None:

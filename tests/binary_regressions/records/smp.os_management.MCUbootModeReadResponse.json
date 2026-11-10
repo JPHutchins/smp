@@ -1,0 +1,2 @@
+{"message": "smp.os_management.MCUbootModeReadResponse", "version": 1, "sequence": 160, "kwargs": {"mode": 9}, "bytes": "090000070000a008a1646d6f646509"}
+{"message": "smp.os_management.MCUbootModeReadResponse", "version": 1, "sequence": 161, "kwargs": {"mode": 9, "no_downgrade": true}, "bytes": "090000150000a108a2646d6f6465096c6e6f2d646f776e6772616465f5"}
